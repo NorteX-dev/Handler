@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const { EventHandler } = require("../out/index");
 const { Client, Intents } = require("discord.js");
 const path = require("path");
@@ -21,6 +23,6 @@ handler.on("error", (err, message) => {
 	message.channel.send({ content: err.message });
 });
 
-client.login("ODYyNDExODMxMTMzOTk1MDI5.YOX9mw.AwoZnDiox4yaophYAsDikFG6WeQ").then(() => {
+client.login(process.env.TOKEN).then(() => {
 	console.log("Bot is listening", client.user.tag);
 });

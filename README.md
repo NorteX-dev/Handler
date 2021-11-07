@@ -44,7 +44,7 @@ const { CommandHandler } = require("@nortex/handler");
 module.exports = class MyClient extends Client {
   constructor() {
     // Supply some options to the Client constructor
-	super({ intents: [Intents.FLAGS.GUILDS /*Pass extra intents if needed*/] })
+    super({ intents: [Intents.FLAGS.GUILDS /*Pass extra intents if needed*/] })
   }
 
   async run() {

@@ -1,6 +1,6 @@
 import CommandDirectoryReferenceError from "./errors/CommandDirectoryReferenceError";
 
-import { Client, Interaction, Message } from "discord.js";
+import { Client, Message } from "discord.js";
 import { EventEmitter } from "events";
 import { Command } from "./Command";
 import { LocalUtils } from "./LocalUtils";

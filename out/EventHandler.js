@@ -66,9 +66,8 @@ var EventHandler = /** @class */ (function (_super) {
             throw new ReferenceError("InteractionHandler(): options.client is required.");
         _this.client = options.client;
         _this.directory = options.directory;
-        _this.enableDebug = options.debug || false;
         _this.events = new Map();
-        _this.localUtils = new LocalUtils_1.LocalUtils(_this.client, true);
+        _this.localUtils = new LocalUtils_1.LocalUtils(_this, _this.client);
         if (options.autoLoad)
             _this.loadEvents();
         return _this;

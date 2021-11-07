@@ -40,11 +40,10 @@ exports.LocalUtils = void 0;
 var CommandExecutionError_1 = require("./errors/CommandExecutionError");
 var InteractionExecutionError_1 = require("./errors/InteractionExecutionError");
 var discord_js_1 = require("discord.js");
-var chalk = require("chalk");
 var LocalUtils = /** @class */ (function () {
-    function LocalUtils(client, enableDebug, owners) {
+    function LocalUtils(handler, client, owners) {
         this.client = client;
-        this.enableDebug = enableDebug || false;
+        this.handler = handler;
         this.owners = owners || [];
     }
     LocalUtils.prototype.isClass = function (input) {
@@ -55,16 +54,8 @@ var LocalUtils = /** @class */ (function () {
             throw new Error("isOwner(): Can't check because owners is undefined.");
         return this.owners.includes(userId);
     };
-    LocalUtils.prototype.debug = function (message, severity) {
-        if (severity === void 0) { severity = "info"; }
-        if (!this.enableDebug)
-            return;
-        if (severity === "info")
-            console.log(chalk.blue("[" + new Date().toISOString() + "]"), "Info: " + message);
-        if (severity === "warn")
-            console.log(chalk.yellow("[" + new Date().toISOString() + "]"), "Warn: " + message);
-        if (severity === "severe")
-            console.log(chalk.red("[" + new Date().toISOString() + "]"), "Severe: " + message);
+    LocalUtils.prototype.debug = function (message) {
+        this.handler.emit("debug", message);
     };
     LocalUtils.prototype.verifyCommand = function (message, command, userCooldowns, guildCooldowns) {
         return __awaiter(this, void 0, void 0, function () {

@@ -13,7 +13,6 @@ interface HandlerOptions {
 	autoLoad?: boolean;
 	directory?: string | undefined;
 	disableInteractionModification?: boolean;
-	debug?: boolean;
 	owners?: Array<string>;
 	forceInteractionUpdate?: boolean;
 }
@@ -45,19 +44,17 @@ export class InteractionHandler extends EventEmitter {
 
 	public interactions: Map<string, Interaction>;
 	private localUtils: LocalUtils;
-	private readonly enableDebug: boolean;
 
 	constructor(options: HandlerOptions) {
 		super();
 		if (!options.client) throw new ReferenceError("InteractionHandler(): options.client is required.");
 		this.client = options.client;
 		this.directory = options.directory;
-		this.enableDebug = options.debug || false;
 		this.owners = options.owners || [];
 		this.disableInteractionModification = options.disableInteractionModification || false;
 		this.forceInteractionUpdate = options.forceInteractionUpdate || false;
 		this.interactions = new Map();
-		this.localUtils = new LocalUtils(this.client, this.enableDebug, this.owners);
+		this.localUtils = new LocalUtils(this, this.client, this.owners);
 		this.setupInteractionEvent();
 		if (options.autoLoad) this.loadInteractions();
 		return this;
@@ -149,7 +146,7 @@ export class InteractionHandler extends EventEmitter {
 		if (!fetchedInteractions) throw new TypeError("Interactions weren't fetched.");
 		const changes = await this.whatChanged(fetchedInteractions);
 		if (changes || force) {
-			this.localUtils.debug("Changes in interaction files detected - re-creating the interactions. Please wait.", "warn");
+			this.localUtils.debug("Changes in interaction files detected - re-creating the interactions. Please wait.");
 			const formed = Array.from(this.interactions, ([_, data]) => ({
 				name: data.name,
 				description: data.description,
@@ -160,7 +157,7 @@ export class InteractionHandler extends EventEmitter {
 			await this.client.application!.commands.set([]).then((r) => console.log("Cleaned out old commands"));
 			// @ts-ignore
 			await this.client.application!.commands.set(formed).then((r) => console.log("Created all commands (" + r.size + " returned)"));
-			this.localUtils.debug("Interaction changes were posted successfully. Remember to wait a bit (up to 1 hour) or kick and add the bot back to see changes.", "info");
+			this.localUtils.debug("Interaction changes were posted successfully. Remember to wait a bit (up to 1 hour) or kick and add the bot back to see changes.");
 		} else this.localUtils.debug("No changes in interactions - not refreshing.");
 	}
 
@@ -196,7 +193,7 @@ export class InteractionHandler extends EventEmitter {
 		}
 		for (let remoteCmd of fetched) {
 			if (!existing.find((c) => c.name === remoteCmd.name)) {
-				this.localUtils.debug("Refreshing interactions because interaction files have been deleted.", "warn");
+				this.localUtils.debug("Refreshing interactions because interaction files have been deleted.");
 				return true;
 			}
 		}

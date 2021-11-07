@@ -12,7 +12,6 @@ import CommandExecutionError from "./errors/CommandExecutionError";
 interface HandlerOptions {
 	client: Client;
 	directory: string | undefined;
-	debug: boolean;
 	prefix: string;
 	owners: Array<string>;
 	autoLoad: boolean;
@@ -41,21 +40,18 @@ export class CommandHandler extends EventEmitter {
 	private readonly guildCooldowns: Map<string, number>;
 	private localUtils: LocalUtils;
 
-	private readonly enableDebug: boolean;
-
 	constructor(options: HandlerOptions) {
 		super();
 		if (!options.client) throw new ReferenceError("CommandHandler(): options.client is required.");
 		this.client = options.client;
 		this.directory = options.directory;
-		this.enableDebug = options.debug || false;
 		this.prefix = options.prefix || "?";
 		this.owners = options.owners || [];
 		this.commands = new Map();
 		this.aliases = new Map();
 		this.userCooldowns = new Map();
 		this.guildCooldowns = new Map();
-		this.localUtils = new LocalUtils(this.client, this.enableDebug, this.owners);
+		this.localUtils = new LocalUtils(this, this.client, this.owners);
 		this.setupMessageEvent();
 		if (options.autoLoad) this.loadCommands();
 		return this;

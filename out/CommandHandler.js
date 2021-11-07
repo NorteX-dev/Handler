@@ -65,14 +65,13 @@ var CommandHandler = /** @class */ (function (_super) {
             throw new ReferenceError("CommandHandler(): options.client is required.");
         _this.client = options.client;
         _this.directory = options.directory;
-        _this.enableDebug = options.debug || false;
         _this.prefix = options.prefix || "?";
         _this.owners = options.owners || [];
         _this.commands = new Map();
         _this.aliases = new Map();
         _this.userCooldowns = new Map();
         _this.guildCooldowns = new Map();
-        _this.localUtils = new LocalUtils_1.LocalUtils(_this.client, _this.enableDebug, _this.owners);
+        _this.localUtils = new LocalUtils_1.LocalUtils(_this, _this.client, _this.owners);
         _this.setupMessageEvent();
         if (options.autoLoad)
             _this.loadCommands();

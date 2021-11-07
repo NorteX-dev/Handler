@@ -10,7 +10,6 @@ const handler = new EventHandler({
 	client: client,
 	directory: path.join(__dirname, "./events"),
 	autoLoad: true,
-	debug: true,
 });
 
 handler.on("load", (interaction) => {
@@ -21,6 +20,9 @@ handler.on("ready", () => {
 });
 handler.on("error", (err, message) => {
 	message.channel.send({ content: err.message });
+});
+handler.on("debug", (debugMsg) => {
+	console.log("[Debug]", debugMsg);
 });
 
 client.login(process.env.TOKEN).then(() => {

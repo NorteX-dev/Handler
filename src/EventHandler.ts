@@ -11,7 +11,6 @@ interface HandlerOptions {
 	client: Client;
 	autoLoad?: boolean;
 	directory?: string | undefined;
-	debug?: boolean;
 }
 
 export class EventHandler extends EventEmitter {
@@ -24,20 +23,17 @@ export class EventHandler extends EventEmitter {
 	 * */
 	public client: Client;
 	public directory?: string;
-	public owners?: Array<string>;
 
 	public events: Map<string, Event>;
 	private localUtils: LocalUtils;
-	private readonly enableDebug: boolean;
 
 	constructor(options: HandlerOptions) {
 		super();
 		if (!options.client) throw new ReferenceError("InteractionHandler(): options.client is required.");
 		this.client = options.client;
 		this.directory = options.directory;
-		this.enableDebug = options.debug || false;
 		this.events = new Map();
-		this.localUtils = new LocalUtils(this.client, true);
+		this.localUtils = new LocalUtils(this, this.client);
 		if (options.autoLoad) this.loadEvents();
 		return this;
 	}

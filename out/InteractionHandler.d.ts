@@ -7,7 +7,6 @@ interface HandlerOptions {
     autoLoad?: boolean;
     directory?: string | undefined;
     disableInteractionModification?: boolean;
-    debug?: boolean;
     owners?: Array<string>;
     forceInteractionUpdate?: boolean;
 }
@@ -19,7 +18,6 @@ export declare class InteractionHandler extends EventEmitter {
     forceInteractionUpdate?: boolean;
     interactions: Map<string, Interaction>;
     private localUtils;
-    private readonly enableDebug;
     constructor(options: HandlerOptions);
     setInteractionsDirectory(absolutePath: string): this;
     loadInteractions(): Promise<unknown>;

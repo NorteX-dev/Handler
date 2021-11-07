@@ -67,12 +67,11 @@ var InteractionHandler = /** @class */ (function (_super) {
             throw new ReferenceError("InteractionHandler(): options.client is required.");
         _this.client = options.client;
         _this.directory = options.directory;
-        _this.enableDebug = options.debug || false;
         _this.owners = options.owners || [];
         _this.disableInteractionModification = options.disableInteractionModification || false;
         _this.forceInteractionUpdate = options.forceInteractionUpdate || false;
         _this.interactions = new Map();
-        _this.localUtils = new LocalUtils_1.LocalUtils(_this.client, _this.enableDebug, _this.owners);
+        _this.localUtils = new LocalUtils_1.LocalUtils(_this, _this.client, _this.owners);
         _this.setupInteractionEvent();
         if (options.autoLoad)
             _this.loadInteractions();
@@ -209,7 +208,7 @@ var InteractionHandler = /** @class */ (function (_super) {
                     case 2:
                         changes = _a.sent();
                         if (!(changes || force)) return [3 /*break*/, 5];
-                        this.localUtils.debug("Changes in interaction files detected - re-creating the interactions. Please wait.", "warn");
+                        this.localUtils.debug("Changes in interaction files detected - re-creating the interactions. Please wait.");
                         formed = Array.from(this.interactions, function (_a) {
                             var _ = _a[0], data = _a[1];
                             return ({
@@ -228,7 +227,7 @@ var InteractionHandler = /** @class */ (function (_super) {
                     case 4:
                         // @ts-ignore
                         _a.sent();
-                        this.localUtils.debug("Interaction changes were posted successfully. Remember to wait a bit (up to 1 hour) or kick and add the bot back to see changes.", "info");
+                        this.localUtils.debug("Interaction changes were posted successfully. Remember to wait a bit (up to 1 hour) or kick and add the bot back to see changes.");
                         return [3 /*break*/, 6];
                     case 5:
                         this.localUtils.debug("No changes in interactions - not refreshing.");
@@ -288,7 +287,7 @@ var InteractionHandler = /** @class */ (function (_super) {
                 }
                 _loop_2 = function (remoteCmd) {
                     if (!existing.find(function (c) { return c.name === remoteCmd.name; })) {
-                        this_2.localUtils.debug("Refreshing interactions because interaction files have been deleted.", "warn");
+                        this_2.localUtils.debug("Refreshing interactions because interaction files have been deleted.");
                         return { value: true };
                     }
                 };

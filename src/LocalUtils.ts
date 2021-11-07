@@ -2,18 +2,20 @@ import { Command } from "./Command";
 import CommandExecutionError from "./errors/CommandExecutionError";
 import InteractionExecutionError from "./errors/InteractionExecutionError";
 import { Client, Permissions } from "discord.js";
-import * as chalk from "chalk";
+import { CommandHandler } from "./CommandHandler";
+import { EventHandler } from "./EventHandler";
+import { InteractionHandler } from "./InteractionHandler";
 
 export class LocalUtils {
+	private handler: CommandHandler | EventHandler | InteractionHandler;
 	private client: Client;
 	private userCooldowns?: Map<string, number>;
 	private guildCooldowns?: Map<string, number>;
 	private readonly owners: Array<string>;
-	private readonly enableDebug: boolean;
 
-	constructor(client: Client, enableDebug: boolean, owners?: Array<string>) {
+	constructor(handler: CommandHandler | EventHandler | InteractionHandler, client: Client, owners?: Array<string>) {
 		this.client = client;
-		this.enableDebug = enableDebug || false;
+		this.handler = handler;
 		this.owners = owners || [];
 	}
 
@@ -26,11 +28,8 @@ export class LocalUtils {
 		return this.owners.includes(userId);
 	}
 
-	debug(message: string, severity: string = "info") {
-		if (!this.enableDebug) return;
-		if (severity === "info") console.log(chalk.blue(`[${new Date().toISOString()}]`), `Info: ${message}`);
-		if (severity === "warn") console.log(chalk.yellow(`[${new Date().toISOString()}]`), `Warn: ${message}`);
-		if (severity === "severe") console.log(chalk.red(`[${new Date().toISOString()}]`), `Severe: ${message}`);
+	debug(message: string) {
+		this.handler.emit("debug", message);
 	}
 
 	async verifyCommand(message: any, command: Command, userCooldowns: Map<string, number>, guildCooldowns: Map<string, number>): Promise<CommandExecutionError | undefined> {

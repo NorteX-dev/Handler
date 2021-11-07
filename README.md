@@ -42,14 +42,14 @@ const { CommandHandler } = require("@nortex/handler");
 
 // Create a class named anything (in this case MyClient) that extends the Client class of Discord.js.
 module.exports = class MyClient extends Client {
-	constructor() {
-		// Supply some options to the Client constructor
-		super({ intents: [Intents.FLAGS.GUILDS /*Pass extra intents if needed*/] })
-    }
+  constructor() {
+    // Supply some options to the Client constructor
+	super({ intents: [Intents.FLAGS.GUILDS /*Pass extra intents if needed*/] })
+  }
 
-	async run() {
-		super.login("YOUR_TOKEN");
-    }
+  async run() {
+    super.login("YOUR_TOKEN");
+  }
 }
 ```
 
@@ -62,16 +62,16 @@ Now that we have the bot running and dependencies satisfied, we can adding the h
 Inside the run() function of MyClient, we are going to initalize CommandHandler using:
 ```js
 const handler = new CommandHandler({
-	client: this,
-	directory: require("path").join(__dirname, "./Commands") // Change to your directory
-	/* Pass optional options here */
+  client: this,
+  directory: require("path").join(__dirname, "./Commands") // Change to your directory
+  /* Pass optional options here */
 });
 // Handle events emitted by the command handler
 handler.on("load", command => {
-	console.log("Loaded", command.name);
+  console.log("Loaded", command.name);
 })
 handler.on("error", e => {
-	console.error(e);
+  console.error(e);
 });
 ```
 Now, we can access the "handler"

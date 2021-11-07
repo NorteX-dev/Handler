@@ -1,10 +1,10 @@
 {
   "name": "@nortex/handler",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "The easy to use, all-in-one command and event handler.",
-  "main": "test/index.js",
+  "main": "out/index.js",
   "scripts": {
-    "test": "node test/index.js"
+    "test": "nodemon test/index.js"
   },
   "author": "",
   "license": "ISC",

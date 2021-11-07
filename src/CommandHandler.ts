@@ -8,7 +8,6 @@ import { glob } from "glob";
 import * as path from "path";
 
 import CommandExecutionError from "./errors/CommandExecutionError";
-import { type } from "typedoc/dist/lib/output/themes/default/partials/type";
 
 interface HandlerOptions {
 	client: Client;

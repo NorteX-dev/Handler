@@ -16,7 +16,6 @@ interface HandlerOptions {
 	debug?: boolean;
 	owners?: Array<string>;
 	forceInteractionUpdate?: boolean;
-	// commandsModule?: CommandHandler;
 }
 
 export class InteractionHandler extends EventEmitter {
@@ -43,7 +42,6 @@ export class InteractionHandler extends EventEmitter {
 	public owners?: Array<string>;
 	public disableInteractionModification?: boolean;
 	public forceInteractionUpdate?: boolean;
-	// public commandsModule?: CommandHandler;
 
 	public interactions: Map<string, Interaction>;
 	private localUtils: LocalUtils;
@@ -58,12 +56,10 @@ export class InteractionHandler extends EventEmitter {
 		this.owners = options.owners || [];
 		this.disableInteractionModification = options.disableInteractionModification || false;
 		this.forceInteractionUpdate = options.forceInteractionUpdate || false;
-		// this.commandsModule = options.commandsModule;
 		this.interactions = new Map();
 		this.localUtils = new LocalUtils(this.client, this.enableDebug, this.owners);
 		this.setupInteractionEvent();
 		if (options.autoLoad) this.loadInteractions();
-		// if (options.commandsModule) this.registerInteractionsAsCommands();
 		return this;
 	}
 
@@ -217,24 +213,4 @@ export class InteractionHandler extends EventEmitter {
 		if (!res) throw new Error("convertType(): Can't convert type because invalid was specified. Valid are 'command', 'usercontext' or 'rolecontext'");
 		return res;
 	}
-
-	// TODO : Update or something
-	// private registerInteractionsAsCommands() {
-	// 	this.localUtils.debug("Command handler was added alongside interaction handler, loading it.");
-	// 	this.on("ready", () => {
-	// 		this.localUtils.debug("Registering commands inherited from the interaction handler.");
-	// 		this.interactions.forEach((interaction) => {
-	// 			if (interaction.type !== "command") return;
-	// 			const cmd = new Command(this.commandsModule!, this.client, interaction.name, {
-	// 				name: interaction.name,
-	// 				description: interaction.description,
-	// 				category: "Slash Commands",
-	// 				userIds: interaction.userIds,
-	// 				guildIds: interaction.guildIds,
-	// 			});
-	// 			console.log("registering additional cmd from interactions dir ", cmd.name);
-	// 			this.commandsModule?.registerCommand(cmd);
-	// 		});
-	// 	});
-	// }
 }

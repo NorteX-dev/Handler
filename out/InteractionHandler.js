@@ -71,13 +71,11 @@ var InteractionHandler = /** @class */ (function (_super) {
         _this.owners = options.owners || [];
         _this.disableInteractionModification = options.disableInteractionModification || false;
         _this.forceInteractionUpdate = options.forceInteractionUpdate || false;
-        // this.commandsModule = options.commandsModule;
         _this.interactions = new Map();
         _this.localUtils = new LocalUtils_1.LocalUtils(_this.client, _this.enableDebug, _this.owners);
         _this.setupInteractionEvent();
         if (options.autoLoad)
             _this.loadInteractions();
-        // if (options.commandsModule) this.registerInteractionsAsCommands();
         return _this;
     }
     /*

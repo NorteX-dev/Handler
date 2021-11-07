@@ -108,7 +108,7 @@ export class CommandHandler extends EventEmitter {
 	registerCommand(command: Command, filename?: string) {
 		this.commands.set(command.name, command);
 		if (command.aliases.length) command.aliases.forEach((alias: string) => this.aliases.set(alias, command.name));
-		this.localUtils.debug(`Registered command "${command.name}"${filename ? ` from file ${filename}` : ""}"`);
+		this.localUtils.debug(`Registered command "${command.name}"${filename ? ` from file ${filename}` : ""}`);
 		this.emit("load", command);
 	}
 

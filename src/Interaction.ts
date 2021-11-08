@@ -2,7 +2,6 @@ import MethodNotOverridenError from "./errors/MethodNotOverridenError";
 
 import { ApplicationCommandOptionData, Client, CommandInteraction } from "discord.js";
 import { CommandHandler } from "./CommandHandler";
-import { InteractionHandler } from "./InteractionHandler";
 
 interface InteractionOptions {
 	name: string;
@@ -38,7 +37,7 @@ export class Interaction {
 		this.userIds = options.userIds || [];
 		this.guildIds = options.guildIds || [];
 		this.disabled = options.disabled || false;
-		this.defaultPermission = options.defaultPermission || false;
+		this.defaultPermission = options.defaultPermission || true;
 		if (!["command", "usercontext", "rolecontext"].includes(this.type)) throw new Error("Bad type specified: " + this.type);
 	}
 

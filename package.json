@@ -1,11 +1,12 @@
 {
   "name": "@nortex/handler",
-  "version": "1.1.2",
+  "version": "1.2.0-fix",
   "description": "The easy to use, all-in-one command and event handler.",
   "main": "out/index.js",
   "scripts": {
     "test": "nodemon test/index.js"
   },
+  "repository": "https://github.com/NorteX-dev/Handler",
   "keywords": ["discord","handler","commands","discordjs","discord.js","commandhandler"],
   "author": "NorteX",
   "license": "ISC",

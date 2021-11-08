@@ -16,7 +16,7 @@ var Interaction = /** @class */ (function () {
         this.userIds = options.userIds || [];
         this.guildIds = options.guildIds || [];
         this.disabled = options.disabled || false;
-        this.defaultPermission = options.defaultPermission || false;
+        this.defaultPermission = options.defaultPermission || true;
         if (!["command", "usercontext", "rolecontext"].includes(this.type))
             throw new Error("Bad type specified: " + this.type);
     }

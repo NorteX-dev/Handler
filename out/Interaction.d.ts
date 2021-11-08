@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, Client, CommandInteraction } from "discord.js";
+import { ApplicationCommandOptionData, CommandInteraction } from "discord.js";
 import { CommandHandler } from "./CommandHandler";
 interface InteractionOptions {
     name: string;
@@ -12,7 +12,7 @@ interface InteractionOptions {
 }
 export declare class Interaction {
     handler: CommandHandler;
-    client: Client;
+    client: any;
     name: string;
     type: string;
     description: string | undefined;

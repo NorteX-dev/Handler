@@ -16,7 +16,7 @@ interface InteractionOptions {
 
 export class Interaction {
 	public handler: CommandHandler;
-	public client: Client;
+	public client: any;
 	public name: string;
 	public type: string;
 	public description: string | undefined;

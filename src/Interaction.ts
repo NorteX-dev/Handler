@@ -26,7 +26,7 @@ export class Interaction {
 	public disabled: boolean;
 	public defaultPermission: boolean;
 
-	constructor(handler: CommandHandler, client: Client, name: string, options?: InteractionOptions) {
+	constructor(handler: CommandHandler, client: any, name: string, options?: InteractionOptions) {
 		if (!options) options = <InteractionOptions>{};
 		this.handler = handler;
 		this.client = client;

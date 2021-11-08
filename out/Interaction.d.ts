@@ -21,7 +21,7 @@ export declare class Interaction {
     guildIds: Array<string>;
     disabled: boolean;
     defaultPermission: boolean;
-    constructor(handler: CommandHandler, client: Client, name: string, options?: InteractionOptions);
+    constructor(handler: CommandHandler, client: any, name: string, options?: InteractionOptions);
     run(interaction: CommandInteraction): void;
 }
 export {};

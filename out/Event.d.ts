@@ -1,4 +1,3 @@
-import { Client } from "discord.js";
 import { EventHandler } from "./EventHandler";
 interface EventOptions {
     name: string;
@@ -6,10 +5,10 @@ interface EventOptions {
 }
 export declare class Event {
     handler: EventHandler;
-    client: Client;
+    client: any;
     name: string;
     once: boolean;
-    constructor(handler: EventHandler, client: Client, name: string, options?: EventOptions);
+    constructor(handler: EventHandler, client: any, name: string, options?: EventOptions);
     run(...args: Array<any>): void;
 }
 export {};

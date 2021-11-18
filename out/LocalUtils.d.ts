@@ -14,7 +14,6 @@ export declare class LocalUtils {
     constructor(handler: CommandHandler | EventHandler | InteractionHandler, client: Client, owners?: Array<string>);
     isClass(input: any): boolean;
     isOwner(userId: string): boolean;
-    debug(message: string): void;
     verifyCommand(message: any, command: Command, userCooldowns: Map<string, number>, guildCooldowns: Map<string, number>): Promise<CommandExecutionError | undefined>;
     verifyInteraction(interaction: any): Promise<InteractionExecutionError | undefined>;
 }

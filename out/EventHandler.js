@@ -124,7 +124,7 @@ var EventHandler = /** @class */ (function (_super) {
                                 }
                                 event_1.run.apply(event_1, args);
                             });
-                            this_1.localUtils.debug("Set event \"" + event_1.name + "\" from file \"" + parsedPath.base + "\"");
+                            this_1.emit("debug", "Set event \"" + event_1.name + "\" from file \"" + parsedPath.base + "\"");
                             this_1.emit("load", event_1);
                         };
                         this_1 = this;

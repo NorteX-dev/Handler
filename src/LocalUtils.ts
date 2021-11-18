@@ -28,10 +28,6 @@ export class LocalUtils {
 		return this.owners.includes(userId);
 	}
 
-	debug(message: string) {
-		this.handler.emit("debug", message);
-	}
-
 	async verifyCommand(message: any, command: Command, userCooldowns: Map<string, number>, guildCooldowns: Map<string, number>): Promise<CommandExecutionError | undefined> {
 		return new Promise((res) => {
 			this.userCooldowns = userCooldowns;
@@ -94,11 +90,11 @@ export class LocalUtils {
 			// "disabled" field
 			if (interaction.disabled && !this.isOwner(interaction.user.id)) return res(new InteractionExecutionError("The command is disabled.", "DISABLED"));
 			// "guildIds" field
-			if (interaction.guildIds?.length && !interaction.guildIds.includes(interaction!.guild.id))
+			if (interaction.guildIds && interaction.guildIds?.length && !interaction.guildIds.includes(interaction!.guild.id))
 				return res(new InteractionExecutionError("This guild ID is not whitelisted.", "GUILD_ID_NOT_WHITELISTED"));
 			// "userIds" field
-			if (interaction.userIds?.length && !interaction.userIds.includes(interaction.user.id))
-				return res(new InteractionExecutionError("This user ID is not whitelisted.", "USER_OD_NOT_WHITELISTED"));
+			if (interaction.userIds && interaction.userIds?.length && !interaction.userIds.includes(interaction.user.id))
+				return res(new InteractionExecutionError("This user ID is not whitelisted.", "USER_ID_NOT_WHITELISTED"));
 			res(undefined);
 		});
 	}

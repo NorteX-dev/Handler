@@ -10,11 +10,11 @@ interface EventOptions {
 
 export class Event {
 	public handler: EventHandler;
-	public client: Client;
+	public client: any;
 	public name: string;
 	public once: boolean;
 
-	constructor(handler: EventHandler, client: Client, name: string, options?: EventOptions) {
+	constructor(handler: EventHandler, client: any, name: string, options?: EventOptions) {
 		if (!options) options = <EventOptions>{};
 		this.handler = handler;
 		this.client = client;

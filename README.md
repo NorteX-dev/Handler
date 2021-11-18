@@ -13,14 +13,40 @@
 > Events are the normal events of Discord.js such as messageCreate, guildMemberAdd...
 
 #### Table of Contents:
+- [Changelog](#changelog)
+---
+Tutorials:
 - [Creating the bot](#bot_base)
 - [Creating a basic Command Handler](#command_handler)
 - [Making the command files](#commands_setup)
 - [Using the options of commands](#command_options)
 - [Creating a basic Event Handler](#event_handler)
-- [Creating a basic Interaction Handler](#interaction_handler)
+- [Creating a basic CommandInteraction Handler](#interaction_handler)
 - [Understanding interaction refreshing](#interaction_refresher)
 - [Using the options of interactions](#interaction_options)
+
+<a id="changelog"></a>
+### Changelog v1 to v2
+
+*   Interaction Handler internal errors will now emit with an `InteractionExecutionError` error object instead of the error reason alone.
+
+> This means you might need to use the `message` property instead of using the object itself.
+
+*   The change above also applies for the `CommandHandler` class.
+*   The `Interaction` class has been renamed to `CommandInteraction` and does not accept the `type` parameter anymore.
+*   Some debug messages were `console.log`ged instead of emitted as debug.
+*   If `force: true`, the interactions will not be fetched and will skip to the updating.
+*   The interaction handler now errors on an attempt of registering duplicate interactions
+*   Halved the amount of required API calls to Discord when updating interactions, speeding up the bot
+*   Fixed typo in interaction handling error: LocalUtils#97
+
+> For now, below features are experimental and are not very dependable. Use at your own risk.
+
+*   Created `UserContextMenuInteraction` class that should be extended in order to handle user context menu interactions (right-click on user options). Options are as follows: `{ name: string, disabled?: boolean = false }`.
+*   Created `MessageContextMenuInteraction` which works the same way `UserContextMenuInteraction` does, but for message context menus instead.
+
+> Warning: message component interactions (buttons, select menus...) is beyond the scope of this project and are not handled. Please consider creating an EventHandler, registering an `interactionCreate` event and handling it manually instead. (This might change in the future.)
+
 
 <a id="bot_base"></a>
 ### 1. Creating a Discord.js bot
@@ -66,6 +92,7 @@ const handler = new CommandHandler({
   directory: require("path").join(__dirname, "./Commands") // Change to your directory
   /* Pass optional options here */
 });
+handler.loadCommands();
 // Handle events emitted by the command handler
 handler.on("load", command => {
   console.log("Loaded", command.name);
@@ -73,7 +100,10 @@ handler.on("load", command => {
 handler.on("error", e => {
   console.error(e);
 });
+handler.on("debug", e => {
+  console.log(`[Debug] ${e.message}`); // Logging debug is not required but very useful when creating the bot.
+});
 ```
-Now, we can access the "handler"
+Now, we can access the "handler" variable.
 
 > More of the README file is going to be finished soon.

@@ -1,14 +1,14 @@
 require("dotenv").config();
 
-const { EventHandler } = require("../out/index");
 const { Client, Intents } = require("discord.js");
 const path = require("path");
+const { InteractionHandler } = require("../out/index");
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
-const handler = new EventHandler({
+const handler = new InteractionHandler({
 	client: client,
-	directory: path.join(__dirname, "./events"),
+	directory: path.join(__dirname, "./interactions"),
 	autoLoad: true,
 });
 

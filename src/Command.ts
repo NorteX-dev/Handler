@@ -69,7 +69,7 @@ interface CommandOptions {
 
 export class Command {
 	public handler: CommandHandler;
-	public client: Client;
+	public client: any;
 	public name: string;
 	public description?: string | undefined;
 	public category: string;
@@ -88,7 +88,7 @@ export class Command {
 	public guildIds: Array<string>;
 	public disabled: boolean;
 
-	constructor(handler: CommandHandler, client: Client, name: string, options?: CommandOptions) {
+	constructor(handler: CommandHandler, client: any, name: string, options?: CommandOptions) {
 		if (!options) options = <CommandOptions>{};
 		this.handler = handler;
 		this.client = client;

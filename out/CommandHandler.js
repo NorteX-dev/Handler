@@ -130,7 +130,7 @@ var CommandHandler = /** @class */ (function (_super) {
         this.commands.set(command.name, command);
         if (command.aliases.length)
             command.aliases.forEach(function (alias) { return _this.aliases.set(alias, command.name); });
-        this.localUtils.debug("Registered command \"" + command.name + "\"" + (filename ? " from file " + filename : ""));
+        this.emit("debug", "Registered command \"" + command.name + "\"" + (filename ? " from file " + filename : ""));
         this.emit("load", command);
     };
     CommandHandler.prototype.setupMessageEvent = function () {
@@ -177,7 +177,7 @@ var CommandHandler = /** @class */ (function (_super) {
                     case 6:
                         ex_1 = _b.sent();
                         console.error(ex_1);
-                        this.emit("Command errored while executing:\n*" + ex_1 + "*");
+                        this.emit("error", ex_1);
                         return [3 /*break*/, 7];
                     case 7: return [2 /*return*/];
                 }

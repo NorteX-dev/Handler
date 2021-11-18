@@ -1,5 +1,5 @@
 import { CommandHandler } from "./CommandHandler";
-import { Client, Message } from "discord.js";
+import { Message } from "discord.js";
 interface CommandOptions {
     name: string;
     description?: string;
@@ -21,7 +21,7 @@ interface CommandOptions {
 }
 export declare class Command {
     handler: CommandHandler;
-    client: Client;
+    client: any;
     name: string;
     description?: string | undefined;
     category: string;
@@ -39,7 +39,7 @@ export declare class Command {
     userIds: Array<string>;
     guildIds: Array<string>;
     disabled: boolean;
-    constructor(handler: CommandHandler, client: Client, name: string, options?: CommandOptions);
+    constructor(handler: CommandHandler, client: any, name: string, options?: CommandOptions);
     run(message: Message, args: Array<String>): void;
 }
 export {};

@@ -104,7 +104,7 @@ export class CommandHandler extends EventEmitter {
 	registerCommand(command: Command, filename?: string) {
 		this.commands.set(command.name, command);
 		if (command.aliases.length) command.aliases.forEach((alias: string) => this.aliases.set(alias, command.name));
-		this.localUtils.debug(`Registered command "${command.name}"${filename ? ` from file ${filename}` : ""}`);
+		this.emit("debug", `Registered command "${command.name}"${filename ? ` from file ${filename}` : ""}`);
 		this.emit("load", command);
 	}
 
@@ -136,7 +136,7 @@ export class CommandHandler extends EventEmitter {
 				await command.run(message, args);
 			} catch (ex) {
 				console.error(ex);
-				this.emit(`Command errored while executing:\n*${ex}*`);
+				this.emit("error", ex);
 			}
 		});
 	}

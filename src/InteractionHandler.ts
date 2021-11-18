@@ -1,4 +1,4 @@
-import { ApplicationCommand, Client, Collection, Interaction as DJSInteraction } from "discord.js";
+import { ApplicationCommand, Client, Collection, Interaction as DJSInteraction, ContextMenuInteraction as DJSContextMenuInteraction } from "discord.js";
 import { EventEmitter } from "events";
 import { LocalUtils } from "./LocalUtils";
 import { glob } from "glob";
@@ -6,7 +6,7 @@ import * as path from "path";
 
 import InteractionDirectoryReferenceError from "./errors/InteractionDirectoryReferenceError";
 import InteractionExecutionError from "./errors/InteractionExecutionError";
-import { Interaction } from "./index";
+import { CommandInteraction, MessageContextMenuInteraction, UserContextMenuInteraction } from "./index";
 
 interface HandlerOptions {
 	client: Client;
@@ -28,7 +28,6 @@ export class InteractionHandler extends EventEmitter {
 	 * @param options.disableInteractionModification Optional - Forcibly stop any modification of command applications
 	 * @param options.forceInteractionUpdate Optional - Forcibly update command applications every load - this option can get you rate limited if the bot restarts often
 	 * @param options.autoLoad Optional - Automatically invoke the loadInteractions() method - requires interactionsDir to be set in the options
-	 * @param options.debug Optional - Show logs in the console of the inner doings of the library
 	 * @returns InteractionHandler
 	 * @example
 	 * ```js
@@ -42,7 +41,7 @@ export class InteractionHandler extends EventEmitter {
 	public disableInteractionModification?: boolean;
 	public forceInteractionUpdate?: boolean;
 
-	public interactions: Map<string, Interaction>;
+	public interactions: Map<string, CommandInteraction | UserContextMenuInteraction | MessageContextMenuInteraction>;
 	private localUtils: LocalUtils;
 
 	constructor(options: HandlerOptions) {
@@ -89,6 +88,7 @@ export class InteractionHandler extends EventEmitter {
 			if (!this.directory) return reject(new InteractionDirectoryReferenceError("Interactions directory is not set. Use setInteractionsDirectory(path) prior."));
 			glob(this.directory.endsWith("/") ? this.directory + "**/*.js" : this.directory + "/**/*.js", async (err: Error | null, files: string[]) => {
 				if (err) return reject(new InteractionDirectoryReferenceError("Supplied interactions directory is invalid. Please ensure it exists and is absolute."));
+				const duplicates = [];
 				for (const file of files) {
 					delete require.cache[file];
 					const parsedPath = path.parse(file);
@@ -99,13 +99,20 @@ export class InteractionHandler extends EventEmitter {
 					// Initialize command class
 					const interaction = new InteractionFile(this, this.client, parsedPath.name.toLowerCase());
 					// Check if initialized class is extending Command
-					if (!(interaction instanceof Interaction)) throw new TypeError(`Interaction file: ${parsedPath.name} doesn't extend the Interaction class.`);
+					if (!(interaction instanceof CommandInteraction || interaction instanceof UserContextMenuInteraction || interaction instanceof MessageContextMenuInteraction))
+						throw new TypeError(
+							`Interaction file: ${parsedPath.name} doesn't extend one of the valid the interaction classes: CommandInteraction, UserContextMenuInteraction, MessageContextMenuInteraction.`
+						);
 					// Save command to map
-					this.interactions.set(interaction.name, interaction);
-					this.localUtils.debug(`Loaded interaction "${interaction.name}" from file "${parsedPath.base}"`);
+					if (this.interactions.get(interaction.type + "_" + interaction.name)) {
+						duplicates.push(interaction);
+						continue;
+					}
+					this.interactions.set(interaction.type + "_" + interaction.name, interaction);
+					this.emit("debug", `Loaded interaction "${interaction.name}" from file "${parsedPath.base}"`);
 					this.emit("load", interaction);
 				}
-				// if (this.findDuplicates(this.interactions)) throw new Error(`Attempt to load commands with same name: ${interaction.name}.`);
+				if (duplicates?.length) throw new Error(`Loading interaction with the same name: ${duplicates.map((d) => d.name).join(", ")}.`);
 				if (!this.disableInteractionModification)
 					this.client.on("ready", async () => {
 						await this.postInteractions(this.forceInteractionUpdate);
@@ -119,49 +126,74 @@ export class InteractionHandler extends EventEmitter {
 	private setupInteractionEvent() {
 		this.client.on("interactionCreate", async (interaction: DJSInteraction) => {
 			if (interaction.user.bot) return;
-			if (interaction.isCommand()) {
-				const slashCommand = this.interactions.get(interaction.commandName.toLowerCase());
-				if (!slashCommand || slashCommand.type?.toLowerCase() !== "command") return;
-
-				const failedReason: InteractionExecutionError | undefined = await this.localUtils.verifyInteraction(interaction);
-				if (failedReason) {
-					this.emit("error", failedReason, interaction);
-					return;
-				}
-
-				try {
-					await slashCommand.run(interaction);
-				} catch (ex) {
-					console.error(ex);
-					this.emit(`Interaction errored while executing:\n*${ex}*`);
-				}
-			}
+			if (interaction.isCommand()) this.handleCommandInteraction(interaction);
+			if (interaction.isContextMenu()) this.handleContextMenuInteraction(interaction);
 		});
+	}
+
+	private async handleCommandInteraction(interaction: any) {
+		const slashCommand = this.interactions.get("COMMAND_" + interaction.commandName.toLowerCase());
+		if (!slashCommand) return;
+
+		const failedReason: InteractionExecutionError | undefined = await this.localUtils.verifyInteraction(interaction);
+		if (failedReason) {
+			this.emit("error", failedReason, interaction);
+			return;
+		}
+
+		try {
+			await slashCommand.run(interaction);
+		} catch (ex) {
+			console.error(ex);
+			this.emit("error", ex, interaction);
+		}
+	}
+
+	private async handleContextMenuInteraction(interaction: DJSContextMenuInteraction) {
+		const contextMenuInt = this.interactions.get("USER_" + interaction.commandName.toLowerCase()) || this.interactions.get("MESSAGE_" + interaction.commandName.toLowerCase());
+		if (!contextMenuInt) return;
+
+		// @ts-ignore
+		if (interaction.targetType === "USER" && contextMenuInt.type !== "USER") return;
+		// @ts-ignore
+		if (interaction.targetType === "MESSAGE" && contextMenuInt.type !== "MESSAGE") return;
+
+		const failedReason: InteractionExecutionError | undefined = await this.localUtils.verifyInteraction(interaction);
+		if (failedReason) return this.emit("error", failedReason, interaction);
+
+		try {
+			await contextMenuInt.run(interaction);
+		} catch (ex) {
+			console.error(ex);
+			this.emit("error", ex, interaction);
+		}
 	}
 
 	private async postInteractions(force: boolean = false) {
-		const fetchedInteractions = await this.client.application!.commands.fetch().catch((err) => {
-			throw new Error(`Can't fetch client commands: ${err}`);
-		});
-		if (!fetchedInteractions) throw new TypeError("Interactions weren't fetched.");
-		const changes = await this.whatChanged(fetchedInteractions);
+		let changes;
+		if (!force) {
+			const fetchedInteractions = await this.client.application!.commands.fetch().catch((err) => {
+				throw new Error(`Can't fetch client commands: ${err}`);
+			});
+			if (!fetchedInteractions) throw new TypeError("Interactions weren't fetched.");
+			changes = await this.didChange(fetchedInteractions);
+		}
 		if (changes || force) {
-			this.localUtils.debug("Changes in interaction files detected - re-creating the interactions. Please wait.");
-			const formed = Array.from(this.interactions, ([_, data]) => ({
-				name: data.name,
-				description: data.description,
-				defaultPermission: data.defaultPermission,
-				options: data.options,
-				type: this.convertType(data.type),
-			}));
-			await this.client.application!.commands.set([]).then((r) => console.log("Cleaned out old commands"));
+			this.emit("debug", "Changes in interaction files detected - re-creating the interactions. Please wait.");
+			const formed = Array.from(this.interactions, ([_, data]) => {
+				// @ts-ignore
+				if (data.type === "COMMAND") return { name: data.name, description: data.description, defaultPermission: data.defaultPermission, options: data.options, type: data.type };
+				if (data.type === "USER") return { name: data.name, type: data.type };
+				if (data.type === "MESSAGE") return { name: data.name, type: data.type };
+			});
+			// await this.client.application!.commands.set([]).then((r) => this.emit("debug", "Cleaned out old commands"));
 			// @ts-ignore
-			await this.client.application!.commands.set(formed).then((r) => console.log("Created all commands (" + r.size + " returned)"));
-			this.localUtils.debug("Interaction changes were posted successfully. Remember to wait a bit (up to 1 hour) or kick and add the bot back to see changes.");
-		} else this.localUtils.debug("No changes in interactions - not refreshing.");
+			await this.client.application!.commands.set(formed).then((r) => this.emit("debug", "Created all commands (" + r.size + " returned)"));
+			this.emit("debug", "Interaction changes were posted successfully. Remember to wait a bit (up to 1 hour) or kick and add the bot back to see changes.");
+		} else this.emit("debug", "No changes in interactions - not refreshing.");
 	}
 
-	private async whatChanged(interactions: Collection<string, ApplicationCommand>) {
+	private async didChange(interactions: Collection<string, ApplicationCommand>) {
 		const fetched = Array.from(interactions, ([_, data]) => data);
 		const existing = Array.from(this.interactions, ([_, data]) => data);
 		for (let localCmd of existing) {
@@ -174,40 +206,32 @@ export class InteractionHandler extends EventEmitter {
 			delete modifiedRemoteCmd.guild;
 			delete modifiedRemoteCmd.id;
 			delete modifiedRemoteCmd.applicationId;
-			const equals = modifiedRemoteCmd.equals({
+			const modifiedLocalCmd: any = {
 				name: localCmd.name,
-				description: localCmd.description || "",
-				type: this.convertType(localCmd.type),
-				defaultPermission: localCmd.defaultPermission,
-			});
-			if (!remoteCmd.options) {
-				remoteCmd.options = [];
-			}
-			if (!localCmd.options) {
+				type: localCmd.type,
+			};
+			const equals = modifiedRemoteCmd.equals(modifiedLocalCmd);
+			if (localCmd.type === "COMMAND") {
 				// @ts-ignore
-				localCmd.options = [];
+				modifiedLocalCmd.description = localCmd.description;
+				// @ts-ignore
+				modifiedLocalCmd.defaultPermission = localCmd.defaultPermission;
+				if (!remoteCmd.options) remoteCmd.options = [];
+				// @ts-ignore
+				if (!localCmd.options) localCmd.options = [];
+				// @ts-ignore
+				const optionsEqual = ApplicationCommand.optionsEqual(oldOptions, localCmd.options);
+				if (!equals || !optionsEqual) return true;
 			}
 			// @ts-ignore
-			const optionsEqual = ApplicationCommand.optionsEqual(oldOptions, localCmd.options);
-			if (!equals || !optionsEqual) return true;
+			if (!equals) return true;
 		}
 		for (let remoteCmd of fetched) {
 			if (!existing.find((c) => c.name === remoteCmd.name)) {
-				this.localUtils.debug("Refreshing interactions because interaction files have been deleted.");
+				this.emit("debug", "Refreshing interactions because interaction files have been deleted.");
 				return true;
 			}
 		}
 		return false;
-	}
-
-	private convertType(handlerType: string) {
-		const keys: any = {
-			command: "CHAT_INPUT",
-			usercontext: "USER",
-			rolecontext: "ROLE",
-		};
-		const res: string = keys[handlerType?.toLowerCase()];
-		if (!res) throw new Error("convertType(): Can't convert type because invalid was specified. Valid are 'command', 'usercontext' or 'rolecontext'");
-		return res;
 	}
 }

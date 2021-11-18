@@ -54,9 +54,6 @@ var LocalUtils = /** @class */ (function () {
             throw new Error("isOwner(): Can't check because owners is undefined.");
         return this.owners.includes(userId);
     };
-    LocalUtils.prototype.debug = function (message) {
-        this.handler.emit("debug", message);
-    };
     LocalUtils.prototype.verifyCommand = function (message, command, userCooldowns, guildCooldowns) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
@@ -138,11 +135,11 @@ var LocalUtils = /** @class */ (function () {
                         if (interaction.disabled && !_this.isOwner(interaction.user.id))
                             return res(new InteractionExecutionError_1.default("The command is disabled.", "DISABLED"));
                         // "guildIds" field
-                        if (((_a = interaction.guildIds) === null || _a === void 0 ? void 0 : _a.length) && !interaction.guildIds.includes(interaction.guild.id))
+                        if (interaction.guildIds && ((_a = interaction.guildIds) === null || _a === void 0 ? void 0 : _a.length) && !interaction.guildIds.includes(interaction.guild.id))
                             return res(new InteractionExecutionError_1.default("This guild ID is not whitelisted.", "GUILD_ID_NOT_WHITELISTED"));
                         // "userIds" field
-                        if (((_b = interaction.userIds) === null || _b === void 0 ? void 0 : _b.length) && !interaction.userIds.includes(interaction.user.id))
-                            return res(new InteractionExecutionError_1.default("This user ID is not whitelisted.", "USER_OD_NOT_WHITELISTED"));
+                        if (interaction.userIds && ((_b = interaction.userIds) === null || _b === void 0 ? void 0 : _b.length) && !interaction.userIds.includes(interaction.user.id))
+                            return res(new InteractionExecutionError_1.default("This user ID is not whitelisted.", "USER_ID_NOT_WHITELISTED"));
                         res(undefined);
                     })];
             });

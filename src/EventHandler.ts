@@ -77,7 +77,7 @@ export class EventHandler extends EventEmitter {
 					this.client[event.once ? "once" : "on"](event.name, (...args) => {
 						event.run(...args);
 					});
-					this.localUtils.debug(`Set event "${event.name}" from file "${parsedPath.base}"`);
+					this.emit("debug", `Set event "${event.name}" from file "${parsedPath.base}"`);
 					this.emit("load", event);
 				}
 				this.emit("ready");

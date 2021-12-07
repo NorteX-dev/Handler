@@ -3,3 +3,4 @@ src
 test
 .idea
 .env
+/test/node_modules

@@ -25,7 +25,6 @@ handler.on("error", (err, message) => {
 handler.on("debug", (debug) => {
 	console.log(`[Debug] ${debug}`);
 });
-// client.login(process.env.TOKEN).then(() => {
-client.login("ODYyNDExODMxMTMzOTk1MDI5.YOX9mw.rKrpCo-m9WoU78zZ2embnDEqe_A").then(() => {
+client.login(process.env.TOKEN).then(() => {
 	console.log("Bot is listening", client.user.tag);
 });

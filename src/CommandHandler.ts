@@ -90,7 +90,15 @@ export class CommandHandler extends EventEmitter {
 					delete require.cache[file];
 					const parsedPath = path.parse(file);
 					// Require command class
-					const CommandFile = require(file);
+					let CommandFile;
+					try {
+						// Attempt CJS import
+						CommandFile = require(file);
+					} catch {
+						// Attempt ESM import
+						CommandFile = import(file);
+					}
+					if (!CommandFile) return this.emit("dubug", `${parsedPath} failed to load.`);
 					// Check if is class
 					if (!this.localUtils.isClass(CommandFile)) throw new TypeError(`registerCommand(): Command ${parsedPath.name} doesn't export any classes.`);
 					// Initialize command class

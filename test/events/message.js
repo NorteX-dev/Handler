@@ -1,6 +1,6 @@
-const { Event } = require("../../out/index");
+import { Event } from "../../out/index.js";
 
-module.exports = class extends Event {
+export default class extends Event {
 	constructor(...args) {
 		super(...args, {
 			name: "channelUpdate",
@@ -8,5 +8,7 @@ module.exports = class extends Event {
 		});
 	}
 
-	async run() {}
-};
+	async run() {
+		console.log("channelUpdate");
+	}
+}

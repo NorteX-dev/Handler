@@ -104,14 +104,24 @@ var EventHandler = /** @class */ (function (_super) {
                 if (!this.directory)
                     return [2 /*return*/, reject(new EventsDirectoryReferenceError_1.default("Events directory is not set. Use setEventsdirectory(path) prior."))];
                 (0, glob_1.glob)(this.directory.endsWith("/") ? this.directory + "**/*.js" : this.directory + "/**/*.js", function (err, files) { return __awaiter(_this, void 0, void 0, function () {
-                    var _loop_1, this_1, _i, files_1, file;
+                    var _loop_1, this_1, _i, files_1, file, state_1;
                     return __generator(this, function (_a) {
                         if (err)
                             return [2 /*return*/, reject(new EventsDirectoryReferenceError_1.default("Supplied events directory is invalid. Please ensure it exists and is absolute."))];
                         _loop_1 = function (file) {
                             delete require.cache[file];
                             var parsedPath = path.parse(file);
-                            var EventFile = require(file);
+                            var EventFile = void 0;
+                            try {
+                                // Attempt CJS import
+                                EventFile = require(file);
+                            }
+                            catch (_b) {
+                                // Attempt ESM import
+                                EventFile = Promise.resolve().then(function () { return require(file); });
+                            }
+                            if (!EventFile)
+                                return { value: this_1.emit("dubug", parsedPath + " failed to load.") };
                             if (!this_1.localUtils.isClass(EventFile))
                                 throw new TypeError("Event " + parsedPath.name + " doesn't export any classes.");
                             var event_1 = new EventFile(this_1, this_1.client, parsedPath.name.toLowerCase());
@@ -130,7 +140,9 @@ var EventHandler = /** @class */ (function (_super) {
                         this_1 = this;
                         for (_i = 0, files_1 = files; _i < files_1.length; _i++) {
                             file = files_1[_i];
-                            _loop_1(file);
+                            state_1 = _loop_1(file);
+                            if (typeof state_1 === "object")
+                                return [2 /*return*/, state_1.value];
                         }
                         this.emit("ready");
                         resolve(this.events);

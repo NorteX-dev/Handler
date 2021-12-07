@@ -119,7 +119,17 @@ var InteractionHandler = /** @class */ (function (_super) {
                             file = files_1[_i];
                             delete require.cache[file];
                             parsedPath = path.parse(file);
-                            InteractionFile = require(file);
+                            InteractionFile = void 0;
+                            try {
+                                // Attempt CJS import
+                                InteractionFile = require(file);
+                            }
+                            catch (_b) {
+                                // Attempt ESM import
+                                InteractionFile = Promise.resolve().then(function () { return require(file); });
+                            }
+                            if (!InteractionFile)
+                                return [2 /*return*/, this.emit("dubug", parsedPath + " failed to load.")];
                             // Check if is class
                             if (!this.localUtils.isClass(InteractionFile))
                                 throw new TypeError("Interaction " + parsedPath.name + " doesn't export any classes.");

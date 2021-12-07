@@ -114,7 +114,17 @@ var CommandHandler = /** @class */ (function (_super) {
                     delete require.cache[file];
                     var parsedPath = path.parse(file);
                     // Require command class
-                    var CommandFile = require(file);
+                    var CommandFile = void 0;
+                    try {
+                        // Attempt CJS import
+                        CommandFile = require(file);
+                    }
+                    catch (_a) {
+                        // Attempt ESM import
+                        CommandFile = Promise.resolve().then(function () { return require(file); });
+                    }
+                    if (!CommandFile)
+                        return _this.emit("dubug", parsedPath + " failed to load.");
                     // Check if is class
                     if (!_this.localUtils.isClass(CommandFile))
                         throw new TypeError("registerCommand(): Command " + parsedPath.name + " doesn't export any classes.");

@@ -70,7 +70,15 @@ export class EventHandler extends EventEmitter {
 				for (const file of files) {
 					delete require.cache[file];
 					const parsedPath = path.parse(file);
-					const EventFile = require(file);
+					let EventFile;
+					try {
+						// Attempt CJS import
+						EventFile = require(file);
+					} catch {
+						// Attempt ESM import
+						EventFile = import(file);
+					}
+					if (!EventFile) return this.emit("dubug", `${parsedPath} failed to load.`);
 					if (!this.localUtils.isClass(EventFile)) throw new TypeError(`Event ${parsedPath.name} doesn't export any classes.`);
 					const event = new EventFile(this, this.client, parsedPath.name.toLowerCase());
 					if (!(event instanceof Event)) throw new TypeError(`Event file: ${parsedPath.name} doesn't extend the Event class.`);

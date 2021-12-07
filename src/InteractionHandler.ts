@@ -93,7 +93,15 @@ export class InteractionHandler extends EventEmitter {
 					delete require.cache[file];
 					const parsedPath = path.parse(file);
 					// Require command class
-					const InteractionFile = require(file);
+					let InteractionFile;
+					try {
+						// Attempt CJS import
+						InteractionFile = require(file);
+					} catch {
+						// Attempt ESM import
+						InteractionFile = import(file);
+					}
+					if (!InteractionFile) return this.emit("dubug", `${parsedPath} failed to load.`);
 					// Check if is class
 					if (!this.localUtils.isClass(InteractionFile)) throw new TypeError(`Interaction ${parsedPath.name} doesn't export any classes.`);
 					// Initialize command class

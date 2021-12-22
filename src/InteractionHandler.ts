@@ -56,6 +56,10 @@ export class InteractionHandler extends EventEmitter {
 		this.localUtils = new LocalUtils(this, this.client, this.owners);
 		this.setupInteractionEvent();
 		if (options.autoLoad) this.loadInteractions();
+		if (!this.client) {
+			throw new ReferenceError("InteractionHandler(): options.client is required.");
+		}
+		console.log(this.client.application);
 		return this;
 	}
 
@@ -190,7 +194,7 @@ export class InteractionHandler extends EventEmitter {
 			this.emit("debug", "Changes in interaction files detected - re-creating the interactions. Please wait.");
 			const formed = Array.from(this.interactions, ([_, data]) => {
 				// @ts-ignore
-				if (data.type === "COMMAND") return { name: data.name, description: data.description, defaultPermission: data.defaultPermission, options: data.options, type: data.type };
+				if (data.type === "CHAT_INPUT") return { name: data.name, description: data.description, defaultPermission: data.defaultPermission, options: data.options, type: data.type };
 				if (data.type === "USER") return { name: data.name, type: data.type };
 				if (data.type === "MESSAGE") return { name: data.name, type: data.type };
 			});

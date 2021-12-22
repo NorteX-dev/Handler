@@ -75,6 +75,10 @@ var InteractionHandler = /** @class */ (function (_super) {
         _this.setupInteractionEvent();
         if (options.autoLoad)
             _this.loadInteractions();
+        if (!_this.client) {
+            throw new ReferenceError("InteractionHandler(): options.client is required.");
+        }
+        console.log(_this.client.application);
         return _this;
     }
     /*
@@ -278,7 +282,7 @@ var InteractionHandler = /** @class */ (function (_super) {
                         formed = Array.from(this.interactions, function (_a) {
                             var _ = _a[0], data = _a[1];
                             // @ts-ignore
-                            if (data.type === "COMMAND")
+                            if (data.type === "CHAT_INPUT")
                                 return { name: data.name, description: data.description, defaultPermission: data.defaultPermission, options: data.options, type: data.type };
                             if (data.type === "USER")
                                 return { name: data.name, type: data.type };

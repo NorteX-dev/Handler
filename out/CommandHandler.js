@@ -123,6 +123,7 @@ var CommandHandler = /** @class */ (function (_super) {
                         // Attempt ESM import
                         CommandFile = Promise.resolve().then(function () { return require(file); });
                     }
+                    console.log(CommandFile);
                     if (!CommandFile)
                         return _this.emit("dubug", parsedPath + " failed to load.");
                     // Check if is class
@@ -137,8 +138,9 @@ var CommandHandler = /** @class */ (function (_super) {
     };
     CommandHandler.prototype.registerCommand = function (command, filename) {
         var _this = this;
+        var _a;
         this.commands.set(command.name, command);
-        if (command.aliases.length)
+        if ((_a = command.aliases) === null || _a === void 0 ? void 0 : _a.length)
             command.aliases.forEach(function (alias) { return _this.aliases.set(alias, command.name); });
         this.emit("debug", "Registered command \"" + command.name + "\"" + (filename ? " from file " + filename : ""));
         this.emit("load", command);

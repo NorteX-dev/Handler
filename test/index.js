@@ -1,15 +1,15 @@
-import dotenv from "dotenv";
+const dotenv = require("dotenv");
 dotenv.config();
-
-import { Client, Intents } from "discord.js";
-import { InteractionHandler } from "../out/index.js";
-import * as path from "path";
+const { Client, Intents } = require("discord.js");
+const { InteractionHandler } = require("../out/index.js");
+const path = require("path");
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
 const handler = new InteractionHandler({
 	client: client,
-	directory: path.join(process.cwd(), "./src/interactions"),
+	directory: path.join(__dirname, "./Interactions"),
+	prefix: "?",
 	autoLoad: true,
 });
 
@@ -25,6 +25,7 @@ handler.on("error", (err, message) => {
 handler.on("debug", (debug) => {
 	console.log(`[Debug] ${debug}`);
 });
-client.login(process.env.TOKEN).then(() => {
+client.login("ODYyNDExODMxMTMzOTk1MDI5.YOX9mw.8TG4-QivZYS4UZFmwYkqDXn7zow").then(() => {
+	// client.login(process.env.TOKEN).then(() => {
 	console.log("Bot is listening", client.user.tag);
 });

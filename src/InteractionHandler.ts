@@ -144,7 +144,7 @@ export class InteractionHandler extends EventEmitter {
 	}
 
 	private async handleCommandInteraction(interaction: any) {
-		const slashCommand = this.interactions.get("COMMAND_" + interaction.commandName.toLowerCase());
+		const slashCommand = this.interactions.get("CHAT_INPUT_" + interaction.commandName.toLowerCase()); // Changed in v2.3.0
 		if (!slashCommand) return;
 
 		const failedReason: InteractionExecutionError | undefined = await this.localUtils.verifyInteraction(interaction);

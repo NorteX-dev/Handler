@@ -192,7 +192,7 @@ var InteractionHandler = /** @class */ (function (_super) {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        slashCommand = this.interactions.get("COMMAND_" + interaction.commandName.toLowerCase());
+                        slashCommand = this.interactions.get("CHAT_INPUT_" + interaction.commandName.toLowerCase());
                         if (!slashCommand)
                             return [2 /*return*/];
                         return [4 /*yield*/, this.localUtils.verifyInteraction(interaction)];

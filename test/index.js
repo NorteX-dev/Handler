@@ -2,7 +2,7 @@ import { Client, Intents } from "discord.js";
 // const { Client, Intents } = require("discord.js");
 import dotenv from "dotenv";
 // const dotenv = require("dotenv");
-import { InteractionHandler } from "../out/index.js";
+import { CommandHandler } from "../out/index.js";
 // const { InteractionHandler } = require("../out/index.js");
 import path from "path";
 // const path = require("path");
@@ -10,13 +10,13 @@ import path from "path";
 dotenv.config();
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
-const handler = new InteractionHandler({
+const handler = new CommandHandler({
 	client: client,
-	directory: path.join(process.cwd(), "./test/Interactions"),
+	directory: path.join(process.cwd(), "./test/Commands"),
 });
 
-handler.on("load", (interaction) => {
-	console.log("Command " + interaction.name + " has been loaded.");
+handler.on("load", (command) => {
+	console.log("Command " + command.name + " has been loaded.");
 });
 handler.on("ready", () => {
 	console.log("All files loaded!");

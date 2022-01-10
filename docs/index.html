@@ -35,34 +35,16 @@ Remember that this requires the message content intent.</p>
 </ul>
 <p><a id="changelog"></a></p>
 
-<a href="#changelog-v1-to-v2" id="changelog-v1-to-v2" style="color: inherit; text-decoration: none;">
-  <h3>Changelog v1 to v2</h3>
+<a href="#changelog-v2-to-v3" id="changelog-v2-to-v3" style="color: inherit; text-decoration: none;">
+  <h3>Changelog v2 to v3</h3>
 </a>
 <ul>
-<li>Interaction Handler internal errors will now emit with an <code>InteractionExecutionError</code> error object instead of the error reason alone.</li>
+<li>Added ability to use this package as an ESM module. Use it with the <code>import</code> keyword.</li>
+<li><code>autoLoad</code> for all handlers is now <code>true</code> by default.</li>
+<li>Bump discord.js version to 13.5.0</li>
+<li>More information will be logged to the debug event.</li>
+<li>Directories for handlers should now be relative as opposed to the previously absolute paths (like &quot;../path.js&quot; instead of &quot;C:/.../Project/src/path.js&quot;)</li>
 </ul>
-<blockquote>
-<p>This means you might need to use the <code>message</code> property instead of using the object itself.</p>
-</blockquote>
-<ul>
-<li>The change above also applies for the <code>CommandHandler</code> class.</li>
-<li>The <code>Interaction</code> class has been renamed to <code>CommandInteraction</code> and does not accept the <code>type</code> parameter anymore.</li>
-<li>Some debug messages were <code>console.log</code>ged instead of emitted as debug.</li>
-<li>If <code>force: true</code>, the interactions will not be fetched and will skip to the updating.</li>
-<li>The interaction handler now errors on an attempt of registering duplicate interactions</li>
-<li>Halved the amount of required API calls to Discord when updating interactions, speeding up the bot</li>
-<li>Fixed typo in interaction handling error: LocalUtils#97</li>
-</ul>
-<blockquote>
-<p>For now, below features are experimental and are not very dependable. Use at your own risk.</p>
-</blockquote>
-<ul>
-<li>Created <code>UserContextMenuInteraction</code> class that should be extended in order to handle user context menu interactions (right-click on user options). Options are as follows: <code>{ name: string, disabled?: boolean = false }</code>.</li>
-<li>Created <code>MessageContextMenuInteraction</code> which works the same way <code>UserContextMenuInteraction</code> does, but for message context menus instead.</li>
-</ul>
-<blockquote>
-<p>Warning: message component interactions (buttons, select menus...) is beyond the scope of this project and are not handled. Please consider creating an EventHandler, registering an <code>interactionCreate</code> event and handling it manually instead. (This might change in the future.)</p>
-</blockquote>
 <p><a id="bot_base"></a></p>
 
 <a href="#1-creating-a-discordjs-bot" id="1-creating-a-discordjs-bot" style="color: inherit; text-decoration: none;">

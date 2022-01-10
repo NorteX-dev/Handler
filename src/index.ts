@@ -1,24 +1,24 @@
-import { CommandHandler } from "./CommandHandler";
-import { InteractionHandler } from "./InteractionHandler";
-import { EventHandler } from "./EventHandler";
-import { Command } from "./Command";
-import { CommandInteraction } from "./CommandInteraction";
-import { Event } from "./Event";
-import { Util } from "./Util";
-import { Pagination } from "./Pagination";
-import { UserContextMenuInteraction } from "./UserContextMenuInteraction";
-import { MessageContextMenuInteraction } from "./MessageContextMenuInteraction";
+import { CommandHandler } from "./handlers/CommandHandler";
+import { InteractionHandler } from "./handlers/InteractionHandler";
+import { EventHandler } from "./handlers/EventHandler";
+import { Command } from "./structures/Command";
+import { CommandInteraction } from "./structures/CommandInteraction";
+import { UserContextMenuInteraction } from "./structures/UserContextMenuInteraction";
+import { MessageContextMenuInteraction } from "./structures/MessageContextMenuInteraction";
+import { Event } from "./structures/Event";
+import { Util } from "./util/Util";
+import { Pagination } from "./util/Pagination";
 
 export {
-	// Handler casses
+	// Handler classes
 	CommandHandler,
 	InteractionHandler,
 	EventHandler,
-	// Extendibles - CommandHandler
+	// Structures - CommandHandler
 	Command,
-	// Extendibles - EventHandler
+	// Structures - EventHandler
 	Event,
-	// Extendibles - InteractionHandler
+	// Structures - InteractionHandler
 	CommandInteraction,
 	UserContextMenuInteraction,
 	MessageContextMenuInteraction,

@@ -1,4 +1,4 @@
-import { ApplicationCommand, Client, Collection, Interaction as DJSInteraction, ContextMenuInteraction as DJSContextMenuInteraction } from "discord.js";
+import { ApplicationCommand, Client, Collection, Interaction as DJSInteraction, ContextMenuInteraction as DJSContextMenuInteraction, ClientApplication } from "discord.js";
 import { EventEmitter } from "events";
 import { LocalUtils } from "./LocalUtils";
 import { glob } from "glob";
@@ -40,6 +40,7 @@ export class InteractionHandler extends EventEmitter {
 	public owners?: Array<string>;
 	public disableInteractionModification?: boolean;
 	public forceInteractionUpdate?: boolean;
+	private application: ClientApplication | null | undefined;
 
 	public interactions: Map<string, CommandInteraction | UserContextMenuInteraction | MessageContextMenuInteraction>;
 	private localUtils: LocalUtils;
@@ -55,11 +56,14 @@ export class InteractionHandler extends EventEmitter {
 		this.interactions = new Map();
 		this.localUtils = new LocalUtils(this, this.client, this.owners);
 		this.setupInteractionEvent();
-		if (options.autoLoad) this.loadInteractions();
+		if (options.autoLoad !== false) this.loadInteractions();
 		if (!this.client) {
 			throw new ReferenceError("InteractionHandler(): options.client is required.");
 		}
-		console.log(this.client.application);
+		this.client.on("ready", async () => {
+			this.emit("debug", `Client.application assigned.`);
+			this.application = this.client.application;
+		});
 		return this;
 	}
 
@@ -90,24 +94,21 @@ export class InteractionHandler extends EventEmitter {
 	loadInteractions() {
 		return new Promise(async (resolve, reject) => {
 			if (!this.directory) return reject(new InteractionDirectoryReferenceError("Interactions directory is not set. Use setInteractionsDirectory(path) prior."));
-			glob(this.directory.endsWith("/") ? this.directory + "**/*.js" : this.directory + "/**/*.js", async (err: Error | null, files: string[]) => {
+			const dirPattern = this.directory.endsWith("/") ? this.directory + "**\\*.js" : this.directory + "\\**\\*.js";
+			console.log(dirPattern);
+			glob(dirPattern, async (err: Error | null, files: string[]) => {
+				this.emit("debug", `Found ${files.length} interaction files.`);
 				if (err) return reject(new InteractionDirectoryReferenceError("Supplied interactions directory is invalid. Please ensure it exists and is absolute."));
 				const duplicates = [];
 				for (const file of files) {
-					delete require.cache[file];
 					const parsedPath = path.parse(file);
 					// Require command class
 					let InteractionFile;
-					try {
-						// Attempt CJS import
-						InteractionFile = require(file);
-					} catch {
-						// Attempt ESM import
-						InteractionFile = import(file);
-					}
+					InteractionFile = require(file);
 					if (!InteractionFile) return this.emit("dubug", `${parsedPath} failed to load.`);
 					// Check if is class
-					if (!this.localUtils.isClass(InteractionFile)) throw new TypeError(`Interaction ${parsedPath.name} doesn't export any classes.`);
+					console.log(InteractionFile);
+					if (!this.localUtils.isClass(InteractionFile)) throw new TypeError(`Interaction ${parsedPath.name} doesn't export any of the correct classes.`);
 					// Initialize command class
 					const interaction = new InteractionFile(this, this.client, parsedPath.name.toLowerCase());
 					// Check if initialized class is extending Command
@@ -144,7 +145,7 @@ export class InteractionHandler extends EventEmitter {
 	}
 
 	private async handleCommandInteraction(interaction: any) {
-		const slashCommand = this.interactions.get("CHAT_INPUT_" + interaction.commandName.toLowerCase()); // Changed in v2.3.0
+		const slashCommand = this.interactions.get("CHAT_INPUT_" + interaction.commandName.toLowerCase());
 		if (!slashCommand) return;
 
 		const failedReason: InteractionExecutionError | undefined = await this.localUtils.verifyInteraction(interaction);
@@ -184,7 +185,7 @@ export class InteractionHandler extends EventEmitter {
 	private async postInteractions(force: boolean = false) {
 		let changes;
 		if (!force) {
-			const fetchedInteractions = await this.client.application!.commands.fetch().catch((err) => {
+			const fetchedInteractions = await this.application!.commands.fetch().catch((err) => {
 				throw new Error(`Can't fetch client commands: ${err}`);
 			});
 			if (!fetchedInteractions) throw new TypeError("Interactions weren't fetched.");
@@ -193,14 +194,16 @@ export class InteractionHandler extends EventEmitter {
 		if (changes || force) {
 			this.emit("debug", "Changes in interaction files detected - re-creating the interactions. Please wait.");
 			const formed = Array.from(this.interactions, ([_, data]) => {
-				// @ts-ignore
-				if (data.type === "CHAT_INPUT") return { name: data.name, description: data.description, defaultPermission: data.defaultPermission, options: data.options, type: data.type };
+				if (data.type === "CHAT_INPUT") {
+					// @ts-ignore
+					return { name: data.name, description: data.description, defaultPermission: data.defaultPermission, options: data.options, type: data.type };
+				}
 				if (data.type === "USER") return { name: data.name, type: data.type };
 				if (data.type === "MESSAGE") return { name: data.name, type: data.type };
 			});
-			// await this.client.application!.commands.set([]).then((r) => this.emit("debug", "Cleaned out old commands"));
+			// await this.application!.commands.set([]).then((r) => this.emit("debug", "Cleaned out old commands"));
 			// @ts-ignore
-			await this.client.application!.commands.set(formed).then((r) => this.emit("debug", "Created all commands (" + r.size + " returned)"));
+			await this.application!.commands.set(formed).then((r) => this.emit("debug", "Created all commands (" + r.size + " returned)"));
 			this.emit("debug", "Interaction changes were posted successfully. Remember to wait a bit (up to 1 hour) or kick and add the bot back to see changes.");
 		} else this.emit("debug", "No changes in interactions - not refreshing.");
 	}

@@ -34,7 +34,7 @@ export class EventHandler extends EventEmitter {
 		this.directory = options.directory;
 		this.events = new Map();
 		this.localUtils = new LocalUtils(this, this.client);
-		if (options.autoLoad) this.loadEvents();
+		if (options.autoLoad !== false) this.loadEvents();
 		return this;
 	}
 

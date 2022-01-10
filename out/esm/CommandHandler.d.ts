@@ -4,10 +4,10 @@ import { EventEmitter } from "events";
 import { Command } from "./Command";
 interface HandlerOptions {
     client: Client;
-    autoLoad: boolean;
     directory: string | undefined;
     prefix: string;
     owners: Array<string>;
+    autoLoad: boolean;
 }
 export declare class CommandHandler extends EventEmitter {
     client: Client;

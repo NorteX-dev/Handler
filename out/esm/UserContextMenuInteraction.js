@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserContextMenuInteraction = void 0;
-const MethodNotOverridenError_1 = require("./errors/MethodNotOverridenError");
-class UserContextMenuInteraction {
-    constructor(handler, client, name, options) {
+var MethodNotOverridenError_1 = require("./errors/MethodNotOverridenError");
+var UserContextMenuInteraction = /** @class */ (function () {
+    function UserContextMenuInteraction(handler, client, name, options) {
         if (!options)
             options = {};
         this.handler = handler;
@@ -12,8 +12,9 @@ class UserContextMenuInteraction {
         this.name = options.name || name;
         this.disabled = options.disabled || false;
     }
-    run(userContextMenuInteraction) {
+    UserContextMenuInteraction.prototype.run = function (userContextMenuInteraction) {
         throw new MethodNotOverridenError_1.default("run() method on " + this.name + " interaction is not present.");
-    }
-}
+    };
+    return UserContextMenuInteraction;
+}());
 exports.UserContextMenuInteraction = UserContextMenuInteraction;

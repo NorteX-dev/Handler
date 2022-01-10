@@ -16,7 +16,6 @@ export declare class InteractionHandler extends EventEmitter {
     owners?: Array<string>;
     disableInteractionModification?: boolean;
     forceInteractionUpdate?: boolean;
-    private application;
     interactions: Map<string, CommandInteraction | UserContextMenuInteraction | MessageContextMenuInteraction>;
     private localUtils;
     constructor(options: HandlerOptions);

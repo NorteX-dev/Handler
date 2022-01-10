@@ -11,10 +11,10 @@ import CommandExecutionError from "./errors/CommandExecutionError";
 
 interface HandlerOptions {
 	client: Client;
+	autoLoad: boolean;
 	directory: string | undefined;
 	prefix: string;
 	owners: Array<string>;
-	autoLoad: boolean;
 }
 
 export class CommandHandler extends EventEmitter {
@@ -53,7 +53,7 @@ export class CommandHandler extends EventEmitter {
 		this.guildCooldowns = new Map();
 		this.localUtils = new LocalUtils(this, this.client, this.owners);
 		this.setupMessageEvent();
-		if (options.autoLoad) this.loadCommands();
+		if (options.autoLoad !== false) this.loadCommands();
 		return this;
 	}
 

@@ -26,27 +26,13 @@ Tutorials:
 - [Using the options of interactions](#interaction_options)
 
 <a id="changelog"></a>
-### Changelog v1 to v2
+### Changelog v2 to v3
 
-*   Interaction Handler internal errors will now emit with an `InteractionExecutionError` error object instead of the error reason alone.
-
-> This means you might need to use the `message` property instead of using the object itself.
-
-*   The change above also applies for the `CommandHandler` class.
-*   The `Interaction` class has been renamed to `CommandInteraction` and does not accept the `type` parameter anymore.
-*   Some debug messages were `console.log`ged instead of emitted as debug.
-*   If `force: true`, the interactions will not be fetched and will skip to the updating.
-*   The interaction handler now errors on an attempt of registering duplicate interactions
-*   Halved the amount of required API calls to Discord when updating interactions, speeding up the bot
-*   Fixed typo in interaction handling error: LocalUtils#97
-
-> For now, below features are experimental and are not very dependable. Use at your own risk.
-
-*   Created `UserContextMenuInteraction` class that should be extended in order to handle user context menu interactions (right-click on user options). Options are as follows: `{ name: string, disabled?: boolean = false }`.
-*   Created `MessageContextMenuInteraction` which works the same way `UserContextMenuInteraction` does, but for message context menus instead.
-
-> Warning: message component interactions (buttons, select menus...) is beyond the scope of this project and are not handled. Please consider creating an EventHandler, registering an `interactionCreate` event and handling it manually instead. (This might change in the future.)
-
+* Added ability to use this package as an ESM module. Use it with the `import` keyword.
+* `autoLoad` for all handlers is now `true` by default.
+* Bump discord.js version to 13.5.0
+* More information will be logged to the debug event.
+* Directories for handlers should now be relative as opposed to the previously absolute paths (like "../path.js" instead of "C:/.../Project/src/path.js")
 
 <a id="bot_base"></a>
 ### 1. Creating a Discord.js bot

@@ -73,7 +73,7 @@ var CommandHandler = /** @class */ (function (_super) {
         _this.guildCooldowns = new Map();
         _this.localUtils = new LocalUtils_1.LocalUtils(_this, _this.client, _this.owners);
         _this.setupMessageEvent();
-        if (options.autoLoad)
+        if (options.autoLoad !== false)
             _this.loadCommands();
         return _this;
     }
@@ -113,35 +113,22 @@ var CommandHandler = /** @class */ (function (_super) {
             (0, glob_1.glob)(_this.directory.endsWith("/") ? _this.directory + "**/*.js" : _this.directory + "/**/*.js", function (err, files) { return __awaiter(_this, void 0, void 0, function () {
                 var _i, files_1, file, parsedPath, CommandFile, cmd;
                 return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            if (err)
-                                return [2 /*return*/, reject(new CommandDirectoryReferenceError_1.default("Supplied command directory is invalid. Please ensure it exists and is absolute."))];
-                            _i = 0, files_1 = files;
-                            _a.label = 1;
-                        case 1:
-                            if (!(_i < files_1.length)) return [3 /*break*/, 4];
-                            file = files_1[_i];
-                            delete require.cache[file];
-                            parsedPath = path.parse(file);
-                            return [4 /*yield*/, Promise.resolve().then(function () { return require(file); })];
-                        case 2:
-                            CommandFile = _a.sent();
-                            console.log(CommandFile);
-                            if (!CommandFile)
-                                return [2 /*return*/, this.emit("dubug", parsedPath + " failed to load.")];
-                            // Check if is class
-                            if (!this.localUtils.isClass(CommandFile))
-                                throw new TypeError("Command " + parsedPath.name + " doesn't export any of the correct classes.");
-                            cmd = new CommandFile(this, this.client, parsedPath.name.toLowerCase());
-                            this.registerCommand(cmd);
-                            resolve(this.commands);
-                            _a.label = 3;
-                        case 3:
-                            _i++;
-                            return [3 /*break*/, 1];
-                        case 4: return [2 /*return*/];
+                    if (err)
+                        return [2 /*return*/, reject(new CommandDirectoryReferenceError_1.default("Supplied command directory is invalid. Please ensure it exists and is absolute."))];
+                    for (_i = 0, files_1 = files; _i < files_1.length; _i++) {
+                        file = files_1[_i];
+                        parsedPath = path.parse(file);
+                        CommandFile = require(file);
+                        if (!CommandFile)
+                            return [2 /*return*/, this.emit("dubug", parsedPath + " failed to load.")];
+                        // Check if is class
+                        if (!this.localUtils.isClass(CommandFile))
+                            throw new TypeError("Command " + parsedPath.name + " doesn't export any of the correct classes.");
+                        cmd = new CommandFile(this, this.client, parsedPath.name.toLowerCase());
+                        this.registerCommand(cmd);
+                        resolve(this.commands);
                     }
+                    return [2 /*return*/];
                 });
             }); });
         });

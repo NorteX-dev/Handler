@@ -124,61 +124,48 @@ var InteractionHandler = /** @class */ (function (_super) {
                     var duplicates, _i, files_1, file, parsedPath, InteractionFile, interaction;
                     var _this = this;
                     return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                this.emit("debug", "Found " + files.length + " interaction files.");
-                                if (err)
-                                    return [2 /*return*/, reject(new InteractionDirectoryReferenceError_1.default("Supplied interactions directory is invalid. Please ensure it exists and is absolute."))];
-                                duplicates = [];
-                                _i = 0, files_1 = files;
-                                _a.label = 1;
-                            case 1:
-                                if (!(_i < files_1.length)) return [3 /*break*/, 4];
-                                file = files_1[_i];
-                                parsedPath = path.parse(file);
-                                return [4 /*yield*/, Promise.resolve().then(function () { return require(file); })];
-                            case 2:
-                                InteractionFile = _a.sent();
-                                if (!InteractionFile)
-                                    return [2 /*return*/, this.emit("dubug", parsedPath + " failed to load.")];
-                                // Check if is class
-                                console.log(InteractionFile);
-                                if (!this.localUtils.isClass(InteractionFile))
-                                    throw new TypeError("Interaction " + parsedPath.name + " doesn't export any of the correct classes.");
-                                interaction = new InteractionFile(this, this.client, parsedPath.name.toLowerCase());
-                                // Check if initialized class is extending Command
-                                if (!(interaction instanceof index_1.CommandInteraction || interaction instanceof index_1.UserContextMenuInteraction || interaction instanceof index_1.MessageContextMenuInteraction))
-                                    throw new TypeError("Interaction file: " + parsedPath.name + " doesn't extend one of the valid the interaction classes: CommandInteraction, UserContextMenuInteraction, MessageContextMenuInteraction.");
-                                // Save command to map
-                                if (this.interactions.get(interaction.type + "_" + interaction.name)) {
-                                    duplicates.push(interaction);
-                                    return [3 /*break*/, 3];
-                                }
-                                this.interactions.set(interaction.type + "_" + interaction.name, interaction);
-                                this.emit("debug", "Loaded interaction \"" + interaction.name + "\" from file \"" + parsedPath.base + "\"");
-                                this.emit("load", interaction);
-                                _a.label = 3;
-                            case 3:
-                                _i++;
-                                return [3 /*break*/, 1];
-                            case 4:
-                                if (duplicates === null || duplicates === void 0 ? void 0 : duplicates.length)
-                                    throw new Error("Loading interaction with the same name: " + duplicates.map(function (d) { return d.name; }).join(", ") + ".");
-                                if (!this.disableInteractionModification)
-                                    this.client.on("ready", function () { return __awaiter(_this, void 0, void 0, function () {
-                                        return __generator(this, function (_a) {
-                                            switch (_a.label) {
-                                                case 0: return [4 /*yield*/, this.postInteractions(this.forceInteractionUpdate)];
-                                                case 1:
-                                                    _a.sent();
-                                                    return [2 /*return*/];
-                                            }
-                                        });
-                                    }); });
-                                this.emit("ready");
-                                resolve(this.interactions);
-                                return [2 /*return*/];
+                        this.emit("debug", "Found " + files.length + " interaction files.");
+                        if (err)
+                            return [2 /*return*/, reject(new InteractionDirectoryReferenceError_1.default("Supplied interactions directory is invalid. Please ensure it exists and is absolute."))];
+                        duplicates = [];
+                        for (_i = 0, files_1 = files; _i < files_1.length; _i++) {
+                            file = files_1[_i];
+                            parsedPath = path.parse(file);
+                            InteractionFile = require(file);
+                            if (!InteractionFile)
+                                return [2 /*return*/, this.emit("dubug", parsedPath + " failed to load.")];
+                            // Check if is class
+                            if (!this.localUtils.isClass(InteractionFile))
+                                throw new TypeError("Interaction " + parsedPath.name + " doesn't export any of the correct classes.");
+                            interaction = new InteractionFile(this, this.client, parsedPath.name.toLowerCase());
+                            // Check if initialized class is extending Command
+                            if (!(interaction instanceof index_1.CommandInteraction || interaction instanceof index_1.UserContextMenuInteraction || interaction instanceof index_1.MessageContextMenuInteraction))
+                                throw new TypeError("Interaction file: " + parsedPath.name + " doesn't extend one of the valid the interaction classes: CommandInteraction, UserContextMenuInteraction, MessageContextMenuInteraction.");
+                            // Save command to map
+                            if (this.interactions.get(interaction.type + "_" + interaction.name)) {
+                                duplicates.push(interaction);
+                                continue;
+                            }
+                            this.interactions.set(interaction.type + "_" + interaction.name, interaction);
+                            this.emit("debug", "Loaded interaction \"" + interaction.name + "\" from file \"" + parsedPath.base + "\"");
+                            this.emit("load", interaction);
                         }
+                        if (duplicates === null || duplicates === void 0 ? void 0 : duplicates.length)
+                            throw new Error("Loading interaction with the same name: " + duplicates.map(function (d) { return d.name; }).join(", ") + ".");
+                        if (!this.disableInteractionModification)
+                            this.client.on("ready", function () { return __awaiter(_this, void 0, void 0, function () {
+                                return __generator(this, function (_a) {
+                                    switch (_a.label) {
+                                        case 0: return [4 /*yield*/, this.postInteractions(this.forceInteractionUpdate)];
+                                        case 1:
+                                            _a.sent();
+                                            return [2 /*return*/];
+                                    }
+                                });
+                            }); });
+                        this.emit("ready");
+                        resolve(this.interactions);
+                        return [2 /*return*/];
                     });
                 }); });
                 return [2 /*return*/];

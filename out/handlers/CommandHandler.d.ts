@@ -14,7 +14,10 @@ export declare class CommandHandler extends EventEmitter {
      * Initializes a handler on the client.
      *
      * @param client Discord.JS Client Instance
-     * @param commandDir Command files directory
+     * @param directory Command files directory
+     * @param prefix Command prefix
+     * @param owners Array of owners
+     * @param autoLoad If undefined or true, will auto load commands; explicitely specify "false" to not load commands automatically
      * @returns CommandHandler
      * @example
      * ```js

@@ -108,60 +108,39 @@ var EventHandler = /** @class */ (function (_super) {
                 (0, glob_1.glob)(this.directory.endsWith("/") ? this.directory + "**/*.js" : this.directory + "/**/*.js", function (err, files) { return __awaiter(_this, void 0, void 0, function () {
                     var _loop_1, this_1, _i, files_1, file, state_1;
                     return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                if (err)
-                                    return [2 /*return*/, reject(new EventsDirectoryReferenceError_1.default("Supplied events directory is invalid. Please ensure it exists and is absolute."))];
-                                _loop_1 = function (file) {
-                                    var parsedPath, EventFile, event_1;
-                                    return __generator(this, function (_b) {
-                                        switch (_b.label) {
-                                            case 0:
-                                                delete require.cache[file];
-                                                parsedPath = path.parse(file);
-                                                return [4 /*yield*/, Promise.resolve().then(function () { return require(file); })];
-                                            case 1:
-                                                EventFile = _b.sent();
-                                                if (!EventFile)
-                                                    return [2 /*return*/, { value: this_1.emit("dubug", parsedPath + " failed to load.") }];
-                                                if (!this_1.localUtils.isClass(EventFile))
-                                                    throw new TypeError("Event " + parsedPath.name + " doesn't export any of the correct classes.");
-                                                event_1 = new EventFile(this_1, this_1.client, parsedPath.name.toLowerCase());
-                                                if (!(event_1 instanceof index_1.Event))
-                                                    throw new TypeError("Event file: " + parsedPath.name + " doesn't extend the Event class.");
-                                                this_1.client[event_1.once ? "once" : "on"](event_1.name, function () {
-                                                    var args = [];
-                                                    for (var _i = 0; _i < arguments.length; _i++) {
-                                                        args[_i] = arguments[_i];
-                                                    }
-                                                    event_1.run.apply(event_1, args);
-                                                });
-                                                this_1.emit("debug", "Set event \"" + event_1.name + "\" from file \"" + parsedPath.base + "\"");
-                                                this_1.emit("load", event_1);
-                                                return [2 /*return*/];
-                                        }
-                                    });
-                                };
-                                this_1 = this;
-                                _i = 0, files_1 = files;
-                                _a.label = 1;
-                            case 1:
-                                if (!(_i < files_1.length)) return [3 /*break*/, 4];
-                                file = files_1[_i];
-                                return [5 /*yield**/, _loop_1(file)];
-                            case 2:
-                                state_1 = _a.sent();
-                                if (typeof state_1 === "object")
-                                    return [2 /*return*/, state_1.value];
-                                _a.label = 3;
-                            case 3:
-                                _i++;
-                                return [3 /*break*/, 1];
-                            case 4:
-                                this.emit("ready");
-                                resolve(this.events);
-                                return [2 /*return*/];
+                        if (err)
+                            return [2 /*return*/, reject(new EventsDirectoryReferenceError_1.default("Supplied events directory is invalid. Please ensure it exists and is absolute."))];
+                        _loop_1 = function (file) {
+                            delete require.cache[file];
+                            var parsedPath = path.parse(file);
+                            var EventFile = require(file);
+                            if (!EventFile)
+                                return { value: this_1.emit("dubug", parsedPath + " failed to load.") };
+                            if (!this_1.localUtils.isClass(EventFile))
+                                throw new TypeError("Event " + parsedPath.name + " doesn't export any of the correct classes.");
+                            var event_1 = new EventFile(this_1, this_1.client, parsedPath.name.toLowerCase());
+                            if (!(event_1 instanceof index_1.Event))
+                                throw new TypeError("Event file: " + parsedPath.name + " doesn't extend the Event class.");
+                            this_1.client[event_1.once ? "once" : "on"](event_1.name, function () {
+                                var args = [];
+                                for (var _i = 0; _i < arguments.length; _i++) {
+                                    args[_i] = arguments[_i];
+                                }
+                                event_1.run.apply(event_1, args);
+                            });
+                            this_1.emit("debug", "Set event \"" + event_1.name + "\" from file \"" + parsedPath.base + "\"");
+                            this_1.emit("load", event_1);
+                        };
+                        this_1 = this;
+                        for (_i = 0, files_1 = files; _i < files_1.length; _i++) {
+                            file = files_1[_i];
+                            state_1 = _loop_1(file);
+                            if (typeof state_1 === "object")
+                                return [2 /*return*/, state_1.value];
                         }
+                        this.emit("ready");
+                        resolve(this.events);
+                        return [2 /*return*/];
                     });
                 }); });
                 return [2 /*return*/];

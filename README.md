@@ -1,95 +1,81 @@
-## `@nortex/handler` - the easy and clean way to effortlessly handle various types of commands.
-### The basic premise of this package is to make a handler that allows for clean code, customizability and ease of use.
+## `@nortex/handler`
+### The easy and clean way to effortlessly handle commands and events.
 
----
-
-> Quick note about naming standards:
+> **Quick note about naming standards:**
 >
-> Commands are classic message-based commands, such as `?ban <@user>`.
+> "Commands" are classic message-based commands, such as `?ban <@user>`.
 > Remember that this requires the message content intent.
 > 
-> Interactions are slash commands and context menus combined - the relatively fresh way of creating commands available in the Discord API.
+> "Interactions" are slash commands and context menus, such as `/ban user:Username`.
 > 
-> Events are the normal events of Discord.js such as messageCreate, guildMemberAdd...
+> "Events" are the normal events of Discord.js such as `messageCreate`, `guildMemberAdd`.
 
 #### Table of Contents:
-- [Changelog](#changelog)
----
-Tutorials:
-- [Creating the bot](#bot_base)
-- [Creating a basic Command Handler](#command_handler)
-- [Making the command files](#commands_setup)
-- [Using the options of commands](#command_options)
-- [Creating a basic Event Handler](#event_handler)
-- [Creating a basic CommandInteraction Handler](#interaction_handler)
-- [Understanding interaction refreshing](#interaction_refresher)
-- [Using the options of interactions](#interaction_options)
+- [Changelog [v3 to v4]](#changelog)
+- [Installation](#installation)
+- [Usage](#usage)
 
 <a id="changelog"></a>
-### Changelog v2 to v3
+### Changelog v3 to v4
 
-* Added ability to use this package as an ESM module. Use it with the `import` keyword.
-* `autoLoad` for all handlers is now `true` by default.
-* Bump discord.js version to 13.5.0
-* More information will be logged to the debug event.
-* Directories for handlers should now be relative as opposed to the previously absolute paths (like "../path.js" instead of "C:/.../Project/src/path.js")
+- Handling message commands is now up to the user; you should now create a messageCreate event, either on the client directly or using the EventHandler class, and then invoking `handler.runCommand(message)`.
+- Created a new `handler.runCommand(message)` method that returns a Promise that should be executed on the `messageCreate` event. The handler will no longer create any events.
+- Added and fixed `userRoles` and `botRoles` options
+- Fixed `userPermissions` and `botPermissions` options
+- [todo] Tip: Pass additional options as a spread argument to the `runCommand` method. These will be available at the end of the run() function on the command.
+- [todo] Added a new option to the command handler: `userCooldownOverwriteRoleId` as well as `guildCooldownOverwriteRoleId` and their permission counterparts: `userCooldownOverwritePermission` and `guildCooldownOVerwritePermission`. If the user satisfies any of these requirements, cooldown will not affect them.
 
-<a id="bot_base"></a>
-### 1. Creating a Discord.js bot
+<a id="todos"></a>
+### TODOs
+- Argument handler - automatic prompting if argument was not provided (with option to explicitely disable prompting).
+
+<a id="disclaimer"></a>
 > Warning: this guide does not explain the step of creating a basic discord bot throughly. If you don't know to create bots, refer to other sources first.
+<a id="installation"></a>
+### Installation
 
-To start using the handler you of course need to have a bot running first. A good first step toward making one is preparing the dependencies we are going to need.
-This also includes the IDE or text editor; and you are welcome to use any one you prefer,
-but some good ones are [Visual Studio Code](https://code.visualstudio.com/) or [Webstorm](https://www.jetbrains.com/webstorm/).
-
-Then, retrieve a bot token from the [Discord Developer Portal](https://discord.com/developers/applications).
-As an optional step, you might also want to set up a database (if you're going to need one).
-
-Now that we have everything ready, we can install `discord.js` using `npm i discord.js` and start by writing this boilerplate code:
-
-`MyClient.js`
-```js
-const { Client } = require("discord.js");
-const { CommandHandler } = require("@nortex/handler");
-
-// Create a class named anything (in this case MyClient) that extends the Client class of Discord.js.
-module.exports = class MyClient extends Client {
-  constructor() {
-    // Supply some options to the Client constructor
-    super({ intents: [Intents.FLAGS.GUILDS /*Pass extra intents if needed*/] })
-  }
-
-  async run() {
-    super.login("YOUR_TOKEN");
-  }
-}
+To install the package, run:
+```shell
+$ npm install @nortex/handler
 ```
 
-The following code should create a very basic bot instance and login using the token. If the bot shows up as online, proceed to the next step.
+Include it in your code using
+```js
+const Handler = require("@nortex/handler");
+```
 
-<a id="command_handler"></a>
-### 2. Creating a basic command handler
-Now that we have the bot running and dependencies satisfied, we can adding the handling of commands.
-
-Inside the run() function of MyClient, we are going to initalize CommandHandler using:
+<a id="usage"></a>
+### Usage
+Run this code to create a command handler on the Discord.js `client` instance:
 ```js
 const handler = new CommandHandler({
-  client: this,
+  client: client,
   directory: require("path").join(__dirname, "./Commands") // Change to your directory
-  /* Pass optional options here */
 });
-handler.loadCommands();
+
 // Handle events emitted by the command handler
 handler.on("load", command => {
+  // Emits when a command is loaded
   console.log("Loaded", command.name);
 })
 handler.on("error", e => {
+  // Emits when an internal exception occurs in the code
   console.error(e);
 });
 handler.on("debug", e => {
+  // Emits additional debug information
   console.log(`[Debug] ${e.message}`); // Logging debug is not required but very useful when creating the bot.
 });
 ```
-Now, we can access the "handler" variable.
 
-> More of the README file is going to be finished soon.
+After creating the handler, you should handle the command execution on a `messageCreate`. You can do so using the EventHandler class or manually:
+```js
+client.on("messageCreate", message => {
+  handler.runCommand(message).then(() => {
+	// Command was executed
+  }).catch(err => {
+	// Command was not executed properly, for example from a lack of permissions.
+	message.reply("Error: " + err.message);
+  });
+});
+```

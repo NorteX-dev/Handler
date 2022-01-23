@@ -50,6 +50,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommandHandler = void 0;
 var CommandDirectoryReferenceError_1 = require("../errors/CommandDirectoryReferenceError");
@@ -57,6 +66,7 @@ var events_1 = require("events");
 var LocalUtils_1 = require("../util/LocalUtils");
 var glob_1 = require("glob");
 var path = require("path");
+var CommandExecutionError_1 = require("../errors/CommandExecutionError");
 var CommandHandler = /** @class */ (function (_super) {
     __extends(CommandHandler, _super);
     function CommandHandler(options) {
@@ -72,7 +82,6 @@ var CommandHandler = /** @class */ (function (_super) {
         _this.userCooldowns = new Map();
         _this.guildCooldowns = new Map();
         _this.localUtils = new LocalUtils_1.LocalUtils(_this, _this.client, _this.owners);
-        _this.setupMessageEvent();
         if (options.autoLoad !== false)
             _this.loadCommands();
         return _this;
@@ -98,7 +107,7 @@ var CommandHandler = /** @class */ (function (_super) {
     /**
      * Loads classic message commands into memory
      *
-     * @returns CommandHandler
+     * @returns CommandHandlers
      *
      * @remarks
      * Requires @see {@link CommandHandler.setCommandDirectory} to be executed first, or `directory` to be specified in the constructor.
@@ -120,10 +129,10 @@ var CommandHandler = /** @class */ (function (_super) {
                         parsedPath = path.parse(file);
                         CommandFile = require(file);
                         if (!CommandFile)
-                            return [2 /*return*/, this.emit("dubug", parsedPath + " failed to load.")];
+                            return [2 /*return*/, this.emit("dubug", "".concat(parsedPath, " failed to load."))];
                         // Check if is class
                         if (!this.localUtils.isClass(CommandFile))
-                            throw new TypeError("Command " + parsedPath.name + " doesn't export any of the correct classes.");
+                            throw new TypeError("Command ".concat(parsedPath.name, " doesn't export any of the correct classes."));
                         cmd = new CommandFile(this, this.client, parsedPath.name.toLowerCase());
                         this.registerCommand(cmd);
                         resolve(this.commands);
@@ -133,21 +142,25 @@ var CommandHandler = /** @class */ (function (_super) {
             }); });
         });
     };
+    /**
+     * @ignore
+     * */
     CommandHandler.prototype.registerCommand = function (command, filename) {
         var _this = this;
         var _a;
         this.commands.set(command.name, command);
         if ((_a = command.aliases) === null || _a === void 0 ? void 0 : _a.length)
             command.aliases.forEach(function (alias) { return _this.aliases.set(alias, command.name); });
-        this.emit("debug", "Registered command \"" + command.name + "\"" + (filename ? " from file " + filename : ""));
+        this.emit("debug", "Registered command \"".concat(command.name, "\"").concat(filename ? " from file ".concat(filename) : ""));
         this.emit("load", command);
     };
-    /**
-     * @ignore
-     * */
-    CommandHandler.prototype.setupMessageEvent = function () {
+    CommandHandler.prototype.runCommand = function (message) {
         var _this = this;
-        this.client.on("messageCreate", function (message) { return __awaiter(_this, void 0, void 0, function () {
+        var additionalOptions = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            additionalOptions[_i - 1] = arguments[_i];
+        }
+        return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
             var _a, typedCommand, args, command, failedReason, ex_1;
             return __generator(this, function (_b) {
                 switch (_b.label) {
@@ -158,17 +171,15 @@ var CommandHandler = /** @class */ (function (_super) {
                         _b.sent();
                         _b.label = 2;
                     case 2:
-                        if (message.author.bot)
-                            return [2 /*return*/];
                         if (!message.content.startsWith(this.prefix))
                             return [2 /*return*/];
                         _a = message.content.slice(this.prefix.length).trim().split(/ +/g), typedCommand = _a[0], args = _a.slice(1);
                         if (!typedCommand)
-                            return [2 /*return*/];
+                            return [2 /*return*/, reject(new CommandExecutionError_1.default("Command is missing but prefix was supplied.", "COMMAND_MISSING"))];
                         typedCommand = typedCommand.trim();
                         command = this.commands.get(typedCommand.toLowerCase()) || this.commands.get(this.aliases.get(typedCommand.toLowerCase()));
                         if (!command)
-                            return [2 /*return*/];
+                            return [2 /*return*/, reject(new CommandExecutionError_1.default("Command not found.", "COMMAND_NOT_FOUND"))];
                         // Handle additional command parameters
                         if (!command.allowDm && message.channel.type === "DM")
                             return [2 /*return*/];
@@ -182,14 +193,15 @@ var CommandHandler = /** @class */ (function (_super) {
                         _b.label = 4;
                     case 4:
                         _b.trys.push([4, 6, , 7]);
-                        return [4 /*yield*/, command.run(message, args)];
+                        return [4 /*yield*/, command.run.apply(command, __spreadArray([message, args], additionalOptions, false))];
                     case 5:
                         _b.sent();
+                        resolve();
                         return [3 /*break*/, 7];
                     case 6:
                         ex_1 = _b.sent();
                         console.error(ex_1);
-                        this.emit("error", ex_1, message);
+                        reject(ex_1);
                         return [3 /*break*/, 7];
                     case 7: return [2 /*return*/];
                 }

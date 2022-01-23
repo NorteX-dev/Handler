@@ -124,7 +124,7 @@ var InteractionHandler = /** @class */ (function (_super) {
                     var duplicates, _i, files_1, file, parsedPath, InteractionFile, interaction;
                     var _this = this;
                     return __generator(this, function (_a) {
-                        this.emit("debug", "Found " + files.length + " interaction files.");
+                        this.emit("debug", "Found ".concat(files.length, " interaction files."));
                         if (err)
                             return [2 /*return*/, reject(new InteractionDirectoryReferenceError_1.default("Supplied interactions directory is invalid. Please ensure it exists and is absolute."))];
                         duplicates = [];
@@ -133,25 +133,25 @@ var InteractionHandler = /** @class */ (function (_super) {
                             parsedPath = path.parse(file);
                             InteractionFile = require(file);
                             if (!InteractionFile)
-                                return [2 /*return*/, this.emit("dubug", parsedPath + " failed to load.")];
+                                return [2 /*return*/, this.emit("dubug", "".concat(parsedPath, " failed to load."))];
                             // Check if is class
                             if (!this.localUtils.isClass(InteractionFile))
-                                throw new TypeError("Interaction " + parsedPath.name + " doesn't export any of the correct classes.");
+                                throw new TypeError("Interaction ".concat(parsedPath.name, " doesn't export any of the correct classes."));
                             interaction = new InteractionFile(this, this.client, parsedPath.name.toLowerCase());
                             // Check if initialized class is extending Command
                             if (!(interaction instanceof index_1.CommandInteraction || interaction instanceof index_1.UserContextMenuInteraction || interaction instanceof index_1.MessageContextMenuInteraction))
-                                throw new TypeError("Interaction file: " + parsedPath.name + " doesn't extend one of the valid the interaction classes: CommandInteraction, UserContextMenuInteraction, MessageContextMenuInteraction.");
+                                throw new TypeError("Interaction file: ".concat(parsedPath.name, " doesn't extend one of the valid the interaction classes: CommandInteraction, UserContextMenuInteraction, MessageContextMenuInteraction."));
                             // Save command to map
                             if (this.interactions.get(interaction.type + "_" + interaction.name)) {
                                 duplicates.push(interaction);
                                 continue;
                             }
                             this.interactions.set(interaction.type + "_" + interaction.name, interaction);
-                            this.emit("debug", "Loaded interaction \"" + interaction.name + "\" from file \"" + parsedPath.base + "\"");
+                            this.emit("debug", "Loaded interaction \"".concat(interaction.name, "\" from file \"").concat(parsedPath.base, "\""));
                             this.emit("load", interaction);
                         }
                         if (duplicates === null || duplicates === void 0 ? void 0 : duplicates.length)
-                            throw new Error("Loading interaction with the same name: " + duplicates.map(function (d) { return d.name; }).join(", ") + ".");
+                            throw new Error("Loading interaction with the same name: ".concat(duplicates.map(function (d) { return d.name; }).join(", "), "."));
                         if (!this.disableInteractionModification)
                             this.client.on("ready", function () { return __awaiter(_this, void 0, void 0, function () {
                                 return __generator(this, function (_a) {
@@ -275,7 +275,7 @@ var InteractionHandler = /** @class */ (function (_super) {
                     case 0:
                         if (!!force) return [3 /*break*/, 3];
                         return [4 /*yield*/, this.application.commands.fetch().catch(function (err) {
-                                throw new Error("Can't fetch client commands: " + err);
+                                throw new Error("Can't fetch client commands: ".concat(err));
                             })];
                     case 1:
                         fetchedInteractions = _a.sent();

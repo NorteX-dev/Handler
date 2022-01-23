@@ -54,7 +54,7 @@ interface CommandOptions {
     botPermissions?: Array<string>;
     botRoles?: Array<string>;
     userCooldown?: Number;
-    guildCooldowns?: Number;
+    guildCooldown?: Number;
     usage?: string;
     nsfw?: boolean;
     allowDm?: boolean;
@@ -75,7 +75,7 @@ export declare class Command {
     botPermissions: Array<string>;
     botRoles: Array<string>;
     userCooldown: Number;
-    guildCooldowns: Number;
+    guildCooldown: Number;
     usage: string;
     nsfw: boolean;
     allowDm: boolean;
@@ -90,6 +90,6 @@ export declare class Command {
      * @param options Additional command options @see {@link CommandOptions}
      * */
     constructor(handler: CommandHandler, client: any, name: string, options?: CommandOptions);
-    run(message: Message, args?: Array<String>): void;
+    run(message: Message, args?: Array<String>, ...additionalParams: any): void;
 }
 export {};

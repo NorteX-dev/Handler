@@ -24,7 +24,7 @@ var Command = /** @class */ (function () {
         this.botPermissions = options.botPermissions || [];
         this.botRoles = options.botRoles || [];
         this.userCooldown = options.userCooldown || 0;
-        this.guildCooldowns = options.guildCooldowns || 0;
+        this.guildCooldown = options.guildCooldown || 0;
         this.nsfw = options.nsfw || false;
         this.allowDm = options.allowDm || false;
         this.onlyDm = options.onlyDm || false;
@@ -35,6 +35,10 @@ var Command = /** @class */ (function () {
             this.allowDm = true;
     }
     Command.prototype.run = function (message, args) {
+        var additionalParams = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            additionalParams[_i - 2] = arguments[_i];
+        }
         throw new MethodNotOverridenError_1.default("run() method on " + this.name + " command is not present.");
     };
     return Command;

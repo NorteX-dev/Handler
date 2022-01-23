@@ -115,12 +115,12 @@ var EventHandler = /** @class */ (function (_super) {
                             var parsedPath = path.parse(file);
                             var EventFile = require(file);
                             if (!EventFile)
-                                return { value: this_1.emit("dubug", parsedPath + " failed to load.") };
+                                return { value: this_1.emit("dubug", "".concat(parsedPath, " failed to load.")) };
                             if (!this_1.localUtils.isClass(EventFile))
-                                throw new TypeError("Event " + parsedPath.name + " doesn't export any of the correct classes.");
+                                throw new TypeError("Event ".concat(parsedPath.name, " doesn't export any of the correct classes."));
                             var event_1 = new EventFile(this_1, this_1.client, parsedPath.name.toLowerCase());
                             if (!(event_1 instanceof index_1.Event))
-                                throw new TypeError("Event file: " + parsedPath.name + " doesn't extend the Event class.");
+                                throw new TypeError("Event file: ".concat(parsedPath.name, " doesn't extend the Event class."));
                             this_1.client[event_1.once ? "once" : "on"](event_1.name, function () {
                                 var args = [];
                                 for (var _i = 0; _i < arguments.length; _i++) {
@@ -128,7 +128,7 @@ var EventHandler = /** @class */ (function (_super) {
                                 }
                                 event_1.run.apply(event_1, args);
                             });
-                            this_1.emit("debug", "Set event \"" + event_1.name + "\" from file \"" + parsedPath.base + "\"");
+                            this_1.emit("debug", "Set event \"".concat(event_1.name, "\" from file \"").concat(parsedPath.base, "\""));
                             this_1.emit("load", event_1);
                         };
                         this_1 = this;

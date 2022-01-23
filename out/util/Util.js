@@ -15,7 +15,7 @@ var Util = /** @class */ (function () {
     Util.truncateString = function (str, length, dontAddDots) {
         if (length === void 0) { length = 100; }
         if (dontAddDots === void 0) { dontAddDots = false; }
-        return str.length > length ? str.slice(0, length) + ("" + (dontAddDots ? "" : "...")) : str;
+        return str.length > length ? str.slice(0, length) + "".concat(dontAddDots ? "" : "...") : str;
     };
     /**
      * Trims an array to a maximum length

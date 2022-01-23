@@ -1,6 +1,6 @@
 {
   "name": "@nortex/handler",
-  "version": "3.0.0-beta.2",
+  "version": "4.0.0",
   "description": "The easy to use, all-in-one command and event handler.",
   "main": "out/index.js",
   "module": "out/esm/js",

@@ -65,7 +65,7 @@ var Pagination = /** @class */ (function (_super) {
         _this.isCreated = false;
         _this.randomId = (0, nanoid_1.nanoid)();
         _this.ids = ["PREVIOUS", "NEXT", "GOTO", "STOP"];
-        _this.ids = _this.ids.map(function (i) { return "PAGINATION_" + i + ("_" + _this.randomId); });
+        _this.ids = _this.ids.map(function (i) { return "PAGINATION_" + i + "_".concat(_this.randomId); });
         return _this;
     }
     Pagination.prototype.constructEmbed = function () {
@@ -73,11 +73,11 @@ var Pagination = /** @class */ (function (_super) {
             throw new Error("cnstructEmbed(): Can't construct embed with data as the dataset is empty.");
         var perPage = this.perPage || 10;
         var dataset = this.dataset;
-        dataset = dataset.map(function (el, i) { return "**" + (i + 1) + "**. " + el; });
+        dataset = dataset.map(function (el, i) { return "**".concat(i + 1, "**. ").concat(el); });
         var dataFromPage = dataset.slice((this.page - 1) * perPage, this.page * perPage);
         this.currentPageDataset = dataset.slice((this.page - 1) * perPage, this.page * perPage);
         var embed = new discord_js_1.MessageEmbed();
-        embed.setDescription(dataFromPage.join("\n")).setFooter({ text: "Page " + this.page + "/" + this.maxPage });
+        embed.setDescription(dataFromPage.join("\n")).setFooter({ text: "Page ".concat(this.page, "/").concat(this.maxPage) });
         return embed;
     };
     Pagination.prototype.updateContent = function () {
@@ -184,7 +184,7 @@ var Pagination = /** @class */ (function (_super) {
                                                         page = parseInt(gt.content);
                                                         gt.delete().catch(function () { });
                                                         if (page > this.maxPage) {
-                                                            interaction.editReply({ embeds: [new discord_js_1.MessageEmbed().setColor("RED").setDescription("This page doesn't exist. Pages go only up to " + this.maxPage + ".")] });
+                                                            interaction.editReply({ embeds: [new discord_js_1.MessageEmbed().setColor("RED").setDescription("This page doesn't exist. Pages go only up to ".concat(this.maxPage, "."))] });
                                                             return [2 /*return*/];
                                                         }
                                                         if (page <= 0) {

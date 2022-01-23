@@ -50,7 +50,7 @@ var LocalUtils = /** @class */ (function () {
         this.owners = owners || [];
     }
     LocalUtils.prototype.isClass = function (input) {
-        return typeof input === "function" && typeof input.prototype === "object" && input.toString().substr(0, 5) === "class";
+        return typeof input === "function" && typeof input.prototype === "object" && input.toString().substring(0, 5) === "class";
     };
     LocalUtils.prototype.isOwner = function (userId) {
         if (!this.owners)
@@ -62,7 +62,7 @@ var LocalUtils = /** @class */ (function () {
             var _this = this;
             return __generator(this, function (_a) {
                 return [2 /*return*/, new Promise(function (res) {
-                        var _a;
+                        var _a, _b;
                         _this.userCooldowns = userCooldowns;
                         _this.guildCooldowns = guildCooldowns;
                         // "disabled" field
@@ -84,45 +84,68 @@ var LocalUtils = /** @class */ (function () {
                         if (command.userCooldown && command.userCooldown > 0) {
                             var useAfter = _this.userCooldowns.get(message.author.id);
                             if (useAfter && useAfter > Date.now())
-                                return res(new CommandExecutionError_1.default("User is on cooldown.", "USER_COOLDOWN"));
+                                return res(new CommandExecutionError_1.default("User is on cooldown for ".concat(((Number(useAfter || 0) - Date.now()) / 1000).toFixed(1), " seconds."), "USER_COOLDOWN"));
                             var millis = parseInt(command.userCooldown.toString()) * 1000;
                             _this.userCooldowns.set(message.author.id, Date.now() + millis);
                         }
                         // "guildCooldowns" field
-                        if (command.guildCooldowns && command.guildCooldowns > 0) {
+                        if (command.guildCooldown && command.guildCooldown > 0) {
                             var useAfter = _this.guildCooldowns.get(message.guild.id);
                             if (useAfter && useAfter > Date.now())
-                                return res(new CommandExecutionError_1.default("Guild is on cooldown.", "GLOBAL_COOLDOWN"));
-                            var millis = parseInt(command.guildCooldowns.toString()) * 1000;
+                                return res(new CommandExecutionError_1.default("Guild is on cooldown for ".concat(((Number(useAfter || 0) - Date.now()) / 1000).toFixed(1), " seconds."), "GLOBAL_COOLDOWN"));
+                            var millis = parseInt(command.guildCooldown.toString()) * 1000;
                             _this.guildCooldowns.set(message.guild.id, Date.now() + millis);
                         }
                         if (command.userPermissions && command.userPermissions.length) {
-                            var userPerms = new discord_js_1.Permissions(message.channel.permissionsFor(message.member)).freeze();
-                            // @ts-ignore
-                            var missingUserPerms = userPerms.missing(command.userPermissions).length !== 0;
-                            if (missingUserPerms)
-                                return res(new CommandExecutionError_1.default("User is missing permissions.", "MISSING_USER_PERMISSIONS"));
+                            var memberPermissions = message.channel.permissionsFor(message.member);
+                            var mappedPermissions = command.userPermissions.map(function (perm) {
+                                // @ts-ignore
+                                var flag = discord_js_1.Permissions.FLAGS[perm];
+                                if (!flag)
+                                    return; // Ignore invalid permissions
+                                return flag;
+                            });
+                            if (!memberPermissions.has(mappedPermissions))
+                                return res(new CommandExecutionError_1.default("User does not have the required permissions.", "USER_PERMISSIONS_MISSING"));
                         }
                         if (command.botPermissions && command.botPermissions.length) {
-                            var botPerms = new discord_js_1.Permissions(message.channel.permissionsFor(message.guild.members.cache.get((_a = _this.client.user) === null || _a === void 0 ? void 0 : _a.id))).freeze();
-                            // @ts-ignore
-                            var missingBotPerms = botPerms.missing(command.botPermissions).length !== 0;
-                            if (missingBotPerms)
-                                return res(new CommandExecutionError_1.default("Bot is missing permissions.", "MISSING_BOT_PERMISSIONS"));
+                            var botMember = message.guild.members.cache.get((_a = _this.client.user) === null || _a === void 0 ? void 0 : _a.id);
+                            var botPermissions = message.channel.permissionsFor(botMember);
+                            var mappedPermissions = command.botPermissions.map(function (perm) {
+                                // @ts-ignore
+                                var flag = discord_js_1.Permissions.FLAGS[perm];
+                                if (!flag)
+                                    return; // Ignore invalid permissions
+                                return flag;
+                            });
+                            if (!botPermissions.has(mappedPermissions))
+                                return res(new CommandExecutionError_1.default("Bot does not have the required permissions.", "BOT_PERMISSIONS_MISSING"));
                         }
-                        // if (command.userRoles && command.userRoles.length) {
-                        // 	let hasRoles = true;
-                        // 	command.userRoles.map((r) => {
-                        // 		if (message.member.roles.cache.has(r)) hasRoles = false;
-                        // 	});
-                        // 	if (hasRoles) return res(new CommandExecutionError("User is missing roles.", "MISSING_USER_ROLES"));
-                        // }
-                        // if (command.botRoles && command.botRoles.length) {
-                        // 	let hasRoles = true; // By default think that the user has all the required role
-                        // 	command.botRoles.map((r) => {
-                        // 		if (!message.guild.members.cache.get(this.client.user?.id).roles.cache.has(r)) hasRoles = false; // If the user doesn't have any of these roles, mark as false
-                        // 	});
-                        // }
+                        if (command.userRoles && command.userRoles.length) {
+                            // Check if user has all required roles
+                            var memberRoles = message.member.roles.cache;
+                            var mappedRoles = command.userRoles.map(function (role) {
+                                var roleObj = message.guild.roles.cache.find(function (r) { return r.name === role; }) || message.guild.roles.cache.get(role);
+                                if (!roleObj)
+                                    return; // Ignore invalid roles
+                                return roleObj;
+                            });
+                            if (!memberRoles.has(mappedRoles))
+                                return res(new CommandExecutionError_1.default("User does not have the required roles.", "USER_ROLES_MISSING"));
+                        }
+                        if (command.botRoles && command.botRoles.length) {
+                            // Check if bot has all required roles
+                            var botMember = message.guild.members.cache.get((_b = _this.client.user) === null || _b === void 0 ? void 0 : _b.id);
+                            var botRoles = botMember.roles.cache;
+                            var mappedRoles = command.botRoles.map(function (role) {
+                                var roleObj = message.guild.roles.cache.find(function (r) { return r.name === role; }) || message.guild.roles.cache.get(role);
+                                if (!roleObj)
+                                    return; // Ignore invalid roles
+                                return roleObj;
+                            });
+                            if (!botRoles.has(mappedRoles))
+                                return res(new CommandExecutionError_1.default("Bot does not have the required roles.", "BOT_ROLES_MISSING"));
+                        }
                         res(undefined);
                     })];
             });

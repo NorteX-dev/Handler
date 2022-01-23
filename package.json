@@ -3,7 +3,7 @@
   "version": "4.0.0",
   "description": "The easy to use, all-in-one command and event handler.",
   "main": "out/index.js",
-  "module": "out/esm/js",
+  "module": "out/esm/index.js",
   "scripts": {
     "test": "nodemon test/index.js"
   },

@@ -196,7 +196,7 @@ var CommandHandler = /** @class */ (function (_super) {
                         return [4 /*yield*/, command.run.apply(command, __spreadArray([message, args], additionalOptions, false))];
                     case 5:
                         _b.sent();
-                        resolve();
+                        resolve(command);
                         return [3 /*break*/, 7];
                     case 6:
                         ex_1 = _b.sent();

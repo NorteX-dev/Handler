@@ -63,6 +63,6 @@ export declare class CommandHandler extends EventEmitter {
      * @ignore
      * */
     registerCommand(command: Command, filename?: string): void;
-    runCommand(message: Message, ...additionalOptions: any): Promise<void>;
+    runCommand(message: Message, ...additionalOptions: any): Promise<Command>;
 }
 export {};

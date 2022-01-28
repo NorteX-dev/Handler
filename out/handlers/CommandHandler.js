@@ -187,7 +187,7 @@ var CommandHandler = /** @class */ (function (_super) {
                     case 3:
                         failedReason = _b.sent();
                         if (failedReason) {
-                            this.emit("error", failedReason, message);
+                            reject(failedReason);
                             return [2 /*return*/];
                         }
                         _b.label = 4;

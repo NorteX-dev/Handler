@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { Client } from "discord.js";
+import { Client, Interaction as DJSInteraction } from "discord.js";
 import { EventEmitter } from "events";
 import { CommandInteraction, MessageContextMenuInteraction, UserContextMenuInteraction } from "../index";
 interface HandlerOptions {
@@ -57,10 +57,7 @@ export declare class InteractionHandler extends EventEmitter {
      * Requires @see {@link InteractionHandler.setInteractionsDirectory} to be executed first, or `directory` to be specified in the constructor.
      * */
     loadInteractions(): Promise<unknown>;
-    /**
-     * @ignore
-     * */
-    private setupInteractionEvent;
+    runInteraction(interaction: DJSInteraction): Promise<unknown>;
     private handleCommandInteraction;
     /**
      * @ignore

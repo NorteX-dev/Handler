@@ -12,18 +12,27 @@
 
 #### Table of Contents:
 - [Changelog [v3 to v4]](#changelog)
+- [Changelog [v4 to v4.1]](#changelog-minor)
 - [Installation](#installation)
 - [Usage](#usage)
 
 <a id="changelog"></a>
-### Changelog v3 to v4
-
+### Changelog v3.0 to v4.0
 - Handling message commands is now up to the user; you should now create a messageCreate event, either on the client directly or using the EventHandler class, and then invoking `handler.runCommand(message)`.
 - Created a new `handler.runCommand(message)` method that returns a Promise that should be executed on the `messageCreate` event. The handler will no longer create any events.
 - Added and fixed `userRoles` and `botRoles` options
 - Fixed `userPermissions` and `botPermissions` options
-- [todo] Tip: Pass additional options as a spread argument to the `runCommand` method. These will be available at the end of the run() function on the command.
-- [todo] Added a new option to the command handler: `userCooldownOverwriteRoleId` as well as `guildCooldownOverwriteRoleId` and their permission counterparts: `userCooldownOverwritePermission` and `guildCooldownOVerwritePermission`. If the user satisfies any of these requirements, cooldown will not affect them.
+- Pass additional options as a spread argument to the `runCommand` method. These will be available at the end of the run() function on the command.
+
+<a id="changelog-minor"></a>
+### Changelog v4.0.x to 4.1.x
+- Usage is now automatically concatonated with the prefix and command name
+- Empty usage will now be undefined instead of an empty string ("")
+- Any additional configuration keys (any other keys than CommandOptions) provided to command options will now be available in `this.opts.x`.
+- If description is undefined it will be an empty string ("") instead of "Empty"
+- Interaction handler now requires runInteraction() and won't set any events by itself anymore - same treatment as CommandHandler
+- Fixed verification of `disabled`, `guildIds` and `userIds` flags in interaction
+- Running commands and interactions is no longer awaited - promise of runCommand() and runInteraction() will get resolved instantly instead of awaiting the run() function.
 
 <a id="todos"></a>
 ### TODOs

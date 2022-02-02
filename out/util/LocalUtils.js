@@ -53,8 +53,8 @@ var LocalUtils = /** @class */ (function () {
         return typeof input === "function" && typeof input.prototype === "object" && input.toString().substring(0, 5) === "class";
     };
     LocalUtils.prototype.isOwner = function (userId) {
-        if (!this.owners)
-            throw new Error("isOwner(): Can't check because owners is undefined.");
+        if (!this.owners || !this.owners.length)
+            return false;
         return this.owners.includes(userId);
     };
     LocalUtils.prototype.verifyCommand = function (message, command, userCooldowns, guildCooldowns) {
@@ -69,11 +69,11 @@ var LocalUtils = /** @class */ (function () {
                         if (command.disabled && !_this.isOwner(message.author.id))
                             return res(new CommandExecutionError_1.default("The command is disabled.", "DISABLED"));
                         // "guildIds" field
-                        if (command.guildIds.length && !command.guildIds.includes(message.guild.id))
-                            return res(new CommandExecutionError_1.default("This guild ID is not whitelisted.", "GUILD_ID_NOT_WHITELISTED"));
+                        if (message.guild && command.guildIds && command.guildIds.length && !command.guildIds.includes(message.guild.id))
+                            return res(new CommandExecutionError_1.default("This guild ID is not whitelisted.", "GUILD_ID_NOT_WHITELISTED", { guildId: message.guild.id }));
                         // "userIds" field
-                        if (command.userIds.length && !command.userIds.includes(message.author.id))
-                            return res(new CommandExecutionError_1.default("This user ID is not whitelisted.", "USER_OD_NOT_WHITELISTED"));
+                        if (command.userIds && command.userIds.length && !command.userIds.includes(message.author.id))
+                            return res(new CommandExecutionError_1.default("This user ID is not whitelisted.", "USER_ID_NOT_WHITELISTED", { userId: message.author.id }));
                         // "onlyDm" field
                         if (command.onlyDm && message.channel.type !== "DM")
                             return res(new CommandExecutionError_1.default("Command is DM only.", "COMMAND_DM_0NLY"));
@@ -84,7 +84,10 @@ var LocalUtils = /** @class */ (function () {
                         if (command.userCooldown && command.userCooldown > 0) {
                             var useAfter = _this.userCooldowns.get(message.author.id);
                             if (useAfter && useAfter > Date.now())
-                                return res(new CommandExecutionError_1.default("User is on cooldown for ".concat(((Number(useAfter || 0) - Date.now()) / 1000).toFixed(1), " seconds."), "USER_COOLDOWN"));
+                                return res(new CommandExecutionError_1.default("User is on cooldown for ".concat(((Number(useAfter || 0) - Date.now()) / 1000).toFixed(1), " seconds."), "USER_COOLDOWN", {
+                                    totalCooldown: command.userCooldown,
+                                    remainingCooldown: (Number(useAfter || 0) - Date.now()) / 1000,
+                                }));
                             var millis = parseInt(command.userCooldown.toString()) * 1000;
                             _this.userCooldowns.set(message.author.id, Date.now() + millis);
                         }
@@ -92,7 +95,10 @@ var LocalUtils = /** @class */ (function () {
                         if (command.guildCooldown && command.guildCooldown > 0) {
                             var useAfter = _this.guildCooldowns.get(message.guild.id);
                             if (useAfter && useAfter > Date.now())
-                                return res(new CommandExecutionError_1.default("Guild is on cooldown for ".concat(((Number(useAfter || 0) - Date.now()) / 1000).toFixed(1), " seconds."), "GLOBAL_COOLDOWN"));
+                                return res(new CommandExecutionError_1.default("Guild is on cooldown for ".concat(((Number(useAfter || 0) - Date.now()) / 1000).toFixed(1), " seconds."), "GUILD_COOLDOWN", {
+                                    totalCooldown: command.guildCooldown,
+                                    remainingCooldown: (Number(useAfter || 0) - Date.now()) / 1000,
+                                }));
                             var millis = parseInt(command.guildCooldown.toString()) * 1000;
                             _this.guildCooldowns.set(message.guild.id, Date.now() + millis);
                         }
@@ -106,7 +112,7 @@ var LocalUtils = /** @class */ (function () {
                                 return flag;
                             });
                             if (!memberPermissions.has(mappedPermissions))
-                                return res(new CommandExecutionError_1.default("User does not have the required permissions.", "USER_PERMISSIONS_MISSING"));
+                                return res(new CommandExecutionError_1.default("User does not have the required permissions.", "USER_PERMISSIONS_MISSING", { missingPermissions: memberPermissions.missing(mappedPermissions) }));
                         }
                         if (command.botPermissions && command.botPermissions.length) {
                             var botMember = message.guild.members.cache.get((_a = _this.client.user) === null || _a === void 0 ? void 0 : _a.id);
@@ -119,7 +125,7 @@ var LocalUtils = /** @class */ (function () {
                                 return flag;
                             });
                             if (!botPermissions.has(mappedPermissions))
-                                return res(new CommandExecutionError_1.default("Bot does not have the required permissions.", "BOT_PERMISSIONS_MISSING"));
+                                return res(new CommandExecutionError_1.default("Bot does not have the required permissions.", "BOT_PERMISSIONS_MISSING", { missingPermissions: botPermissions.missing(mappedPermissions) }));
                         }
                         if (command.userRoles && command.userRoles.length) {
                             // Check if user has all required roles
@@ -151,20 +157,20 @@ var LocalUtils = /** @class */ (function () {
             });
         });
     };
-    LocalUtils.prototype.verifyInteraction = function (interaction) {
+    LocalUtils.prototype.verifyInteraction = function (interactionEvent, interactionObject) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
                 return [2 /*return*/, new Promise(function (res) {
                         var _a, _b;
                         // "disabled" field
-                        if (interaction.disabled && !_this.isOwner(interaction.user.id))
+                        if (interactionObject.disabled && !_this.isOwner(interactionEvent.user.id))
                             return res(new InteractionExecutionError_1.default("The command is disabled.", "DISABLED"));
                         // "guildIds" field
-                        if (interaction.guildIds && ((_a = interaction.guildIds) === null || _a === void 0 ? void 0 : _a.length) && !interaction.guildIds.includes(interaction.guild.id))
+                        if (interactionEvent.guild && interactionObject.guildIds && ((_a = interactionObject.guildIds) === null || _a === void 0 ? void 0 : _a.length) && !interactionObject.guildIds.includes(interactionEvent.guild.id))
                             return res(new InteractionExecutionError_1.default("This guild ID is not whitelisted.", "GUILD_ID_NOT_WHITELISTED"));
                         // "userIds" field
-                        if (interaction.userIds && ((_b = interaction.userIds) === null || _b === void 0 ? void 0 : _b.length) && !interaction.userIds.includes(interaction.user.id))
+                        if (interactionObject.userIds && ((_b = interactionObject.userIds) === null || _b === void 0 ? void 0 : _b.length) && !interactionObject.userIds.includes(interactionEvent.user.id))
                             return res(new InteractionExecutionError_1.default("This user ID is not whitelisted.", "USER_ID_NOT_WHITELISTED"));
                         res(undefined);
                     })];

@@ -68,7 +68,7 @@ var EventHandler = /** @class */ (function (_super) {
         _this.directory = options.directory;
         _this.events = new Map();
         _this.localUtils = new LocalUtils_1.LocalUtils(_this, _this.client);
-        if (options.autoLoad !== false)
+        if (options.autoLoad === undefined || !options.autoLoad)
             _this.loadEvents();
         return _this;
     }

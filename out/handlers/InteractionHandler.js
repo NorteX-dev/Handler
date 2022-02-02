@@ -72,8 +72,7 @@ var InteractionHandler = /** @class */ (function (_super) {
         _this.forceInteractionUpdate = options.forceInteractionUpdate || false;
         _this.interactions = new Map();
         _this.localUtils = new LocalUtils_1.LocalUtils(_this, _this.client, _this.owners);
-        _this.setupInteractionEvent();
-        if (options.autoLoad !== false)
+        if (options.autoLoad === undefined || !options.autoLoad)
             _this.loadInteractions();
         if (!_this.client) {
             throw new ReferenceError("InteractionHandler(): options.client is required.");
@@ -99,7 +98,7 @@ var InteractionHandler = /** @class */ (function (_super) {
      * */
     InteractionHandler.prototype.setInteractionsDirectory = function (absolutePath) {
         if (!absolutePath)
-            throw new InteractionDirectoryReferenceError_1.default("absolutePath parameter is required.");
+            throw new InteractionDirectoryReferenceError_1.default("setInteractionsDirectory(): absolutePath parameter is required.");
         this.directory = absolutePath;
         return this;
     };
@@ -172,53 +171,50 @@ var InteractionHandler = /** @class */ (function (_super) {
             });
         }); });
     };
-    /**
-     * @ignore
-     * */
-    InteractionHandler.prototype.setupInteractionEvent = function () {
+    InteractionHandler.prototype.runInteraction = function (interaction) {
         var _this = this;
-        this.client.on("interactionCreate", function (interaction) { return __awaiter(_this, void 0, void 0, function () {
-            return __generator(this, function (_a) {
-                if (interaction.user.bot)
-                    return [2 /*return*/];
-                if (interaction.isCommand())
-                    this.handleCommandInteraction(interaction);
-                if (interaction.isContextMenu())
-                    this.handleContextMenuInteraction(interaction);
-                return [2 /*return*/];
-            });
-        }); });
+        return new Promise(function (res, rej) {
+            if (interaction.user.bot)
+                return rej("Bot users can't run interactions.");
+            if (interaction.isCommand()) {
+                _this.handleCommandInteraction(interaction).then(res).catch(rej);
+            }
+            if (interaction.isContextMenu()) {
+                _this.handleContextMenuInteraction(interaction).then(res).catch(rej);
+            }
+        });
     };
     InteractionHandler.prototype.handleCommandInteraction = function (interaction) {
         return __awaiter(this, void 0, void 0, function () {
-            var slashCommand, failedReason, ex_1;
+            var _this = this;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        slashCommand = this.interactions.get("CHAT_INPUT_" + interaction.commandName.toLowerCase());
-                        if (!slashCommand)
-                            return [2 /*return*/];
-                        return [4 /*yield*/, this.localUtils.verifyInteraction(interaction)];
-                    case 1:
-                        failedReason = _a.sent();
-                        if (failedReason) {
-                            this.emit("error", failedReason, interaction);
-                            return [2 /*return*/];
-                        }
-                        _a.label = 2;
-                    case 2:
-                        _a.trys.push([2, 4, , 5]);
-                        return [4 /*yield*/, slashCommand.run(interaction)];
-                    case 3:
-                        _a.sent();
-                        return [3 /*break*/, 5];
-                    case 4:
-                        ex_1 = _a.sent();
-                        console.error(ex_1);
-                        this.emit("error", ex_1, interaction);
-                        return [3 /*break*/, 5];
-                    case 5: return [2 /*return*/];
-                }
+                return [2 /*return*/, new Promise(function (res, rej) { return __awaiter(_this, void 0, void 0, function () {
+                        var slashCommand, failedReason;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    slashCommand = this.interactions.get("CHAT_INPUT_" + interaction.commandName.toLowerCase());
+                                    if (!slashCommand)
+                                        return [2 /*return*/];
+                                    return [4 /*yield*/, this.localUtils.verifyInteraction(interaction, slashCommand)];
+                                case 1:
+                                    failedReason = _a.sent();
+                                    if (failedReason) {
+                                        rej(failedReason);
+                                        return [2 /*return*/];
+                                    }
+                                    try {
+                                        slashCommand.run(interaction);
+                                        res(slashCommand);
+                                    }
+                                    catch (ex) {
+                                        console.error(ex);
+                                        rej(ex);
+                                    }
+                                    return [2 /*return*/];
+                            }
+                        });
+                    }); })];
             });
         });
     };
@@ -226,8 +222,9 @@ var InteractionHandler = /** @class */ (function (_super) {
      * @ignore
      * */
     InteractionHandler.prototype.handleContextMenuInteraction = function (interaction) {
-        return __awaiter(this, void 0, void 0, function () {
-            var contextMenuInt, failedReason, ex_2;
+        var _this = this;
+        return new Promise(function (res, rej) { return __awaiter(_this, void 0, void 0, function () {
+            var contextMenuInt, failedReason, ex_1;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -240,27 +237,30 @@ var InteractionHandler = /** @class */ (function (_super) {
                         // @ts-ignore
                         if (interaction.targetType === "MESSAGE" && contextMenuInt.type !== "MESSAGE")
                             return [2 /*return*/];
-                        return [4 /*yield*/, this.localUtils.verifyInteraction(interaction)];
+                        return [4 /*yield*/, this.localUtils.verifyInteraction(interaction, contextMenuInt)];
                     case 1:
                         failedReason = _a.sent();
-                        if (failedReason)
-                            return [2 /*return*/, this.emit("error", failedReason, interaction)];
+                        if (failedReason) {
+                            rej(failedReason);
+                            return [2 /*return*/];
+                        }
                         _a.label = 2;
                     case 2:
                         _a.trys.push([2, 4, , 5]);
                         return [4 /*yield*/, contextMenuInt.run(interaction)];
                     case 3:
                         _a.sent();
+                        res(contextMenuInt);
                         return [3 /*break*/, 5];
                     case 4:
-                        ex_2 = _a.sent();
-                        console.error(ex_2);
-                        this.emit("error", ex_2, interaction);
+                        ex_1 = _a.sent();
+                        console.error(ex_1);
+                        rej(ex_1);
                         return [3 /*break*/, 5];
                     case 5: return [2 /*return*/];
                 }
             });
-        });
+        }); });
     };
     /**
      * @ignore
@@ -299,11 +299,9 @@ var InteractionHandler = /** @class */ (function (_super) {
                             if (data.type === "MESSAGE")
                                 return { name: data.name, type: data.type };
                         });
-                        // await this.application!.commands.set([]).then((r) => this.emit("debug", "Cleaned out old commands"));
                         // @ts-ignore
-                        return [4 /*yield*/, this.application.commands.set(formed).then(function (r) { return _this.emit("debug", "Created all commands (" + r.size + " returned)"); })];
+                        return [4 /*yield*/, this.application.commands.set(formed).then(function (r) { return _this.emit("debug", "Set interactions (" + r.size + " returned)"); })];
                     case 4:
-                        // await this.application!.commands.set([]).then((r) => this.emit("debug", "Cleaned out old commands"));
                         // @ts-ignore
                         _a.sent();
                         this.emit("debug", "Interaction changes were posted successfully. Remember to wait a bit (up to 1 hour) or kick and add the bot back to see changes.");

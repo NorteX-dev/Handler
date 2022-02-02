@@ -38,16 +38,21 @@ export declare class CommandHandler extends EventEmitter {
     /**
      * Sets directory for commands
      *
-     * @returns CommandHandler
-     *
-     * @remarks
-     * This directory includes all children directories too.
-     * @see {@link https://www.npmjs.com/package/glob} for information on how directories are parsed
      * @param absolutePath Absolute path to directory. Recommended to concatenate it using `path.join() and process.cwd()`
+     * @remarks This directory includes all children directories too.
+     * @see {@link https://www.npmjs.com/package/glob} for information on how directories are parsed
      *
      * @returns CommandHandler
      * */
     setCommandDirectory(absolutePath: string): this;
+    /**
+     * Sets a prefix
+     *
+     * @param prefix Prefix to set
+     *
+     * @returns CommandHandler
+     * */
+    setPrefix(prefix: string): this;
     /**
      * Loads classic message commands into memory
      *

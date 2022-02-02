@@ -13,13 +13,14 @@ export declare class CommandInteraction {
     handler: CommandHandler;
     client: any;
     name: string;
+    type: string;
     description: string | undefined;
     options: ApplicationCommandOptionData;
     userIds: Array<string>;
     guildIds: Array<string>;
     disabled: boolean;
     defaultPermission: boolean;
-    type: string;
+    opts?: any;
     constructor(handler: CommandHandler, client: any, name: string, options?: CommandInteractionOptions);
     run(interaction: any): void;
 }

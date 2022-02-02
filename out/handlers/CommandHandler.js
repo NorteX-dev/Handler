@@ -82,26 +82,36 @@ var CommandHandler = /** @class */ (function (_super) {
         _this.userCooldowns = new Map();
         _this.guildCooldowns = new Map();
         _this.localUtils = new LocalUtils_1.LocalUtils(_this, _this.client, _this.owners);
-        if (options.autoLoad !== false)
+        if (options.autoLoad === undefined || !options.autoLoad)
             _this.loadCommands();
         return _this;
     }
     /**
      * Sets directory for commands
      *
-     * @returns CommandHandler
-     *
-     * @remarks
-     * This directory includes all children directories too.
-     * @see {@link https://www.npmjs.com/package/glob} for information on how directories are parsed
      * @param absolutePath Absolute path to directory. Recommended to concatenate it using `path.join() and process.cwd()`
+     * @remarks This directory includes all children directories too.
+     * @see {@link https://www.npmjs.com/package/glob} for information on how directories are parsed
      *
      * @returns CommandHandler
      * */
     CommandHandler.prototype.setCommandDirectory = function (absolutePath) {
         if (!absolutePath)
-            throw new CommandDirectoryReferenceError_1.default("absolutePath parameter is required.");
+            throw new CommandDirectoryReferenceError_1.default("setCommandDirectory(): absolutePath parameter is required.");
         this.directory = absolutePath;
+        return this;
+    };
+    /**
+     * Sets a prefix
+     *
+     * @param prefix Prefix to set
+     *
+     * @returns CommandHandler
+     * */
+    CommandHandler.prototype.setPrefix = function (prefix) {
+        if (!prefix)
+            throw new ReferenceError("setPrefix(): prefix parameter is required.");
+        this.prefix = prefix;
         return this;
     };
     /**
@@ -161,7 +171,7 @@ var CommandHandler = /** @class */ (function (_super) {
             additionalOptions[_i - 1] = arguments[_i];
         }
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-            var _a, typedCommand, args, command, failedReason, ex_1;
+            var _a, typedCommand, args, command, failedReason;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -175,11 +185,11 @@ var CommandHandler = /** @class */ (function (_super) {
                             return [2 /*return*/];
                         _a = message.content.slice(this.prefix.length).trim().split(/ +/g), typedCommand = _a[0], args = _a.slice(1);
                         if (!typedCommand)
-                            return [2 /*return*/, reject(new CommandExecutionError_1.default("Command is missing but prefix was supplied.", "COMMAND_MISSING"))];
+                            return [2 /*return*/];
                         typedCommand = typedCommand.trim();
                         command = this.commands.get(typedCommand.toLowerCase()) || this.commands.get(this.aliases.get(typedCommand.toLowerCase()));
                         if (!command)
-                            return [2 /*return*/, reject(new CommandExecutionError_1.default("Command not found.", "COMMAND_NOT_FOUND"))];
+                            return [2 /*return*/, reject(new CommandExecutionError_1.default("Command not found.", "COMMAND_NOT_FOUND", { typedCommand: typedCommand }))];
                         // Handle additional command parameters
                         if (!command.allowDm && message.channel.type === "DM")
                             return [2 /*return*/];
@@ -190,20 +200,17 @@ var CommandHandler = /** @class */ (function (_super) {
                             reject(failedReason);
                             return [2 /*return*/];
                         }
-                        _b.label = 4;
-                    case 4:
-                        _b.trys.push([4, 6, , 7]);
-                        return [4 /*yield*/, command.run.apply(command, __spreadArray([message, args], additionalOptions, false))];
-                    case 5:
-                        _b.sent();
-                        resolve(command);
-                        return [3 /*break*/, 7];
-                    case 6:
-                        ex_1 = _b.sent();
-                        console.error(ex_1);
-                        reject(ex_1);
-                        return [3 /*break*/, 7];
-                    case 7: return [2 /*return*/];
+                        if (command.usage)
+                            command.usage = "".concat(this.prefix).concat(command.name, " ").concat(command.usage) || "";
+                        try {
+                            command.run.apply(command, __spreadArray([message, args], additionalOptions, false));
+                            resolve(command);
+                        }
+                        catch (ex) {
+                            console.error(ex);
+                            reject(ex);
+                        }
+                        return [2 /*return*/];
                 }
             });
         }); });

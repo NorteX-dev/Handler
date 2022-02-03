@@ -192,7 +192,7 @@ var CommandHandler = /** @class */ (function (_super) {
                             return [2 /*return*/, reject(new CommandExecutionError_1.default("Command not found.", "COMMAND_NOT_FOUND", { typedCommand: typedCommand }))];
                         // Handle additional command parameters
                         if (!command.allowDm && message.channel.type === "DM")
-                            return [2 /*return*/];
+                            return [2 /*return*/, reject(new CommandExecutionError_1.default("Command cannot be executed in DM.", "COMMAND_NOT_ALLOWED_IN_DM", { command: command }))];
                         return [4 /*yield*/, this.localUtils.verifyCommand(message, command, this.userCooldowns, this.guildCooldowns)];
                     case 3:
                         failedReason = _b.sent();

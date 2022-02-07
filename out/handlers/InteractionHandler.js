@@ -118,7 +118,7 @@ var InteractionHandler = /** @class */ (function (_super) {
             return __generator(this, function (_a) {
                 if (!this.directory)
                     return [2 /*return*/, reject(new InteractionDirectoryReferenceError_1.default("Interactions directory is not set. Use setInteractionsDirectory(path) prior."))];
-                dirPattern = this.directory.endsWith("/") ? this.directory + "**\\*.js" : this.directory + "\\**\\*.js";
+                dirPattern = this.directory.endsWith("/") ? this.directory + "**/*.js" : this.directory + "/**/*.js";
                 (0, glob_1.glob)(dirPattern, function (err, files) { return __awaiter(_this, void 0, void 0, function () {
                     var duplicates, _i, files_1, file, parsedPath, InteractionFile, interaction;
                     var _this = this;

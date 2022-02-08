@@ -1,0 +1,4 @@
+node_modules
+.idea
+test/.env
+/test/node_modules

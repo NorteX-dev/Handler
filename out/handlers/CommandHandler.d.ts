@@ -29,7 +29,7 @@ export declare class CommandHandler extends EventEmitter {
     directory: string | undefined;
     commands: Map<string, Command>;
     aliases: Map<string, string>;
-    prefix: string;
+    prefix?: string[];
     owners: Array<string>;
     private readonly userCooldowns;
     private readonly guildCooldowns;
@@ -52,7 +52,7 @@ export declare class CommandHandler extends EventEmitter {
      *
      * @returns CommandHandler
      * */
-    setPrefix(prefix: string): this;
+    setPrefix(prefix: string | string[]): this;
     /**
      * Loads classic message commands into memory
      *

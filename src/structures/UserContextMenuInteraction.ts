@@ -28,16 +28,6 @@ export class UserContextMenuInteraction {
 		this.userIds = options.userIds || [];
 		this.guildIds = options.guildIds || [];
 		this.disabled = options.disabled || false;
-
-		this.opts = {}; // Initialize
-
-		Object.keys(options).forEach((key) => {
-			if (["name", "description", "options", "userIds", "guildIds", "disabled", "defaultPermission"].includes(key)) {
-				return;
-			}
-			// @ts-ignore
-			this.opts[key] = options[key];
-		});
 	}
 
 	run(userContextMenuInteraction: any) {

@@ -9,6 +9,7 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 
 const handler = new CommandHandler({
 	client: client,
+	prefix: "?",
 	directory: path.join(__dirname, "commands"),
 });
 
@@ -26,12 +27,11 @@ handler.on("debug", (debug) => {
 });
 
 client.on("messageCreate", (message) => {
-	handler.setPrefix("!");
 	handler.runCommand(message).catch((err) => {
 		console.log(err);
 	});
 });
 
-client.login("ODYyNDExODMxMTMzOTk1MDI5.YOX9mw.qdbJ_3Ag8DpQSoV-hEc-3SBYvEc").then(() => {
+client.login("ODYyNDExODMxMTMzOTk1MDI5.YOX9mw.tK-ek_kyFuaB65mLj7Njr9bv0FY").then(() => {
 	console.log("Bot is listening", client.user.tag);
 });

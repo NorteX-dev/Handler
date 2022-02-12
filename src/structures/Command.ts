@@ -88,8 +88,6 @@ export class Command {
 	public guildIds: Array<string>;
 	public disabled: boolean;
 
-	public opts?: any;
-
 	/**
 	 * @param handler The command handler instance
 	 * @param client The Discord.js client instance
@@ -117,37 +115,6 @@ export class Command {
 		this.userIds = options.userIds || [];
 		this.guildIds = options.guildIds || [];
 		this.disabled = options.disabled || false;
-
-		this.opts = {}; // Initialize
-
-		Object.keys(options).forEach((key) => {
-			if (
-				[
-					"name",
-					"description",
-					"category",
-					"aliases",
-					"userPermissions",
-					"userRoles",
-					"botPermissions",
-					"botRoles",
-					"userCooldown",
-					"guildCooldown",
-					"usage",
-					"nsfw",
-					"allowDm",
-					"onlyDm",
-					"userIds",
-					"guildIds",
-					"disabled",
-				].includes(key)
-			) {
-				return;
-			}
-			// @ts-ignore
-			this.opts[key] = options[key];
-		});
-
 		if (this.onlyDm && !this.allowDm) this.allowDm = true;
 	}
 

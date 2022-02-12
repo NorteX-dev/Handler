@@ -83,7 +83,6 @@ export declare class Command {
     userIds: Array<string>;
     guildIds: Array<string>;
     disabled: boolean;
-    opts?: any;
     /**
      * @param handler The command handler instance
      * @param client The Discord.js client instance

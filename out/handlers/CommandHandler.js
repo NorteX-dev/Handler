@@ -75,7 +75,7 @@ var CommandHandler = /** @class */ (function (_super) {
             throw new ReferenceError("CommandHandler(): options.client is required.");
         _this.client = options.client;
         _this.directory = options.directory;
-        _this.prefix = options.prefix || "?";
+        _this.setPrefix(options.prefix || "?");
         _this.owners = options.owners || [];
         _this.commands = new Map();
         _this.aliases = new Map();
@@ -110,7 +110,9 @@ var CommandHandler = /** @class */ (function (_super) {
      * */
     CommandHandler.prototype.setPrefix = function (prefix) {
         if (!prefix)
-            throw new ReferenceError("setPrefix(): prefix parameter is required.");
+            throw new ReferenceError("setPrefix(): prefix parameter is required as a string or string[].");
+        if (typeof prefix === "string")
+            prefix = [prefix];
         this.prefix = prefix;
         return this;
     };
@@ -171,7 +173,7 @@ var CommandHandler = /** @class */ (function (_super) {
             additionalOptions[_i - 1] = arguments[_i];
         }
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-            var _a, typedCommand, args, command, failedReason;
+            var prefixes, _i, prefixes_1, prefix, _a, typedCommand, args, command, failedReason;
             return __generator(this, function (_b) {
                 switch (_b.label) {
                     case 0:
@@ -181,9 +183,17 @@ var CommandHandler = /** @class */ (function (_super) {
                         _b.sent();
                         _b.label = 2;
                     case 2:
-                        if (!message.content.startsWith(this.prefix))
-                            return [2 /*return*/];
-                        _a = message.content.slice(this.prefix.length).trim().split(/ +/g), typedCommand = _a[0], args = _a.slice(1);
+                        prefixes = this.prefix;
+                        if (!prefixes || !prefixes.length)
+                            prefixes = ["?"];
+                        _i = 0, prefixes_1 = prefixes;
+                        _b.label = 3;
+                    case 3:
+                        if (!(_i < prefixes_1.length)) return [3 /*break*/, 6];
+                        prefix = prefixes_1[_i];
+                        if (!message.content.startsWith(prefix))
+                            return [3 /*break*/, 5];
+                        _a = message.content.slice(prefix.length).trim().split(/ +/g), typedCommand = _a[0], args = _a.slice(1);
                         if (!typedCommand)
                             return [2 /*return*/];
                         typedCommand = typedCommand.trim();
@@ -194,14 +204,14 @@ var CommandHandler = /** @class */ (function (_super) {
                         if (!command.allowDm && message.channel.type === "DM")
                             return [2 /*return*/, reject(new CommandExecutionError_1.default("Command cannot be executed in DM.", "COMMAND_NOT_ALLOWED_IN_DM", { command: command }))];
                         return [4 /*yield*/, this.localUtils.verifyCommand(message, command, this.userCooldowns, this.guildCooldowns)];
-                    case 3:
+                    case 4:
                         failedReason = _b.sent();
                         if (failedReason) {
                             reject(failedReason);
                             return [2 /*return*/];
                         }
                         if (command.usage)
-                            command.usage = "".concat(this.prefix).concat(command.name, " ").concat(command.usage) || "";
+                            command.usage = "".concat(prefix).concat(command.name, " ").concat(command.usage) || "";
                         try {
                             command.run.apply(command, __spreadArray([message, args], additionalOptions, false));
                             resolve(command);
@@ -210,7 +220,11 @@ var CommandHandler = /** @class */ (function (_super) {
                             console.error(ex);
                             reject(ex);
                         }
-                        return [2 /*return*/];
+                        _b.label = 5;
+                    case 5:
+                        _i++;
+                        return [3 /*break*/, 3];
+                    case 6: return [2 /*return*/];
                 }
             });
         }); });

@@ -39,17 +39,6 @@ export class CommandInteraction {
 		this.guildIds = options.guildIds || [];
 		this.disabled = options.disabled || false;
 		this.defaultPermission = options.defaultPermission || true;
-
-		this.opts = {}; // Initialize
-
-		Object.keys(options).forEach((key) => {
-			if (["name", "description", "options", "userIds", "guildIds", "disabled", "defaultPermission"].includes(key)) {
-				return;
-			}
-			// @ts-ignore
-			this.opts[key] = options[key];
-		});
-
 		if (!this.description) throw new Error("CommandInteraction: description is required.");
 	}
 

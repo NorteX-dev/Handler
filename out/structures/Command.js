@@ -10,7 +10,6 @@ var Command = /** @class */ (function () {
      * @param options Additional command options @see {@link CommandOptions}
      * */
     function Command(handler, client, name, options) {
-        var _this = this;
         if (!options)
             options = {};
         this.handler = handler;
@@ -32,32 +31,6 @@ var Command = /** @class */ (function () {
         this.userIds = options.userIds || [];
         this.guildIds = options.guildIds || [];
         this.disabled = options.disabled || false;
-        this.opts = {}; // Initialize
-        Object.keys(options).forEach(function (key) {
-            if ([
-                "name",
-                "description",
-                "category",
-                "aliases",
-                "userPermissions",
-                "userRoles",
-                "botPermissions",
-                "botRoles",
-                "userCooldown",
-                "guildCooldown",
-                "usage",
-                "nsfw",
-                "allowDm",
-                "onlyDm",
-                "userIds",
-                "guildIds",
-                "disabled",
-            ].includes(key)) {
-                return;
-            }
-            // @ts-ignore
-            _this.opts[key] = options[key];
-        });
         if (this.onlyDm && !this.allowDm)
             this.allowDm = true;
     }

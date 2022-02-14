@@ -70,12 +70,13 @@ var CommandExecutionError_1 = require("../errors/CommandExecutionError");
 var CommandHandler = /** @class */ (function (_super) {
     __extends(CommandHandler, _super);
     function CommandHandler(options) {
+        var _a;
         var _this = _super.call(this) || this;
         if (!options.client)
             throw new ReferenceError("CommandHandler(): options.client is required.");
         _this.client = options.client;
         _this.directory = options.directory;
-        _this.setPrefix(options.prefix || "?");
+        _this.setPrefix((_a = options.prefix) !== null && _a !== void 0 ? _a : "?");
         _this.owners = options.owners || [];
         _this.commands = new Map();
         _this.aliases = new Map();
@@ -109,7 +110,7 @@ var CommandHandler = /** @class */ (function (_super) {
      * @returns CommandHandler
      * */
     CommandHandler.prototype.setPrefix = function (prefix) {
-        if (!prefix)
+        if (prefix === undefined)
             throw new ReferenceError("setPrefix(): prefix parameter is required as a string or string[].");
         if (typeof prefix === "string")
             prefix = [prefix];
@@ -145,7 +146,7 @@ var CommandHandler = /** @class */ (function (_super) {
                         // Check if is class
                         if (!this.localUtils.isClass(CommandFile))
                             throw new TypeError("Command ".concat(parsedPath.name, " doesn't export any of the correct classes."));
-                        cmd = new CommandFile(this, this.client, parsedPath.name.toLowerCase());
+                        cmd = new CommandFile(this, this.client, parsedPath.name);
                         this.registerCommand(cmd);
                         resolve(this.commands);
                     }

@@ -48,7 +48,7 @@ export class CommandHandler extends EventEmitter {
 		if (!options.client) throw new ReferenceError("CommandHandler(): options.client is required.");
 		this.client = options.client;
 		this.directory = options.directory;
-		this.setPrefix(options.prefix || "?");
+		this.setPrefix(options.prefix ?? "?");
 		this.owners = options.owners || [];
 		this.commands = new Map();
 		this.aliases = new Map();
@@ -82,7 +82,7 @@ export class CommandHandler extends EventEmitter {
 	 * @returns CommandHandler
 	 * */
 	setPrefix(prefix: string | string[]) {
-		if (!prefix) throw new ReferenceError("setPrefix(): prefix parameter is required as a string or string[].");
+		if (prefix === undefined) throw new ReferenceError("setPrefix(): prefix parameter is required as a string or string[].");
 		if (typeof prefix === "string") prefix = [prefix];
 		this.prefix = prefix;
 		return this;
@@ -111,7 +111,7 @@ export class CommandHandler extends EventEmitter {
 					// Check if is class
 					if (!this.localUtils.isClass(CommandFile)) throw new TypeError(`Command ${parsedPath.name} doesn't export any of the correct classes.`);
 					// Initialize command class
-					const cmd = new CommandFile(this, this.client, parsedPath.name.toLowerCase());
+					const cmd = new CommandFile(this, this.client, parsedPath.name);
 					this.registerCommand(cmd);
 					resolve(this.commands);
 				}

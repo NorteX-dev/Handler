@@ -118,7 +118,7 @@ var EventHandler = /** @class */ (function (_super) {
                                 return { value: this_1.emit("dubug", "".concat(parsedPath, " failed to load.")) };
                             if (!this_1.localUtils.isClass(EventFile))
                                 throw new TypeError("Event ".concat(parsedPath.name, " doesn't export any of the correct classes."));
-                            var event_1 = new EventFile(this_1, this_1.client, parsedPath.name.toLowerCase());
+                            var event_1 = new EventFile(this_1, this_1.client, parsedPath.name);
                             if (!(event_1 instanceof index_1.Event))
                                 throw new TypeError("Event file: ".concat(parsedPath.name, " doesn't extend the Event class."));
                             this_1.client[event_1.once ? "once" : "on"](event_1.name, function () {

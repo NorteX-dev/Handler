@@ -25,8 +25,6 @@ export class CommandInteraction {
 	public disabled: boolean;
 	public defaultPermission: boolean;
 
-	public opts?: any;
-
 	constructor(handler: CommandHandler, client: any, name: string, options?: CommandInteractionOptions) {
 		if (!options) options = <CommandInteractionOptions>{};
 		this.handler = handler;
@@ -47,7 +45,7 @@ export class CommandInteraction {
 	 * @override
 	 * */
 
-	run(interaction: any) {
+	run(interaction: any, ...additionalParams: any) {
 		throw new MethodNotOverridenError("run() method on " + this.name + " interaction is not present.");
 	}
 }

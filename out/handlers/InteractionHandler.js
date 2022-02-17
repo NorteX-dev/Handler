@@ -50,6 +50,15 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
+var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
+    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
+        if (ar || !(i in from)) {
+            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
+            ar[i] = from[i];
+        }
+    }
+    return to.concat(ar || Array.prototype.slice.call(from));
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InteractionHandler = void 0;
 var discord_js_1 = require("discord.js");
@@ -176,15 +185,17 @@ var InteractionHandler = /** @class */ (function (_super) {
         return new Promise(function (res, rej) {
             if (interaction.user.bot)
                 return rej("Bot users can't run interactions.");
-            if (interaction.isCommand()) {
+            if (interaction.isCommand())
                 _this.handleCommandInteraction(interaction).then(res).catch(rej);
-            }
-            if (interaction.isContextMenu()) {
+            if (interaction.isContextMenu())
                 _this.handleContextMenuInteraction(interaction).then(res).catch(rej);
-            }
         });
     };
     InteractionHandler.prototype.handleCommandInteraction = function (interaction) {
+        var additionalOptions = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            additionalOptions[_i - 1] = arguments[_i];
+        }
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
@@ -204,7 +215,7 @@ var InteractionHandler = /** @class */ (function (_super) {
                                         return [2 /*return*/];
                                     }
                                     try {
-                                        slashCommand.run(interaction);
+                                        slashCommand.run.apply(slashCommand, __spreadArray([interaction], additionalOptions, false));
                                         res(slashCommand);
                                     }
                                     catch (ex) {
@@ -223,8 +234,12 @@ var InteractionHandler = /** @class */ (function (_super) {
      * */
     InteractionHandler.prototype.handleContextMenuInteraction = function (interaction) {
         var _this = this;
-        return new Promise(function (res, rej) { return __awaiter(_this, void 0, void 0, function () {
-            var contextMenuInt, failedReason, ex_1;
+        var additionalOptions = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            additionalOptions[_i - 1] = arguments[_i];
+        }
+        return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
+            var contextMenuInt, failedReason;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
@@ -241,23 +256,18 @@ var InteractionHandler = /** @class */ (function (_super) {
                     case 1:
                         failedReason = _a.sent();
                         if (failedReason) {
-                            rej(failedReason);
+                            reject(failedReason);
                             return [2 /*return*/];
                         }
-                        _a.label = 2;
-                    case 2:
-                        _a.trys.push([2, 4, , 5]);
-                        return [4 /*yield*/, contextMenuInt.run(interaction)];
-                    case 3:
-                        _a.sent();
-                        res(contextMenuInt);
-                        return [3 /*break*/, 5];
-                    case 4:
-                        ex_1 = _a.sent();
-                        console.error(ex_1);
-                        rej(ex_1);
-                        return [3 /*break*/, 5];
-                    case 5: return [2 /*return*/];
+                        try {
+                            contextMenuInt.run.apply(contextMenuInt, __spreadArray([interaction], additionalOptions, false));
+                            resolve(contextMenuInt);
+                        }
+                        catch (ex) {
+                            console.error(ex);
+                            reject(ex);
+                        }
+                        return [2 /*return*/];
                 }
             });
         }); });

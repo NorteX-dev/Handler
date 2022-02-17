@@ -20,8 +20,7 @@ export declare class CommandInteraction {
     guildIds: Array<string>;
     disabled: boolean;
     defaultPermission: boolean;
-    opts?: any;
     constructor(handler: CommandHandler, client: any, name: string, options?: CommandInteractionOptions);
-    run(interaction: any): void;
+    run(interaction: any, ...additionalParams: any): void;
 }
 export {};

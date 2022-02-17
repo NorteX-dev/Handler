@@ -17,7 +17,6 @@ export class UserContextMenuInteraction {
 	public disabled: boolean;
 	public userIds: Array<string>;
 	public guildIds: Array<string>;
-	public opts?: any;
 
 	constructor(handler: CommandHandler, client: any, name: string, options?: UserContextMenuInteractionOptions) {
 		if (!options) options = <UserContextMenuInteractionOptions>{};
@@ -30,7 +29,7 @@ export class UserContextMenuInteraction {
 		this.disabled = options.disabled || false;
 	}
 
-	run(userContextMenuInteraction: any) {
+	run(userContextMenuInteraction: any, ...additionalParams: any) {
 		throw new MethodNotOverridenError("run() method on " + this.name + " interaction is not present.");
 	}
 }

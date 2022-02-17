@@ -135,16 +135,12 @@ export class InteractionHandler extends EventEmitter {
 	runInteraction(interaction: DJSInteraction) {
 		return new Promise((res, rej) => {
 			if (interaction.user.bot) return rej("Bot users can't run interactions.");
-			if (interaction.isCommand()) {
-				this.handleCommandInteraction(interaction).then(res).catch(rej);
-			}
-			if (interaction.isContextMenu()) {
-				this.handleContextMenuInteraction(interaction).then(res).catch(rej);
-			}
+			if (interaction.isCommand()) this.handleCommandInteraction(interaction).then(res).catch(rej);
+			if (interaction.isContextMenu()) this.handleContextMenuInteraction(interaction).then(res).catch(rej);
 		});
 	}
 
-	private async handleCommandInteraction(interaction: any) {
+	private async handleCommandInteraction(interaction: any, ...additionalOptions: any) {
 		return new Promise(async (res, rej) => {
 			const slashCommand = this.interactions.get("CHAT_INPUT_" + interaction.commandName.toLowerCase());
 			if (!slashCommand) return;
@@ -156,7 +152,7 @@ export class InteractionHandler extends EventEmitter {
 			}
 
 			try {
-				slashCommand.run(interaction);
+				slashCommand.run(interaction, ...additionalOptions);
 				res(slashCommand);
 			} catch (ex) {
 				console.error(ex);
@@ -168,8 +164,8 @@ export class InteractionHandler extends EventEmitter {
 	/**
 	 * @ignore
 	 * */
-	private handleContextMenuInteraction(interaction: DJSContextMenuInteraction) {
-		return new Promise(async (res, rej) => {
+	private handleContextMenuInteraction(interaction: DJSContextMenuInteraction, ...additionalOptions: any) {
+		return new Promise(async (resolve, reject) => {
 			const contextMenuInt = this.interactions.get("USER_" + interaction.commandName.toLowerCase()) || this.interactions.get("MESSAGE_" + interaction.commandName.toLowerCase());
 			if (!contextMenuInt) return;
 
@@ -180,16 +176,16 @@ export class InteractionHandler extends EventEmitter {
 
 			const failedReason: InteractionExecutionError | undefined = await this.localUtils.verifyInteraction(interaction, contextMenuInt);
 			if (failedReason) {
-				rej(failedReason);
+				reject(failedReason);
 				return;
 			}
 
 			try {
-				await contextMenuInt.run(interaction);
-				res(contextMenuInt);
+				contextMenuInt.run(interaction, ...additionalOptions);
+				resolve(contextMenuInt);
 			} catch (ex) {
 				console.error(ex);
-				rej(ex);
+				reject(ex);
 			}
 		});
 	}

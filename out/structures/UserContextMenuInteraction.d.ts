@@ -13,8 +13,7 @@ export declare class UserContextMenuInteraction {
     disabled: boolean;
     userIds: Array<string>;
     guildIds: Array<string>;
-    opts?: any;
     constructor(handler: CommandHandler, client: any, name: string, options?: UserContextMenuInteractionOptions);
-    run(userContextMenuInteraction: any): void;
+    run(userContextMenuInteraction: any, ...additionalParams: any): void;
 }
 export {};

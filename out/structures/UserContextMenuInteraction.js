@@ -15,6 +15,10 @@ var UserContextMenuInteraction = /** @class */ (function () {
         this.disabled = options.disabled || false;
     }
     UserContextMenuInteraction.prototype.run = function (userContextMenuInteraction) {
+        var additionalParams = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            additionalParams[_i - 1] = arguments[_i];
+        }
         throw new MethodNotOverridenError_1.default("run() method on " + this.name + " interaction is not present.");
     };
     return UserContextMenuInteraction;

@@ -8,6 +8,7 @@ Things to add/change to @nortex/handler:
 - Set prefix method (even though assigning manually works) [✔]
 - Additional readable parameters to CommandExecutionErrors like remaining cooldown [✔]
 - Make sure promise resolves synchronously (dont wait for actual execution) [✔]
+- Fix: events innherited from filenames are toLowerCase'd() which makes events like messageCreate messagecreate
 - Log errors of posting interactions instead of saying nothing changed
 - Make paths relative instead of absolute
 - Change commands and interactions Map to a custom Collection

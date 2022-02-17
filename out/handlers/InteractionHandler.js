@@ -182,13 +182,19 @@ var InteractionHandler = /** @class */ (function (_super) {
     };
     InteractionHandler.prototype.runInteraction = function (interaction) {
         var _this = this;
+        var additionalOptions = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            additionalOptions[_i - 1] = arguments[_i];
+        }
         return new Promise(function (res, rej) {
             if (interaction.user.bot)
                 return rej("Bot users can't run interactions.");
             if (interaction.isCommand())
-                _this.handleCommandInteraction(interaction).then(res).catch(rej);
+                _this.handleCommandInteraction.apply(_this, __spreadArray([interaction], additionalOptions, false)).then(res)
+                    .catch(rej);
             if (interaction.isContextMenu())
-                _this.handleContextMenuInteraction(interaction).then(res).catch(rej);
+                _this.handleContextMenuInteraction.apply(_this, __spreadArray([interaction], additionalOptions, false)).then(res)
+                    .catch(rej);
         });
     };
     InteractionHandler.prototype.handleCommandInteraction = function (interaction) {

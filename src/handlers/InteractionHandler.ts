@@ -132,11 +132,17 @@ export class InteractionHandler extends EventEmitter {
 		});
 	}
 
-	runInteraction(interaction: DJSInteraction) {
+	runInteraction(interaction: DJSInteraction, ...additionalOptions: any) {
 		return new Promise((res, rej) => {
 			if (interaction.user.bot) return rej("Bot users can't run interactions.");
-			if (interaction.isCommand()) this.handleCommandInteraction(interaction).then(res).catch(rej);
-			if (interaction.isContextMenu()) this.handleContextMenuInteraction(interaction).then(res).catch(rej);
+			if (interaction.isCommand())
+				this.handleCommandInteraction(interaction, ...additionalOptions)
+					.then(res)
+					.catch(rej);
+			if (interaction.isContextMenu())
+				this.handleContextMenuInteraction(interaction, ...additionalOptions)
+					.then(res)
+					.catch(rej);
 		});
 	}
 

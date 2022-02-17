@@ -57,7 +57,7 @@ export declare class InteractionHandler extends EventEmitter {
      * Requires @see {@link InteractionHandler.setInteractionsDirectory} to be executed first, or `directory` to be specified in the constructor.
      * */
     loadInteractions(): Promise<unknown>;
-    runInteraction(interaction: DJSInteraction): Promise<unknown>;
+    runInteraction(interaction: DJSInteraction, ...additionalOptions: any): Promise<unknown>;
     private handleCommandInteraction;
     /**
      * @ignore

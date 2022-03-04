@@ -61,47 +61,28 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommandHandler = void 0;
-var CommandDirectoryReferenceError_1 = require("../errors/CommandDirectoryReferenceError");
-var events_1 = require("events");
+var DirectoryReferenceError_1 = require("../errors/DirectoryReferenceError");
+var ExecutionError_1 = require("../errors/ExecutionError");
+var Handler_1 = require("./Handler");
 var LocalUtils_1 = require("../util/LocalUtils");
 var glob_1 = require("glob");
 var path = require("path");
-var CommandExecutionError_1 = require("../errors/CommandExecutionError");
 var CommandHandler = /** @class */ (function (_super) {
     __extends(CommandHandler, _super);
     function CommandHandler(options) {
         var _a;
-        var _this = _super.call(this) || this;
-        if (!options.client)
-            throw new ReferenceError("CommandHandler(): options.client is required.");
-        _this.client = options.client;
-        _this.directory = options.directory;
+        var _this = _super.call(this, options) || this;
         _this.setPrefix((_a = options.prefix) !== null && _a !== void 0 ? _a : "?");
         _this.owners = options.owners || [];
         _this.commands = new Map();
         _this.aliases = new Map();
         _this.userCooldowns = new Map();
         _this.guildCooldowns = new Map();
-        _this.localUtils = new LocalUtils_1.LocalUtils(_this, _this.client, _this.owners);
+        _this.localUtils = new LocalUtils_1.LocalUtils();
         if (options.autoLoad === undefined || !options.autoLoad)
             _this.loadCommands();
         return _this;
     }
-    /**
-     * Sets directory for commands
-     *
-     * @param absolutePath Absolute path to directory. Recommended to concatenate it using `path.join() and process.cwd()`
-     * @remarks This directory includes all children directories too.
-     * @see {@link https://www.npmjs.com/package/glob} for information on how directories are parsed
-     *
-     * @returns CommandHandler
-     * */
-    CommandHandler.prototype.setCommandDirectory = function (absolutePath) {
-        if (!absolutePath)
-            throw new CommandDirectoryReferenceError_1.default("setCommandDirectory(): absolutePath parameter is required.");
-        this.directory = absolutePath;
-        return this;
-    };
     /**
      * Sets a prefix
      *
@@ -123,7 +104,7 @@ var CommandHandler = /** @class */ (function (_super) {
      * @returns CommandHandlers
      *
      * @remarks
-     * Requires @see {@link CommandHandler.setCommandDirectory} to be executed first, or `directory` to be specified in the constructor.
+     * Requires @see {@link CommandHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
      *
      * @returns Map<string, Command>
      * */
@@ -131,12 +112,12 @@ var CommandHandler = /** @class */ (function (_super) {
         var _this = this;
         return new Promise(function (resolve, reject) {
             if (!_this.directory)
-                return reject(new CommandDirectoryReferenceError_1.default("Command directory is not set. Use setCommandDirectory(path) prior."));
-            (0, glob_1.glob)(_this.directory.endsWith("/") ? _this.directory + "**/*.js" : _this.directory + "/**/*.js", function (err, files) { return __awaiter(_this, void 0, void 0, function () {
+                return reject(new DirectoryReferenceError_1.default("Command directory is not set. Use setDirectory(path) prior."));
+            (0, glob_1.glob)(path.join(process.cwd(), _this.directory), function (err, files) { return __awaiter(_this, void 0, void 0, function () {
                 var _i, files_1, file, parsedPath, CommandFile, cmd;
                 return __generator(this, function (_a) {
                     if (err)
-                        return [2 /*return*/, reject(new CommandDirectoryReferenceError_1.default("Supplied command directory is invalid. Please ensure it exists and is absolute."))];
+                        return [2 /*return*/, reject(new DirectoryReferenceError_1.default("Supplied command directory is invalid. Please ensure it exists and is relative to project root."))];
                     for (_i = 0, files_1 = files; _i < files_1.length; _i++) {
                         file = files_1[_i];
                         parsedPath = path.parse(file);
@@ -146,7 +127,7 @@ var CommandHandler = /** @class */ (function (_super) {
                         // Check if is class
                         if (!this.localUtils.isClass(CommandFile))
                             throw new TypeError("Command ".concat(parsedPath.name, " doesn't export any of the correct classes."));
-                        cmd = new CommandFile(this, this.client, parsedPath.name);
+                        cmd = new CommandFile(this, parsedPath.name);
                         this.registerCommand(cmd);
                         resolve(this.commands);
                     }
@@ -156,17 +137,28 @@ var CommandHandler = /** @class */ (function (_super) {
         });
     };
     /**
-     * @ignore
+     * Manually register an instanced command. This should not be needed when using loadCommands().
+     *
+     * @returns Command
+     *
+     * @returns Map<string, Command>
      * */
-    CommandHandler.prototype.registerCommand = function (command, filename) {
+    CommandHandler.prototype.registerCommand = function (command) {
         var _this = this;
         var _a;
+        // if (!(command instanceof Command)) throw new TypeError("registerCommand(): command parameter must be an instance of Command.");
         this.commands.set(command.name, command);
         if ((_a = command.aliases) === null || _a === void 0 ? void 0 : _a.length)
             command.aliases.forEach(function (alias) { return _this.aliases.set(alias, command.name); });
-        this.emit("debug", "Registered command \"".concat(command.name, "\"").concat(filename ? " from file ".concat(filename) : ""));
+        this.emit("debug", "Registered command \"".concat(command.name, "\"."));
         this.emit("load", command);
+        return command;
     };
+    /**
+     * Attempts to run the interaction. Returns a promise with the interaction if run succeeded, or rejects with an execution error.
+     *
+     * @returns Promise<<Command>
+     * */
     CommandHandler.prototype.runCommand = function (message) {
         var _this = this;
         var additionalOptions = [];
@@ -200,10 +192,10 @@ var CommandHandler = /** @class */ (function (_super) {
                         typedCommand = typedCommand.trim();
                         command = this.commands.get(typedCommand.toLowerCase()) || this.commands.get(this.aliases.get(typedCommand.toLowerCase()));
                         if (!command)
-                            return [2 /*return*/, reject(new CommandExecutionError_1.default("Command not found.", "COMMAND_NOT_FOUND", { typedCommand: typedCommand }))];
+                            return [2 /*return*/, reject(new ExecutionError_1.default("Command not found.", "COMMAND_NOT_FOUND", { query: typedCommand }))];
                         // Handle additional command parameters
                         if (!command.allowDm && message.channel.type === "DM")
-                            return [2 /*return*/, reject(new CommandExecutionError_1.default("Command cannot be executed in DM.", "COMMAND_NOT_ALLOWED_IN_DM", { command: command }))];
+                            return [2 /*return*/, reject(new ExecutionError_1.default("Command cannot be executed in DM.", "COMMAND_NOT_ALLOWED_IN_DM", { command: command }))];
                         return [4 /*yield*/, this.localUtils.verifyCommand(message, command, this.userCooldowns, this.guildCooldowns)];
                     case 4:
                         failedReason = _b.sent();
@@ -231,5 +223,5 @@ var CommandHandler = /** @class */ (function (_super) {
         }); });
     };
     return CommandHandler;
-}(events_1.EventEmitter));
+}(Handler_1.Handler));
 exports.CommandHandler = CommandHandler;

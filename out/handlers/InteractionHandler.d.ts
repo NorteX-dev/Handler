@@ -1,16 +1,13 @@
-/// <reference types="node" />
 import { Client, Interaction as DJSInteraction } from "discord.js";
-import { EventEmitter } from "events";
-import { CommandInteraction, MessageContextMenuInteraction, UserContextMenuInteraction } from "../index";
+import { Handler } from "./Handler";
+import { InteractionCommand, MessageContextMenu, UserContextMenu } from "../index";
 interface HandlerOptions {
     client: Client;
+    directory?: string;
     autoLoad?: boolean;
-    directory?: string | undefined;
-    disableInteractionModification?: boolean;
     owners?: Array<string>;
-    forceInteractionUpdate?: boolean;
 }
-export declare class InteractionHandler extends EventEmitter {
+export declare class InteractionHandler extends Handler {
     /**
      * Initializes an interaction handler on the client.
      *
@@ -18,8 +15,6 @@ export declare class InteractionHandler extends EventEmitter {
      * @param options.client Discord.JS Client Instance
      * @param options.directory Optional - Interaction files directory
      * @param options.owners Optional - Array of superusers' ids
-     * @param options.disableInteractionModification Optional - Forcibly stop any modification of application commands
-     * @param options.forceInteractionUpdate Optional - Forcibly update command applications every load - this option can get you rate limited if the bot restarts often
      * @param options.autoLoad Optional - Automatically invoke the loadInteractions() method - requires `directory` to be set in the options
      * @returns InteractionHandler
      * @example
@@ -31,45 +26,39 @@ export declare class InteractionHandler extends EventEmitter {
     client: Client;
     directory?: string;
     owners?: Array<string>;
-    disableInteractionModification?: boolean;
-    forceInteractionUpdate?: boolean;
     private application;
-    interactions: Map<string, CommandInteraction | UserContextMenuInteraction | MessageContextMenuInteraction>;
+    interactions: Map<string, InteractionCommand | UserContextMenu | MessageContextMenu>;
     private localUtils;
     constructor(options: HandlerOptions);
-    /**
-     * Sets directory for interactions
-     *
-     * @returns InteractionHandler
-     *
-     * @remarks
-     * This directory includes all children directories too.
-     * @see {@link https://www.npmjs.com/package/glob} for information on how directories are parsed
-     * @param absolutePath Absolute path to directory. Recommended to concatenate it using `path.join() and process.cwd()`
-     * */
-    setInteractionsDirectory(absolutePath: string): this;
     /**
      * Loads interaction commands into memory
      *
      * @returns InteractionHandler
      *
      * @remarks
-     * Requires @see {@link InteractionHandler.setInteractionsDirectory} to be executed first, or `directory` to be specified in the constructor.
+     * Requires @see {@link InteractionHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
+     * Run {@link InteractionHandler.runInteraction()} to be invoked to run the ocmmand on an event.
      * */
     loadInteractions(): Promise<unknown>;
+    /**
+     * Attempts to run the interaction. Returns a promise with the interaction if run succeeded, or rejects with an execution error.
+     *
+     * @returns Promise<Interaction>
+     *
+     * */
     runInteraction(interaction: DJSInteraction, ...additionalOptions: any): Promise<unknown>;
+    /**
+     * @ignore
+     * */
     private handleCommandInteraction;
     /**
      * @ignore
      * */
     private handleContextMenuInteraction;
+    updateInteractions(force?: boolean): Promise<void>;
     /**
      * @ignore
      * */
-    private postInteractions;
-    /**
-     * @ignore
-     * */
-    private didChange;
+    private checkDiff;
 }
 export {};

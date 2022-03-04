@@ -1,6 +1,6 @@
 import MethodNotOverridenError from "../errors/MethodNotOverridenError";
 
-import { CommandHandler } from "../handlers/CommandHandler";
+import { InteractionHandler } from "../handlers/InteractionHandler";
 
 interface UserContextMenuInteractionOptions {
 	name: string;
@@ -9,8 +9,8 @@ interface UserContextMenuInteractionOptions {
 	guildIds?: Array<string>;
 }
 
-export class UserContextMenuInteraction {
-	public handler: CommandHandler;
+export class UserContextMenu {
+	public handler: InteractionHandler;
 	public client: any;
 	public type: string;
 	public name: string;
@@ -18,7 +18,7 @@ export class UserContextMenuInteraction {
 	public userIds: Array<string>;
 	public guildIds: Array<string>;
 
-	constructor(handler: CommandHandler, client: any, name: string, options?: UserContextMenuInteractionOptions) {
+	constructor(handler: InteractionHandler, client: any, name: string, options?: UserContextMenuInteractionOptions) {
 		if (!options) options = <UserContextMenuInteractionOptions>{};
 		this.handler = handler;
 		this.client = client;

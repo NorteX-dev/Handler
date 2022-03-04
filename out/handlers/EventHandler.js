@@ -52,49 +52,33 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EventHandler = void 0;
-var events_1 = require("events");
 var LocalUtils_1 = require("../util/LocalUtils");
 var glob_1 = require("glob");
 var path = require("path");
 var index_1 = require("../index");
-var EventsDirectoryReferenceError_1 = require("../errors/EventsDirectoryReferenceError");
+var DirectoryReferenceError_1 = require("../errors/DirectoryReferenceError");
+var Handler_1 = require("./Handler");
 var EventHandler = /** @class */ (function (_super) {
     __extends(EventHandler, _super);
     function EventHandler(options) {
-        var _this = _super.call(this) || this;
+        var _this = _super.call(this, options) || this;
         if (!options.client)
             throw new ReferenceError("EventHandler(): options.client is required.");
         _this.client = options.client;
         _this.directory = options.directory;
         _this.events = new Map();
-        _this.localUtils = new LocalUtils_1.LocalUtils(_this, _this.client);
+        _this.localUtils = new LocalUtils_1.LocalUtils();
         if (options.autoLoad === undefined || !options.autoLoad)
             _this.loadEvents();
         return _this;
     }
     /**
-     * Sets directory for commands
+     * Loads events & creates the event emitter handlers.
      *
      * @returns EventHandler
      *
      * @remarks
-     * This directory includes all children directories too.
-     * @see {@link https://www.npmjs.com/package/glob} for information on how directories are parsed.
-     * @param absolutePath Absolute path to directory. Recommended to concatenate it using `path.join() and process.cwd()`
-     * */
-    EventHandler.prototype.setEventsDirectory = function (absolutePath) {
-        if (!absolutePath)
-            throw new EventsDirectoryReferenceError_1.default("absolutePath parameter is required.");
-        this.directory = absolutePath;
-        return this;
-    };
-    /**
-     * Loads events into memory
-     *
-     * @returns EventHandler
-     *
-     * @remarks
-     * Requires @see {@link EventHandler.setEventsDirectory} to be executed first, or `directory` to be specified in the constructor.
+     * Requires @see {@link EventHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
      *
      * @returns Map<string, Event>
      * */
@@ -104,18 +88,18 @@ var EventHandler = /** @class */ (function (_super) {
             var _this = this;
             return __generator(this, function (_a) {
                 if (!this.directory)
-                    return [2 /*return*/, reject(new EventsDirectoryReferenceError_1.default("Events directory is not set. Use setEventsDirectory(path) prior."))];
-                (0, glob_1.glob)(this.directory.endsWith("/") ? this.directory + "**/*.js" : this.directory + "/**/*.js", function (err, files) { return __awaiter(_this, void 0, void 0, function () {
+                    return [2 /*return*/, reject(new DirectoryReferenceError_1.default("Events directory is not set. Use setDirectory(path) prior."))];
+                (0, glob_1.glob)(path.join(process.cwd(), this.directory), function (err, files) { return __awaiter(_this, void 0, void 0, function () {
                     var _loop_1, this_1, _i, files_1, file, state_1;
                     return __generator(this, function (_a) {
                         if (err)
-                            return [2 /*return*/, reject(new EventsDirectoryReferenceError_1.default("Supplied events directory is invalid. Please ensure it exists and is absolute."))];
+                            return [2 /*return*/, reject(new DirectoryReferenceError_1.default("Supplied events directory is invalid. Please ensure it exists and is absolute."))];
                         _loop_1 = function (file) {
                             delete require.cache[file];
                             var parsedPath = path.parse(file);
                             var EventFile = require(file);
                             if (!EventFile)
-                                return { value: this_1.emit("dubug", "".concat(parsedPath, " failed to load.")) };
+                                return { value: this_1.emit("debug", "".concat(parsedPath, " failed to load.")) };
                             if (!this_1.localUtils.isClass(EventFile))
                                 throw new TypeError("Event ".concat(parsedPath.name, " doesn't export any of the correct classes."));
                             var event_1 = new EventFile(this_1, this_1.client, parsedPath.name);
@@ -148,5 +132,5 @@ var EventHandler = /** @class */ (function (_super) {
         }); });
     };
     return EventHandler;
-}(events_1.EventEmitter));
+}(Handler_1.Handler));
 exports.EventHandler = EventHandler;

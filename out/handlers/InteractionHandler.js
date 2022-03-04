@@ -61,31 +61,25 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InteractionHandler = void 0;
-var discord_js_1 = require("discord.js");
-var events_1 = require("events");
 var LocalUtils_1 = require("../util/LocalUtils");
+var Handler_1 = require("./Handler");
 var glob_1 = require("glob");
 var path = require("path");
-var InteractionDirectoryReferenceError_1 = require("../errors/InteractionDirectoryReferenceError");
+var DirectoryReferenceError_1 = require("../errors/DirectoryReferenceError");
 var index_1 = require("../index");
 var InteractionHandler = /** @class */ (function (_super) {
     __extends(InteractionHandler, _super);
     function InteractionHandler(options) {
-        var _this = _super.call(this) || this;
+        var _this = _super.call(this, options) || this;
         if (!options.client)
             throw new ReferenceError("InteractionHandler(): options.client is required.");
         _this.client = options.client;
-        _this.directory = options.directory;
+        _this.directory = options.directory ? path.join(process.cwd(), options.directory) : undefined;
         _this.owners = options.owners || [];
-        _this.disableInteractionModification = options.disableInteractionModification || false;
-        _this.forceInteractionUpdate = options.forceInteractionUpdate || false;
         _this.interactions = new Map();
-        _this.localUtils = new LocalUtils_1.LocalUtils(_this, _this.client, _this.owners);
+        _this.localUtils = new LocalUtils_1.LocalUtils();
         if (options.autoLoad === undefined || !options.autoLoad)
             _this.loadInteractions();
-        if (!_this.client) {
-            throw new ReferenceError("InteractionHandler(): options.client is required.");
-        }
         _this.client.on("ready", function () { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 this.emit("debug", "Client.application assigned.");
@@ -96,45 +90,29 @@ var InteractionHandler = /** @class */ (function (_super) {
         return _this;
     }
     /**
-     * Sets directory for interactions
-     *
-     * @returns InteractionHandler
-     *
-     * @remarks
-     * This directory includes all children directories too.
-     * @see {@link https://www.npmjs.com/package/glob} for information on how directories are parsed
-     * @param absolutePath Absolute path to directory. Recommended to concatenate it using `path.join() and process.cwd()`
-     * */
-    InteractionHandler.prototype.setInteractionsDirectory = function (absolutePath) {
-        if (!absolutePath)
-            throw new InteractionDirectoryReferenceError_1.default("setInteractionsDirectory(): absolutePath parameter is required.");
-        this.directory = absolutePath;
-        return this;
-    };
-    /**
      * Loads interaction commands into memory
      *
      * @returns InteractionHandler
      *
      * @remarks
-     * Requires @see {@link InteractionHandler.setInteractionsDirectory} to be executed first, or `directory` to be specified in the constructor.
+     * Requires @see {@link InteractionHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
+     * Run {@link InteractionHandler.runInteraction()} to be invoked to run the ocmmand on an event.
      * */
     InteractionHandler.prototype.loadInteractions = function () {
         var _this = this;
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-            var dirPattern;
             var _this = this;
             return __generator(this, function (_a) {
                 if (!this.directory)
-                    return [2 /*return*/, reject(new InteractionDirectoryReferenceError_1.default("Interactions directory is not set. Use setInteractionsDirectory(path) prior."))];
-                dirPattern = this.directory.endsWith("/") ? this.directory + "**/*.js" : this.directory + "/**/*.js";
-                (0, glob_1.glob)(dirPattern, function (err, files) { return __awaiter(_this, void 0, void 0, function () {
+                    return [2 /*return*/, reject(new DirectoryReferenceError_1.default("Interactions directory is not set. Use setDirectory(path) prior."))];
+                (0, glob_1.glob)(this.directory + "/**/*.js", {}, function (err, files) { return __awaiter(_this, void 0, void 0, function () {
                     var duplicates, _i, files_1, file, parsedPath, InteractionFile, interaction;
-                    var _this = this;
                     return __generator(this, function (_a) {
+                        if (err)
+                            throw err;
                         this.emit("debug", "Found ".concat(files.length, " interaction files."));
                         if (err)
-                            return [2 /*return*/, reject(new InteractionDirectoryReferenceError_1.default("Supplied interactions directory is invalid. Please ensure it exists and is absolute."))];
+                            return [2 /*return*/, reject(new DirectoryReferenceError_1.default("Supplied interactions directory is invalid. Please ensure it exists and is absolute."))];
                         duplicates = [];
                         for (_i = 0, files_1 = files; _i < files_1.length; _i++) {
                             file = files_1[_i];
@@ -147,31 +125,20 @@ var InteractionHandler = /** @class */ (function (_super) {
                                 throw new TypeError("Interaction ".concat(parsedPath.name, " doesn't export any of the correct classes."));
                             interaction = new InteractionFile(this, this.client, parsedPath.name.toLowerCase());
                             // Check if initialized class is extending Command
-                            if (!(interaction instanceof index_1.CommandInteraction || interaction instanceof index_1.UserContextMenuInteraction || interaction instanceof index_1.MessageContextMenuInteraction))
-                                throw new TypeError("Interaction file: ".concat(parsedPath.name, " doesn't extend one of the valid the interaction classes: CommandInteraction, UserContextMenuInteraction, MessageContextMenuInteraction."));
+                            if (!(interaction instanceof index_1.InteractionCommand || interaction instanceof index_1.UserContextMenu || interaction instanceof index_1.MessageContextMenu))
+                                throw new TypeError("Interaction file: ".concat(parsedPath.name, " doesn't extend one of the valid the interaction classes: CommandInteraction, UserContextMenuInteraction, MessageContextMenuInteraction. Use ComponentHandler to handle buttons, select menus and other components."));
                             // Save command to map
                             if (this.interactions.get(interaction.type + "_" + interaction.name)) {
                                 duplicates.push(interaction);
                                 continue;
                             }
+                            // @ts-ignore - Fine to ignore since it's never going to be verified
                             this.interactions.set(interaction.type + "_" + interaction.name, interaction);
-                            this.emit("debug", "Loaded interaction \"".concat(interaction.name, "\" from file \"").concat(parsedPath.base, "\""));
+                            this.emit("debug", "Loaded interaction \"".concat(interaction.name, "\" from file \"").concat(parsedPath.base, "\"."));
                             this.emit("load", interaction);
                         }
                         if (duplicates === null || duplicates === void 0 ? void 0 : duplicates.length)
                             throw new Error("Loading interaction with the same name: ".concat(duplicates.map(function (d) { return d.name; }).join(", "), "."));
-                        if (!this.disableInteractionModification)
-                            this.client.on("ready", function () { return __awaiter(_this, void 0, void 0, function () {
-                                return __generator(this, function (_a) {
-                                    switch (_a.label) {
-                                        case 0: return [4 /*yield*/, this.postInteractions(this.forceInteractionUpdate)];
-                                        case 1:
-                                            _a.sent();
-                                            return [2 /*return*/];
-                                    }
-                                });
-                            }); });
-                        this.emit("ready");
                         resolve(this.interactions);
                         return [2 /*return*/];
                     });
@@ -180,6 +147,12 @@ var InteractionHandler = /** @class */ (function (_super) {
             });
         }); });
     };
+    /**
+     * Attempts to run the interaction. Returns a promise with the interaction if run succeeded, or rejects with an execution error.
+     *
+     * @returns Promise<Interaction>
+     *
+     * */
     InteractionHandler.prototype.runInteraction = function (interaction) {
         var _this = this;
         var additionalOptions = [];
@@ -189,51 +162,55 @@ var InteractionHandler = /** @class */ (function (_super) {
         return new Promise(function (res, rej) {
             if (interaction.user.bot)
                 return rej("Bot users can't run interactions.");
-            if (interaction.isCommand())
+            if (interaction.isCommand()) {
                 _this.handleCommandInteraction.apply(_this, __spreadArray([interaction], additionalOptions, false)).then(res)
                     .catch(rej);
-            if (interaction.isContextMenu())
+            }
+            else if (interaction.isContextMenu()) {
                 _this.handleContextMenuInteraction.apply(_this, __spreadArray([interaction], additionalOptions, false)).then(res)
                     .catch(rej);
+            }
+            else {
+                throw new Error("InteractionHandler#runInteraction(): Unsupported interaction type. This only supports command and context menus interactions. You should check the type beforehand, or refer to ComponentHandler() to handle components.");
+            }
         });
     };
+    /**
+     * @ignore
+     * */
     InteractionHandler.prototype.handleCommandInteraction = function (interaction) {
+        var _this = this;
         var additionalOptions = [];
         for (var _i = 1; _i < arguments.length; _i++) {
             additionalOptions[_i - 1] = arguments[_i];
         }
-        return __awaiter(this, void 0, void 0, function () {
-            var _this = this;
+        return new Promise(function (res, rej) { return __awaiter(_this, void 0, void 0, function () {
+            var applicationCommand, failedReason;
             return __generator(this, function (_a) {
-                return [2 /*return*/, new Promise(function (res, rej) { return __awaiter(_this, void 0, void 0, function () {
-                        var slashCommand, failedReason;
-                        return __generator(this, function (_a) {
-                            switch (_a.label) {
-                                case 0:
-                                    slashCommand = this.interactions.get("CHAT_INPUT_" + interaction.commandName.toLowerCase());
-                                    if (!slashCommand)
-                                        return [2 /*return*/];
-                                    return [4 /*yield*/, this.localUtils.verifyInteraction(interaction, slashCommand)];
-                                case 1:
-                                    failedReason = _a.sent();
-                                    if (failedReason) {
-                                        rej(failedReason);
-                                        return [2 /*return*/];
-                                    }
-                                    try {
-                                        slashCommand.run.apply(slashCommand, __spreadArray([interaction], additionalOptions, false));
-                                        res(slashCommand);
-                                    }
-                                    catch (ex) {
-                                        console.error(ex);
-                                        rej(ex);
-                                    }
-                                    return [2 /*return*/];
-                            }
-                        });
-                    }); })];
+                switch (_a.label) {
+                    case 0:
+                        applicationCommand = this.interactions.get("CHAT_INPUT_" + interaction.commandName.toLowerCase());
+                        if (!applicationCommand)
+                            return [2 /*return*/];
+                        return [4 /*yield*/, this.localUtils.verifyInteraction(interaction, applicationCommand)];
+                    case 1:
+                        failedReason = _a.sent();
+                        if (failedReason) {
+                            rej(failedReason);
+                            return [2 /*return*/];
+                        }
+                        try {
+                            applicationCommand.run.apply(applicationCommand, __spreadArray([interaction], additionalOptions, false));
+                            res(applicationCommand);
+                        }
+                        catch (ex) {
+                            console.error(ex);
+                            rej(ex);
+                        }
+                        return [2 /*return*/];
+                }
             });
-        });
+        }); });
     };
     /**
      * @ignore
@@ -252,10 +229,8 @@ var InteractionHandler = /** @class */ (function (_super) {
                         contextMenuInt = this.interactions.get("USER_" + interaction.commandName.toLowerCase()) || this.interactions.get("MESSAGE_" + interaction.commandName.toLowerCase());
                         if (!contextMenuInt)
                             return [2 /*return*/];
-                        // @ts-ignore
                         if (interaction.targetType === "USER" && contextMenuInt.type !== "USER")
                             return [2 /*return*/];
-                        // @ts-ignore
                         if (interaction.targetType === "MESSAGE" && contextMenuInt.type !== "MESSAGE")
                             return [2 /*return*/];
                         return [4 /*yield*/, this.localUtils.verifyInteraction(interaction, contextMenuInt)];
@@ -278,54 +253,82 @@ var InteractionHandler = /** @class */ (function (_super) {
             });
         }); });
     };
-    /**
-     * @ignore
-     * */
-    InteractionHandler.prototype.postInteractions = function (force) {
+    InteractionHandler.prototype.updateInteractions = function (force) {
         if (force === void 0) { force = false; }
         return __awaiter(this, void 0, void 0, function () {
-            var changes, fetchedInteractions, formed;
+            var changesMade, fetchedInteractions, interactionsArray, interactionsToSend_1;
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        if (!!force) return [3 /*break*/, 3];
+                        changesMade = false;
+                        if (!force) return [3 /*break*/, 1];
+                        // Forcing update, automatically assume changes were made
+                        this.emit("debug", "Skipping checks and updating interactions.");
+                        changesMade = true;
+                        return [3 /*break*/, 4];
+                    case 1:
+                        // Fetch existing interactions and compare to loaded
+                        this.emit("debug", "Checking for differences.");
+                        if (!this.application)
+                            throw new Error("updateInteractions(): client.application is undefined. Make sure you are executing updateInteractions() after the client has emitted the 'ready' event.");
                         return [4 /*yield*/, this.application.commands.fetch().catch(function (err) {
                                 throw new Error("Can't fetch client commands: ".concat(err));
                             })];
-                    case 1:
+                    case 2:
                         fetchedInteractions = _a.sent();
                         if (!fetchedInteractions)
-                            throw new TypeError("Interactions weren't fetched.");
-                        return [4 /*yield*/, this.didChange(fetchedInteractions)];
-                    case 2:
-                        changes = _a.sent();
-                        _a.label = 3;
+                            throw new Error("Interactions weren't fetched.");
+                        return [4 /*yield*/, this.checkDiff(fetchedInteractions)];
                     case 3:
-                        if (!(changes || force)) return [3 /*break*/, 5];
-                        this.emit("debug", "Changes in interaction files detected - re-creating the interactions. Please wait.");
-                        formed = Array.from(this.interactions, function (_a) {
-                            var _ = _a[0], data = _a[1];
-                            if (data.type === "CHAT_INPUT") {
-                                // @ts-ignore
-                                return { name: data.name, description: data.description, defaultPermission: data.defaultPermission, options: data.options, type: data.type };
+                        changesMade = _a.sent();
+                        _a.label = 4;
+                    case 4:
+                        if (!changesMade) return [3 /*break*/, 6];
+                        interactionsArray = Array.from(this.interactions, function (_a) {
+                            var _key = _a[0], interaction = _a[1];
+                            return interaction;
+                        }).filter(function (r) { return ["CHAT_INPUT", "USER", "MESSAGE"].includes(r.type); });
+                        interactionsToSend_1 = [];
+                        interactionsArray.forEach(function (interaction) {
+                            if (interaction.type === "CHAT_INPUT" && interaction instanceof index_1.InteractionCommand) {
+                                interactionsToSend_1.push({
+                                    type: "CHAT_INPUT",
+                                    name: interaction.name,
+                                    description: interaction.description,
+                                    defaultPermission: interaction.defaultPermission,
+                                    permissions: interaction.permissions,
+                                    options: interaction.options,
+                                });
                             }
-                            if (data.type === "USER")
-                                return { name: data.name, type: data.type };
-                            if (data.type === "MESSAGE")
-                                return { name: data.name, type: data.type };
+                            else if (interaction.type === "USER" && interaction instanceof index_1.UserContextMenu) {
+                                interactionsToSend_1.push({ type: "USER", name: interaction.name });
+                            }
+                            else if (interaction.type === "MESSAGE" && interaction instanceof index_1.MessageContextMenu) {
+                                interactionsToSend_1.push({ type: "MESSAGE", name: interaction.name });
+                            }
+                            else {
+                                _this.emit("debug", "Interaction type ".concat(interaction.type, " is not supported."));
+                            }
                         });
                         // @ts-ignore
-                        return [4 /*yield*/, this.application.commands.set(formed).then(function (r) { return _this.emit("debug", "Set interactions (" + r.size + " returned)"); })];
-                    case 4:
+                        return [4 /*yield*/, this.application.commands.set(interactionsArray)
+                                .then(function (returned) {
+                                _this.emit("debug", "Updated interactions (".concat(returned.size, " returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes."));
+                                _this.emit("ready");
+                            })
+                                .catch(function (err) {
+                                throw new Error("Can't update client commands: ".concat(err));
+                            })];
+                    case 5:
                         // @ts-ignore
                         _a.sent();
-                        this.emit("debug", "Interaction changes were posted successfully. Remember to wait a bit (up to 1 hour) or kick and add the bot back to see changes.");
-                        return [3 /*break*/, 6];
-                    case 5:
+                        return [3 /*break*/, 7];
+                    case 6:
                         this.emit("debug", "No changes in interactions - not refreshing.");
-                        _a.label = 6;
-                    case 6: return [2 /*return*/];
+                        this.emit("ready");
+                        _a.label = 7;
+                    case 7: return [2 /*return*/];
                 }
             });
         });
@@ -333,9 +336,9 @@ var InteractionHandler = /** @class */ (function (_super) {
     /**
      * @ignore
      * */
-    InteractionHandler.prototype.didChange = function (interactions) {
+    InteractionHandler.prototype.checkDiff = function (interactions) {
         return __awaiter(this, void 0, void 0, function () {
-            var fetched, existing, _loop_1, _i, existing_1, localCmd, state_1, _loop_2, this_1, _a, fetched_1, remoteCmd, state_2;
+            var fetched, existing, changesMade, _loop_1, _i, existing_1, localCmd, state_1, _loop_2, this_1, _a, fetched_1, remoteCmd, state_2;
             return __generator(this, function (_b) {
                 fetched = Array.from(interactions, function (_a) {
                     var _ = _a[0], data = _a[1];
@@ -345,64 +348,40 @@ var InteractionHandler = /** @class */ (function (_super) {
                     var _ = _a[0], data = _a[1];
                     return data;
                 });
+                changesMade = false;
                 _loop_1 = function (localCmd) {
-                    var remoteCmd = fetched.find(function (cmd) { return cmd.name === localCmd.name; });
-                    if (!remoteCmd)
-                        return { value: true };
-                    var oldOptions = remoteCmd.options;
-                    var modifiedRemoteCmd = remoteCmd;
-                    delete modifiedRemoteCmd.options;
-                    delete modifiedRemoteCmd.version;
-                    delete modifiedRemoteCmd.guild;
-                    delete modifiedRemoteCmd.id;
-                    delete modifiedRemoteCmd.applicationId;
-                    var modifiedLocalCmd = {
-                        name: localCmd.name,
-                        type: localCmd.type,
-                    };
-                    var equals = modifiedRemoteCmd.equals(modifiedLocalCmd);
-                    if (localCmd.type === "COMMAND") {
-                        // @ts-ignore
-                        modifiedLocalCmd.description = localCmd.description;
-                        // @ts-ignore
-                        modifiedLocalCmd.defaultPermission = localCmd.defaultPermission;
-                        if (!remoteCmd.options)
-                            remoteCmd.options = [];
-                        // @ts-ignore
-                        if (!localCmd.options)
-                            localCmd.options = [];
-                        // @ts-ignore
-                        var optionsEqual = discord_js_1.ApplicationCommand.optionsEqual(oldOptions, localCmd.options);
-                        if (!equals || !optionsEqual)
-                            return { value: true };
+                    var remoteCmd = fetched.find(function (f) { return f.name === localCmd.name; });
+                    if (!remoteCmd) {
+                        changesMade = true;
+                        return "break";
                     }
-                    // @ts-ignore
-                    if (!equals)
-                        return { value: true };
+                    changesMade = !remoteCmd.equals(localCmd);
                 };
                 for (_i = 0, existing_1 = existing; _i < existing_1.length; _i++) {
                     localCmd = existing_1[_i];
                     state_1 = _loop_1(localCmd);
-                    if (typeof state_1 === "object")
-                        return [2 /*return*/, state_1.value];
+                    if (state_1 === "break")
+                        break;
                 }
                 _loop_2 = function (remoteCmd) {
                     if (!existing.find(function (c) { return c.name === remoteCmd.name; })) {
-                        this_1.emit("debug", "Refreshing interactions because interaction files have been deleted.");
-                        return { value: true };
+                        this_1.emit("debug", "Interactions match check failed because local interaction files are missing from the filesystem. Updating...");
+                        changesMade = true;
+                        return "break";
                     }
                 };
                 this_1 = this;
                 for (_a = 0, fetched_1 = fetched; _a < fetched_1.length; _a++) {
                     remoteCmd = fetched_1[_a];
                     state_2 = _loop_2(remoteCmd);
-                    if (typeof state_2 === "object")
-                        return [2 /*return*/, state_2.value];
+                    if (state_2 === "break")
+                        break;
                 }
-                return [2 /*return*/, false];
+                // Assume match
+                return [2 /*return*/, changesMade];
             });
         });
     };
     return InteractionHandler;
-}(events_1.EventEmitter));
+}(Handler_1.Handler));
 exports.InteractionHandler = InteractionHandler;

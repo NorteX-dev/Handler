@@ -11,34 +11,35 @@
 > "Events" are the normal events of Discord.js such as `messageCreate`, `guildMemberAdd`.
 
 #### Table of Contents:
-- [Changelog [v3 to v4]](#changelog)
-- [Changelog [v4 to v4.1]](#changelog-minor)
+- [Changelog [v4.2 to v5]](#changelog)
 - [Installation](#installation)
 - [Usage](#usage)
 
 <a id="changelog"></a>
-### Changelog v3.0 to v4.0
-- Handling message commands is now up to the user; you should now create a messageCreate event, either on the client directly or using the EventHandler class, and then invoking `handler.runCommand(message)`.
-- Created a new `handler.runCommand(message)` method that returns a Promise that should be executed on the `messageCreate` event. The handler will no longer create any events.
-- Added and fixed `userRoles` and `botRoles` options.
-- Fixed `userPermissions` and `botPermissions` options.
-- Pass additional options as a spread argument to the `runCommand` method. These will be available at the end of the run() function on the command.
+### Changelog v4.2 to v5
+Breaking changes:
+- **Paths supplied to each handlers' constructors should now be relative instead of absolute, like "./path/to/directory". Make sure you input paths relative to the project ROOT (`process.cwd()`) and not the file you're executing the code in.**
+- [todo in interaction/events] Arguments passed into the `super` constructor of each handler should now be (handler, name) instead of (handler, client, name). You can get the client instance from `handler.client`.
+- `setCommandDirectory(absolutePath)` has been changed to `setDirectory(relativePath)`.
+- `setInteractionDirectory(absolutePath)` has been changed to `setDirectory(relativePath)`.
+- `setEventsDirectory(absolutePath)` has been changed to `setDirectory(relativePath)`.
+- Removed `disableInbteractionModification` and `forceInteractionUpdate`. You now have to execute `interactionHandler.updateInteractions()` manually, in a `ready` event.
+> Information: `interactionHandler.updateInteractions()` will by default check if anything has changed and if not, stop the refreshing.
+  Run `interactionHandler.updateInteractions(true)` to forcibly update all interactions.
+  Remember however that you might be ratelimited by the Discord API after doing refreshing interactions too many times.
 
-<a id="changelog-minor"></a>
-### Changelog v4.0.x to 4.1.x
-- Usage is now automatically concatonated with the prefix and command name
-- Empty usage will now be undefined instead of an empty string ("")
-- Any additional configuration keys (any other keys than CommandOptions) provided to command options will now be available in `this.opts.x`.
-- If description is undefined it will be an empty string ("") instead of "Empty".
-- Interaction handler now requires runInteraction() and won't set any events by itself anymore - same treatment as CommandHandler.
-- Fixed verification of `disabled`, `guildIds` and `userIds` flags in interaction.
-- Running commands and interactions is no longer awaited - promise of runCommand() and runInteraction() will get resolved instantly instead of awaiting the run() function.
+Added:
+- **ComponentHandler() - a handler specifically for handling message components (interactions with customId's), like buttons, select menus and modal responses.**
+- registerCommand(commandInstance) is now public and documented. It allows for manual registration of commands and takes the instanced command as the parameter.
 
-### Changelog v4.1 to v4.2
-- The `prefix` property inside CommandHandler constructor can now accept an Array with multiple prefixes.
-- Same treatment as above to the setPrefix method.
-- > Small notice: If a message satisfies two or more prefixes, the command is still going to execute once.
-- Removed this.opts added in the previous minor update in favor of assigning properties to the class command itself, like `this.x = "Hello World!"`
+Other changes:
+- CommandDirectoryReferenceError, EventsDirectoryReferenceError and InteractionDirectoryReferenceError have been merged into DirectoryReferenceError.
+- CommandExecutionError and InteractionExecutionError have been merged into ExecutionError.
+- The COMMAND_NOT_FOUND error will now provide a `query` key inside the params instead of `typedCommand`.
+- the `LocalUtils()` constructor should now be empty.
+- Documented `runCommand()`, `runInteraction()` methods.
+- Fixed clarification on loadEvents() docs description.
+- Multiple miscellaneous code refactors
 
 <a id="todos"></a>
 ### TODOs
@@ -56,7 +57,7 @@ $ npm install @nortex/handler
 
 Include it in your code using
 ```js
-const Handler = require("@nortex/handler");
+const { CommandHandler } = require("@nortex/handler");
 ```
 
 <a id="usage"></a>
@@ -65,7 +66,7 @@ Run this code to create a command handler on the Discord.js `client` instance:
 ```js
 const handler = new CommandHandler({
   client: client,
-  directory: require("path").join(__dirname, "./Commands") // Change to your directory
+  directory: "./Commands" // Change to your directory (relative to root dir)
 });
 
 // Handle events emitted by the command handler

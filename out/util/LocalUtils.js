@@ -37,74 +37,68 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LocalUtils = void 0;
-var CommandExecutionError_1 = require("../errors/CommandExecutionError");
-var InteractionExecutionError_1 = require("../errors/InteractionExecutionError");
+var ExecutionError_1 = require("../errors/ExecutionError");
 var discord_js_1 = require("discord.js");
 /**
  * @ignore
  * */
 var LocalUtils = /** @class */ (function () {
-    function LocalUtils(handler, client, owners) {
-        this.client = client;
-        this.handler = handler;
-        this.owners = owners || [];
+    function LocalUtils() {
     }
     LocalUtils.prototype.isClass = function (input) {
         return typeof input === "function" && typeof input.prototype === "object" && input.toString().substring(0, 5) === "class";
     };
-    LocalUtils.prototype.isOwner = function (userId) {
-        if (!this.owners || !this.owners.length)
+    LocalUtils.prototype.isOwner = function (owners, userId) {
+        if (!owners || !owners.length)
             return false;
-        return this.owners.includes(userId);
+        return owners.includes(userId);
     };
-    LocalUtils.prototype.verifyCommand = function (message, command, userCooldowns, guildCooldowns) {
+    LocalUtils.prototype.verifyCommand = function (message, commandObject, userCooldowns, guildCooldowns) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
                 return [2 /*return*/, new Promise(function (res) {
                         var _a, _b;
-                        _this.userCooldowns = userCooldowns;
-                        _this.guildCooldowns = guildCooldowns;
                         // "disabled" field
-                        if (command.disabled && !_this.isOwner(message.author.id))
-                            return res(new CommandExecutionError_1.default("The command is disabled.", "DISABLED"));
+                        if (commandObject.disabled && !_this.isOwner(commandObject.handler.owners, message.author.id))
+                            return res(new ExecutionError_1.default("The command is disabled.", "DISABLED"));
                         // "guildIds" field
-                        if (message.guild && command.guildIds && command.guildIds.length && !command.guildIds.includes(message.guild.id))
-                            return res(new CommandExecutionError_1.default("This guild ID is not whitelisted.", "GUILD_ID_NOT_WHITELISTED", { guildId: message.guild.id }));
+                        if (message.guild && commandObject.guildIds && commandObject.guildIds.length && !commandObject.guildIds.includes(message.guild.id))
+                            return res(new ExecutionError_1.default("This guild ID is not whitelisted.", "GUILD_ID_NOT_WHITELISTED", { guildId: message.guild.id }));
                         // "userIds" field
-                        if (command.userIds && command.userIds.length && !command.userIds.includes(message.author.id))
-                            return res(new CommandExecutionError_1.default("This user ID is not whitelisted.", "USER_ID_NOT_WHITELISTED", { userId: message.author.id }));
+                        if (commandObject.userIds && commandObject.userIds.length && !commandObject.userIds.includes(message.author.id))
+                            return res(new ExecutionError_1.default("This user ID is not whitelisted.", "USER_ID_NOT_WHITELISTED", { userId: message.author.id }));
                         // "onlyDm" field
-                        if (command.onlyDm && message.channel.type !== "DM")
-                            return res(new CommandExecutionError_1.default("Command is DM only.", "COMMAND_DM_0NLY"));
+                        if (commandObject.onlyDm && message.channel.type !== "DM")
+                            return res(new ExecutionError_1.default("Command is DM only.", "COMMAND_DM_0NLY"));
                         // "nsfw" field
-                        if (command.nsfw && !message.channel.nsfw)
-                            return res(new CommandExecutionError_1.default("Command is marked as NSFW-channels only.", "NSFW_COMMAND_USED_IN_NON_NSFW_CHANNEL"));
+                        if (commandObject.nsfw && !message.channel.nsfw)
+                            return res(new ExecutionError_1.default("Command is marked as NSFW-channels only.", "NSFW_COMMAND_USED_IN_NON_NSFW_CHANNEL"));
                         // "userCooldown" field
-                        if (command.userCooldown && command.userCooldown > 0) {
-                            var useAfter = _this.userCooldowns.get(message.author.id);
+                        if (commandObject.userCooldown && commandObject.userCooldown > 0) {
+                            var useAfter = userCooldowns.get(message.author.id);
                             if (useAfter && useAfter > Date.now())
-                                return res(new CommandExecutionError_1.default("User is on cooldown for ".concat(((Number(useAfter || 0) - Date.now()) / 1000).toFixed(1), " seconds."), "USER_COOLDOWN", {
-                                    totalCooldown: command.userCooldown,
+                                return res(new ExecutionError_1.default("User is on cooldown for ".concat(((Number(useAfter || 0) - Date.now()) / 1000).toFixed(1), " seconds."), "USER_COOLDOWN", {
+                                    totalCooldown: commandObject.userCooldown,
                                     remainingCooldown: (Number(useAfter || 0) - Date.now()) / 1000,
                                 }));
-                            var millis = parseInt(command.userCooldown.toString()) * 1000;
-                            _this.userCooldowns.set(message.author.id, Date.now() + millis);
+                            var millis = parseInt(commandObject.userCooldown.toString()) * 1000;
+                            userCooldowns.set(message.author.id, Date.now() + millis);
                         }
                         // "guildCooldowns" field
-                        if (command.guildCooldown && command.guildCooldown > 0) {
-                            var useAfter = _this.guildCooldowns.get(message.guild.id);
+                        if (commandObject.guildCooldown && commandObject.guildCooldown > 0) {
+                            var useAfter = guildCooldowns.get(message.guild.id);
                             if (useAfter && useAfter > Date.now())
-                                return res(new CommandExecutionError_1.default("Guild is on cooldown for ".concat(((Number(useAfter || 0) - Date.now()) / 1000).toFixed(1), " seconds."), "GUILD_COOLDOWN", {
-                                    totalCooldown: command.guildCooldown,
+                                return res(new ExecutionError_1.default("Guild is on cooldown for ".concat(((Number(useAfter || 0) - Date.now()) / 1000).toFixed(1), " seconds."), "GUILD_COOLDOWN", {
+                                    totalCooldown: commandObject.guildCooldown,
                                     remainingCooldown: (Number(useAfter || 0) - Date.now()) / 1000,
                                 }));
-                            var millis = parseInt(command.guildCooldown.toString()) * 1000;
-                            _this.guildCooldowns.set(message.guild.id, Date.now() + millis);
+                            var millis = parseInt(commandObject.guildCooldown.toString()) * 1000;
+                            guildCooldowns.set(message.guild.id, Date.now() + millis);
                         }
-                        if (command.userPermissions && command.userPermissions.length) {
+                        if (commandObject.userPermissions && commandObject.userPermissions.length) {
                             var memberPermissions = message.channel.permissionsFor(message.member);
-                            var mappedPermissions = command.userPermissions.map(function (perm) {
+                            var mappedPermissions = commandObject.userPermissions.map(function (perm) {
                                 // @ts-ignore
                                 var flag = discord_js_1.Permissions.FLAGS[perm];
                                 if (!flag)
@@ -112,12 +106,12 @@ var LocalUtils = /** @class */ (function () {
                                 return flag;
                             });
                             if (!memberPermissions.has(mappedPermissions))
-                                return res(new CommandExecutionError_1.default("User does not have the required permissions.", "USER_PERMISSIONS_MISSING", { missingPermissions: memberPermissions.missing(mappedPermissions) }));
+                                return res(new ExecutionError_1.default("User does not have the required permissions.", "USER_PERMISSIONS_MISSING", { missingPermissions: memberPermissions.missing(mappedPermissions) }));
                         }
-                        if (command.botPermissions && command.botPermissions.length) {
-                            var botMember = message.guild.members.cache.get((_a = _this.client.user) === null || _a === void 0 ? void 0 : _a.id);
+                        if (commandObject.botPermissions && commandObject.botPermissions.length) {
+                            var botMember = message.guild.members.cache.get((_a = commandObject.client.user) === null || _a === void 0 ? void 0 : _a.id);
                             var botPermissions = message.channel.permissionsFor(botMember);
-                            var mappedPermissions = command.botPermissions.map(function (perm) {
+                            var mappedPermissions = commandObject.botPermissions.map(function (perm) {
                                 // @ts-ignore
                                 var flag = discord_js_1.Permissions.FLAGS[perm];
                                 if (!flag)
@@ -125,32 +119,32 @@ var LocalUtils = /** @class */ (function () {
                                 return flag;
                             });
                             if (!botPermissions.has(mappedPermissions))
-                                return res(new CommandExecutionError_1.default("Bot does not have the required permissions.", "BOT_PERMISSIONS_MISSING", { missingPermissions: botPermissions.missing(mappedPermissions) }));
+                                return res(new ExecutionError_1.default("Bot does not have the required permissions.", "BOT_PERMISSIONS_MISSING", { missingPermissions: botPermissions.missing(mappedPermissions) }));
                         }
-                        if (command.userRoles && command.userRoles.length) {
+                        if (commandObject.userRoles && commandObject.userRoles.length) {
                             // Check if user has all required roles
                             var memberRoles = message.member.roles.cache;
-                            var mappedRoles = command.userRoles.map(function (role) {
+                            var mappedRoles = commandObject.userRoles.map(function (role) {
                                 var roleObj = message.guild.roles.cache.find(function (r) { return r.name === role; }) || message.guild.roles.cache.get(role);
                                 if (!roleObj)
                                     return; // Ignore invalid roles
                                 return roleObj;
                             });
                             if (!memberRoles.has(mappedRoles))
-                                return res(new CommandExecutionError_1.default("User does not have the required roles.", "USER_ROLES_MISSING"));
+                                return res(new ExecutionError_1.default("User does not have the required roles.", "USER_ROLES_MISSING"));
                         }
-                        if (command.botRoles && command.botRoles.length) {
+                        if (commandObject.botRoles && commandObject.botRoles.length) {
                             // Check if bot has all required roles
-                            var botMember = message.guild.members.cache.get((_b = _this.client.user) === null || _b === void 0 ? void 0 : _b.id);
+                            var botMember = message.guild.members.cache.get((_b = commandObject.client.user) === null || _b === void 0 ? void 0 : _b.id);
                             var botRoles = botMember.roles.cache;
-                            var mappedRoles = command.botRoles.map(function (role) {
+                            var mappedRoles = commandObject.botRoles.map(function (role) {
                                 var roleObj = message.guild.roles.cache.find(function (r) { return r.name === role; }) || message.guild.roles.cache.get(role);
                                 if (!roleObj)
                                     return; // Ignore invalid roles
                                 return roleObj;
                             });
                             if (!botRoles.has(mappedRoles))
-                                return res(new CommandExecutionError_1.default("Bot does not have the required roles.", "BOT_ROLES_MISSING"));
+                                return res(new ExecutionError_1.default("Bot does not have the required roles.", "BOT_ROLES_MISSING"));
                         }
                         res(undefined);
                     })];
@@ -164,14 +158,14 @@ var LocalUtils = /** @class */ (function () {
                 return [2 /*return*/, new Promise(function (res) {
                         var _a, _b;
                         // "disabled" field
-                        if (interactionObject.disabled && !_this.isOwner(interactionEvent.user.id))
-                            return res(new InteractionExecutionError_1.default("The command is disabled.", "DISABLED"));
+                        if (interactionObject.disabled && !_this.isOwner(interactionObject.handler.owners, interactionEvent.user.id))
+                            return res(new ExecutionError_1.default("The command is disabled.", "DISABLED"));
                         // "guildIds" field
                         if (interactionEvent.guild && interactionObject.guildIds && ((_a = interactionObject.guildIds) === null || _a === void 0 ? void 0 : _a.length) && !interactionObject.guildIds.includes(interactionEvent.guild.id))
-                            return res(new InteractionExecutionError_1.default("This guild ID is not whitelisted.", "GUILD_ID_NOT_WHITELISTED"));
+                            return res(new ExecutionError_1.default("This guild ID is not whitelisted.", "GUILD_ID_NOT_WHITELISTED"));
                         // "userIds" field
                         if (interactionObject.userIds && ((_b = interactionObject.userIds) === null || _b === void 0 ? void 0 : _b.length) && !interactionObject.userIds.includes(interactionEvent.user.id))
-                            return res(new InteractionExecutionError_1.default("This user ID is not whitelisted.", "USER_ID_NOT_WHITELISTED"));
+                            return res(new ExecutionError_1.default("This user ID is not whitelisted.", "USER_ID_NOT_WHITELISTED"));
                         res(undefined);
                     })];
             });

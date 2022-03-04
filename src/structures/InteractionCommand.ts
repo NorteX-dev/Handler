@@ -1,9 +1,9 @@
 import MethodNotOverridenError from "../errors/MethodNotOverridenError";
 
 import { ApplicationCommandOptionData } from "discord.js";
-import { CommandHandler } from "../handlers/CommandHandler";
+import { InteractionHandler } from "../handlers/InteractionHandler";
 
-interface CommandInteractionOptions {
+interface ApplicationCommandOptions {
 	name: string;
 	description: string;
 	options: ApplicationCommandOptionData;
@@ -11,39 +11,39 @@ interface CommandInteractionOptions {
 	guildIds?: Array<string>;
 	disabled?: boolean;
 	defaultPermission?: boolean;
+	permissions: any[];
 }
 
-export class CommandInteraction {
-	public handler: CommandHandler;
+export class InteractionCommand {
+	public handler: InteractionHandler;
 	public client: any;
-	public name: string;
 	public type: string;
-	public description: string | undefined;
+	public name: string;
+	public description: string;
 	public options: ApplicationCommandOptionData;
 	public userIds: Array<string>;
 	public guildIds: Array<string>;
 	public disabled: boolean;
 	public defaultPermission: boolean;
+	public permissions: any[];
 
-	constructor(handler: CommandHandler, client: any, name: string, options?: CommandInteractionOptions) {
-		if (!options) options = <CommandInteractionOptions>{};
+	constructor(handler: InteractionHandler, client: any, filename: string, options?: ApplicationCommandOptions) {
+		if (!options) options = <ApplicationCommandOptions>{};
+		if (!options.name || !options.description) throw new Error("CommandInteraction: name & description are required.");
 		this.handler = handler;
 		this.client = client;
 		this.type = "CHAT_INPUT";
-		this.name = options.name || name;
+		this.name = options.name || filename;
 		this.description = options.description;
-		this.options = options.options;
 		this.userIds = options.userIds || [];
 		this.guildIds = options.guildIds || [];
 		this.disabled = options.disabled || false;
-		this.defaultPermission = options.defaultPermission || true;
-		if (!this.description) throw new Error("CommandInteraction: description is required.");
-	}
 
-	/*z
-	 * @param {Interaction} interaction
-	 * @override
-	 * */
+		// Exclusive properties for slash commands
+		this.options = options.options;
+		this.defaultPermission = options.defaultPermission || true;
+		this.permissions = options.permissions || [];
+	}
 
 	run(interaction: any, ...additionalParams: any) {
 		throw new MethodNotOverridenError("run() method on " + this.name + " interaction is not present.");

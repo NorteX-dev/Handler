@@ -1,36 +1,33 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CommandInteraction = void 0;
+exports.InteractionCommand = void 0;
 var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
-var CommandInteraction = /** @class */ (function () {
-    function CommandInteraction(handler, client, name, options) {
+var InteractionCommand = /** @class */ (function () {
+    function InteractionCommand(handler, client, filename, options) {
         if (!options)
             options = {};
+        if (!options.name || !options.description)
+            throw new Error("CommandInteraction: name & description are required.");
         this.handler = handler;
         this.client = client;
         this.type = "CHAT_INPUT";
-        this.name = options.name || name;
+        this.name = options.name || filename;
         this.description = options.description;
-        this.options = options.options;
         this.userIds = options.userIds || [];
         this.guildIds = options.guildIds || [];
         this.disabled = options.disabled || false;
+        // Exclusive properties for slash commands
+        this.options = options.options;
         this.defaultPermission = options.defaultPermission || true;
         this.permissions = options.permissions || [];
-        if (!this.description)
-            throw new Error("CommandInteraction: description is required.");
     }
-    /*z
-     * @param {Interaction} interaction
-     * @override
-     * */
-    CommandInteraction.prototype.run = function (interaction) {
+    InteractionCommand.prototype.run = function (interaction) {
         var additionalParams = [];
         for (var _i = 1; _i < arguments.length; _i++) {
             additionalParams[_i - 1] = arguments[_i];
         }
         throw new MethodNotOverridenError_1.default("run() method on " + this.name + " interaction is not present.");
     };
-    return CommandInteraction;
+    return InteractionCommand;
 }());
-exports.CommandInteraction = CommandInteraction;
+exports.InteractionCommand = InteractionCommand;

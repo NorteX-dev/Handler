@@ -1,15 +1,14 @@
-/// <reference types="node" />
 import { Client, Message } from "discord.js";
-import { EventEmitter } from "events";
+import { Handler } from "./Handler";
 import { Command } from "../structures/Command";
 interface HandlerOptions {
     client: Client;
     autoLoad: boolean;
-    directory: string | undefined;
-    prefix: string;
-    owners: Array<string>;
+    directory?: string;
+    prefix?: string;
+    owners?: Array<string>;
 }
-export declare class CommandHandler extends EventEmitter {
+export declare class CommandHandler extends Handler {
     /**
      * Initializes a handler on the client.
      *
@@ -25,26 +24,14 @@ export declare class CommandHandler extends EventEmitter {
      * const handler = new CommandHandler({ client: client });
      * ```
      * */
-    client: Client;
-    directory: string | undefined;
     commands: Map<string, Command>;
     aliases: Map<string, string>;
     prefix?: string[];
-    owners: Array<string>;
+    owners: string[];
     private readonly userCooldowns;
     private readonly guildCooldowns;
     private localUtils;
     constructor(options: HandlerOptions);
-    /**
-     * Sets directory for commands
-     *
-     * @param absolutePath Absolute path to directory. Recommended to concatenate it using `path.join() and process.cwd()`
-     * @remarks This directory includes all children directories too.
-     * @see {@link https://www.npmjs.com/package/glob} for information on how directories are parsed
-     *
-     * @returns CommandHandler
-     * */
-    setCommandDirectory(absolutePath: string): this;
     /**
      * Sets a prefix
      *
@@ -59,15 +46,24 @@ export declare class CommandHandler extends EventEmitter {
      * @returns CommandHandlers
      *
      * @remarks
-     * Requires @see {@link CommandHandler.setCommandDirectory} to be executed first, or `directory` to be specified in the constructor.
+     * Requires @see {@link CommandHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
      *
      * @returns Map<string, Command>
      * */
     loadCommands(): Promise<unknown>;
     /**
-     * @ignore
+     * Manually register an instanced command. This should not be needed when using loadCommands().
+     *
+     * @returns Command
+     *
+     * @returns Map<string, Command>
      * */
-    registerCommand(command: Command, filename?: string): void;
+    registerCommand(command: Command): Command;
+    /**
+     * Attempts to run the interaction. Returns a promise with the interaction if run succeeded, or rejects with an execution error.
+     *
+     * @returns Promise<<Command>
+     * */
     runCommand(message: Message, ...additionalOptions: any): Promise<Command>;
 }
 export {};

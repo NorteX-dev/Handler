@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionData } from "discord.js";
-import { CommandHandler } from "../handlers/CommandHandler";
-interface CommandInteractionOptions {
+import { InteractionHandler } from "../handlers/InteractionHandler";
+interface ApplicationCommandOptions {
     name: string;
     description: string;
     options: ApplicationCommandOptionData;
@@ -10,19 +10,19 @@ interface CommandInteractionOptions {
     defaultPermission?: boolean;
     permissions: any[];
 }
-export declare class CommandInteraction {
-    handler: CommandHandler;
+export declare class ApplicationCommand {
+    handler: InteractionHandler;
     client: any;
-    name: string;
     type: string;
-    description: string | undefined;
+    name: string;
+    description: string;
     options: ApplicationCommandOptionData;
     userIds: Array<string>;
     guildIds: Array<string>;
     disabled: boolean;
     defaultPermission: boolean;
     permissions: any[];
-    constructor(handler: CommandHandler, client: any, name: string, options?: CommandInteractionOptions);
+    constructor(handler: InteractionHandler, client: any, filename: string, options?: ApplicationCommandOptions);
     run(interaction: any, ...additionalParams: any): void;
 }
 export {};

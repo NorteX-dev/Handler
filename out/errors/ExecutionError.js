@@ -15,14 +15,20 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var DirectoryReferenceError = /** @class */ (function (_super) {
-    __extends(DirectoryReferenceError, _super);
-    function DirectoryReferenceError(message) {
+var ExecutionError = /** @class */ (function (_super) {
+    __extends(ExecutionError, _super);
+    function ExecutionError(message, code) {
+        var params = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            params[_i - 2] = arguments[_i];
+        }
         var _this = _super.call(this, message) || this;
-        _this.name = "DirectoryReference";
+        _this.name = "InteractionExecutionError";
+        _this.code = code;
         _this.message = message;
+        _this.params = params;
         return _this;
     }
-    return DirectoryReferenceError;
+    return ExecutionError;
 }(Error));
-exports.default = DirectoryReferenceError;
+exports.default = ExecutionError;

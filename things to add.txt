@@ -8,11 +8,16 @@ Things to add/change to @nortex/handler:
 - Set prefix method (even though assigning manually works) [✔]
 - Additional readable parameters to CommandExecutionErrors like remaining cooldown [✔]
 - Make sure promise resolves synchronously (dont wait for actual execution) [✔]
-- Fix: events innherited from filenames are toLowerCase'd() which makes events like messageCreate messagecreate
-- Log errors of posting interactions instead of saying nothing changed
-- Make paths relative instead of absolute
+- Fix: Options don't update interactions [✔]
+- Refactor: Interaction refreshing [✔]
+- Fix: events innherited from filenames are toLowerCase'd() which makes events like messageCreate messagecreate [✔]
+- Log errors of posting interactions instead of saying nothing changed [✔]
+- Make paths relative instead of absolute [✔]
+- Add a runXunsafely() variant to run without any checks
+- Add "ws" support for events
 - Change commands and interactions Map to a custom Collection
 - Combined handler which has `async runCommand` and `async runInteraction`
 - Fetchers utility with sharding support
 - Built-in Prompters
+- Custom runtime error validators
 - Built-in subcommand support for subcommands in commands (maybe as Util) (?)

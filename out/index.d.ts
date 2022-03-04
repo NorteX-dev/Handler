@@ -1,11 +1,13 @@
 import { CommandHandler } from "./handlers/CommandHandler";
 import { InteractionHandler } from "./handlers/InteractionHandler";
 import { EventHandler } from "./handlers/EventHandler";
+import { ComponentHandler } from "./handlers/ComponentHandler";
 import { Command } from "./structures/Command";
-import { CommandInteraction } from "./structures/CommandInteraction";
-import { UserContextMenuInteraction } from "./structures/UserContextMenuInteraction";
-import { MessageContextMenuInteraction } from "./structures/MessageContextMenuInteraction";
+import { InteractionCommand } from "./structures/InteractionCommand";
+import { UserContextMenu } from "./structures/UserContextMenu";
+import { MessageContextMenu } from "./structures/MessageContextMenu";
+import { ComponentInteraction } from "./structures/ComponentInteraction";
 import { Event } from "./structures/Event";
 import { Util } from "./util/Util";
 import { Pagination } from "./util/Pagination";
-export { CommandHandler, InteractionHandler, EventHandler, Command, Event, CommandInteraction, UserContextMenuInteraction, MessageContextMenuInteraction, Pagination, Util, };
+export { CommandHandler, InteractionHandler, EventHandler, ComponentHandler, Command, Event, InteractionCommand, UserContextMenu, MessageContextMenu, ComponentInteraction, Pagination, Util, };

@@ -1,6 +1,6 @@
 import MethodNotOverridenError from "../errors/MethodNotOverridenError";
 
-import { CommandHandler } from "../handlers/CommandHandler";
+import { InteractionHandler } from "../handlers/InteractionHandler";
 
 interface MessageContextMenuInteractionOptions {
 	name: string;
@@ -9,8 +9,8 @@ interface MessageContextMenuInteractionOptions {
 	guildIds?: Array<string>;
 }
 
-export class MessageContextMenuInteraction {
-	public handler: CommandHandler;
+export class MessageContextMenu {
+	public handler: InteractionHandler;
 	public client: any;
 	public type: string;
 	public name: string;
@@ -18,12 +18,12 @@ export class MessageContextMenuInteraction {
 	public userIds: Array<string>;
 	public guildIds: Array<string>;
 
-	constructor(handler: CommandHandler, client: any, name: string, options?: MessageContextMenuInteractionOptions) {
+	constructor(handler: InteractionHandler, client: any, filename: string, options?: MessageContextMenuInteractionOptions) {
 		if (!options) options = <MessageContextMenuInteractionOptions>{};
 		this.handler = handler;
 		this.client = client;
 		this.type = "MESSAGE";
-		this.name = options.name || name;
+		this.name = options.name || filename;
 		this.userIds = options.userIds || [];
 		this.guildIds = options.guildIds || [];
 		this.disabled = options.disabled || false;

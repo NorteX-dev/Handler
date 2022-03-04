@@ -1,25 +1,16 @@
 import { Command } from "../structures/Command";
-import CommandExecutionError from "../errors/CommandExecutionError";
-import InteractionExecutionError from "../errors/InteractionExecutionError";
-import { Client, Interaction } from "discord.js";
-import { CommandHandler } from "../handlers/CommandHandler";
-import { EventHandler } from "../handlers/EventHandler";
-import { InteractionHandler } from "../handlers/InteractionHandler";
-import { UserContextMenuInteraction } from "../structures/UserContextMenuInteraction";
-import { CommandInteraction } from "../structures/CommandInteraction";
-import { MessageContextMenuInteraction } from "../structures/MessageContextMenuInteraction";
+import ExecutionError from "../errors/ExecutionError";
+import { Interaction } from "discord.js";
+import { UserContextMenu } from "../structures/UserContextMenu";
+import { InteractionCommand } from "../structures/InteractionCommand";
+import { MessageContextMenu } from "../structures/MessageContextMenu";
 /**
  * @ignore
  * */
 export declare class LocalUtils {
-    private handler;
-    private client;
-    private userCooldowns?;
-    private guildCooldowns?;
-    private readonly owners;
-    constructor(handler: CommandHandler | EventHandler | InteractionHandler, client: Client, owners?: Array<string>);
+    constructor();
     isClass(input: any): boolean;
-    isOwner(userId: string): boolean;
-    verifyCommand(message: any, command: Command, userCooldowns: Map<string, number>, guildCooldowns: Map<string, number>): Promise<CommandExecutionError | undefined>;
-    verifyInteraction(interactionEvent: Interaction, interactionObject: CommandInteraction | MessageContextMenuInteraction | UserContextMenuInteraction): Promise<InteractionExecutionError | undefined>;
+    isOwner(owners: Array<string> | undefined, userId: string): boolean;
+    verifyCommand(message: any, commandObject: Command, userCooldowns: Map<string, number>, guildCooldowns: Map<string, number>): Promise<ExecutionError | undefined>;
+    verifyInteraction(interactionEvent: Interaction, interactionObject: InteractionCommand | MessageContextMenu | UserContextMenu): Promise<ExecutionError | undefined>;
 }

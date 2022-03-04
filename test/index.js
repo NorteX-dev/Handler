@@ -2,36 +2,56 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const { Client, Intents } = require("discord.js");
-const { CommandHandler } = require("../out");
-const path = require("path");
+const { InteractionHandler, ComponentHandler } = require("../out");
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
-const handler = new CommandHandler({
+const interactionHandler = new InteractionHandler({
 	client: client,
-	prefix: "?",
-	directory: path.join(__dirname, "commands"),
+	directory: "./test/interactions",
 });
 
-handler.on("load", (command) => {
-	console.log("Command " + command.name + " has been loaded.");
+const componentHandler = new ComponentHandler({
+	client: client,
+	directory: "./test/components",
 });
-handler.on("ready", () => {
+
+interactionHandler.on("load", (command) => {
+	console.log("Interaction " + command.name + " has been loaded.");
+});
+interactionHandler.on("ready", () => {
 	console.log("All files loaded!");
 });
-handler.on("error", (err, message) => {
-	message.channel.send({ content: err.message });
-});
-handler.on("debug", (debug) => {
+interactionHandler.on("debug", (debug) => {
 	console.log(`[Debug] ${debug}`);
 });
 
-client.on("messageCreate", (message) => {
-	handler.runCommand(message).catch((err) => {
-		console.log(err);
-	});
+componentHandler.on("load", (command) => {
+	console.log("Component " + command.name + " has been loaded.");
+});
+componentHandler.on("ready", () => {
+	console.log("All files loaded!");
+});
+componentHandler.on("debug", (debug) => {
+	console.log(`[Debug2] ${debug}`);
 });
 
-client.login("ODYyNDExODMxMTMzOTk1MDI5.YOX9mw.tK-ek_kyFuaB65mLj7Njr9bv0FY").then(() => {
+client.on("ready", () => {
+	interactionHandler.updateInteractions(/*true*/);
+});
+
+client.on("interactionCreate", (int) => {
+	if (int.isCommand() || int.isContextMenu()) {
+		interactionHandler.runInteraction(int).catch((err) => {
+			console.log(err);
+		});
+	} else {
+		componentHandler.runComponent(int).catch((err) => {
+			console.log(err);
+		});
+	}
+});
+
+client.login("ODYyNDExODMxMTMzOTk1MDI5.YOX9mw.OdAIcfi6OTuvWUw8Wezmnla6x4s").then(() => {
 	console.log("Bot is listening", client.user.tag);
 });

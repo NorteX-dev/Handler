@@ -27,11 +27,11 @@ export class InteractionCommand {
 	public defaultPermission: boolean;
 	public permissions: any[];
 
-	constructor(handler: InteractionHandler, client: any, filename: string, options?: ApplicationCommandOptions) {
+	constructor(handler: InteractionHandler, filename: string, options?: ApplicationCommandOptions) {
 		if (!options) options = <ApplicationCommandOptions>{};
 		if (!options.name || !options.description) throw new Error("CommandInteraction: name & description are required.");
 		this.handler = handler;
-		this.client = client;
+		this.client = handler.client;
 		this.type = "CHAT_INPUT";
 		this.name = options.name || filename;
 		this.description = options.description;

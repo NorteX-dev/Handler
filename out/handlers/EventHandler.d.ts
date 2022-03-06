@@ -15,7 +15,6 @@ export declare class EventHandler extends Handler {
      * @returns EventHandler
      * */
     events: Map<string, Event>;
-    private localUtils;
     constructor(options: HandlerOptions);
     /**
      * Loads events & creates the event emitter handlers.

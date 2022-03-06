@@ -1,5 +1,4 @@
 import { Client } from "discord.js";
-import { LocalUtils } from "../util/LocalUtils";
 import { glob } from "glob";
 import * as path from "path";
 
@@ -22,7 +21,6 @@ export class EventHandler extends Handler {
 	 * @returns EventHandler
 	 * */
 	public events: Map<string, Event>;
-	private localUtils: LocalUtils;
 
 	constructor(options: HandlerOptions) {
 		super(options);
@@ -30,7 +28,6 @@ export class EventHandler extends Handler {
 		this.client = options.client;
 		this.directory = options.directory;
 		this.events = new Map();
-		this.localUtils = new LocalUtils();
 		if (options.autoLoad === undefined || !options.autoLoad) this.loadEvents();
 		return this;
 	}
@@ -54,14 +51,14 @@ export class EventHandler extends Handler {
 					delete require.cache[file];
 					const parsedPath = path.parse(file);
 					const EventFile = require(file);
-					if (!EventFile) return this.emit("debug", `${parsedPath} failed to load.`);
+					if (!EventFile) return this.debug(`${parsedPath} failed to load. The file was loaded but cannot be required.`);
 					if (!this.localUtils.isClass(EventFile)) throw new TypeError(`Event ${parsedPath.name} doesn't export any of the correct classes.`);
-					const event = new EventFile(this, this.client, parsedPath.name);
+					const event = new EventFile(this, parsedPath.name);
 					if (!(event instanceof Event)) throw new TypeError(`Event file: ${parsedPath.name} doesn't extend the Event class.`);
 					this.client[event.once ? "once" : "on"](event.name, (...args) => {
 						event.run(...args);
 					});
-					this.emit("debug", `Set event "${event.name}" from file "${parsedPath.base}"`);
+					this.debug(`Set event "${event.name}" from file "${parsedPath.base}"`);
 					this.emit("load", event);
 				}
 				this.emit("ready");

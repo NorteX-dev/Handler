@@ -3,13 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.InteractionCommand = void 0;
 var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
 var InteractionCommand = /** @class */ (function () {
-    function InteractionCommand(handler, client, filename, options) {
+    function InteractionCommand(handler, filename, options) {
         if (!options)
             options = {};
         if (!options.name || !options.description)
             throw new Error("CommandInteraction: name & description are required.");
         this.handler = handler;
-        this.client = client;
+        this.client = handler.client;
         this.type = "CHAT_INPUT";
         this.name = options.name || filename;
         this.description = options.description;

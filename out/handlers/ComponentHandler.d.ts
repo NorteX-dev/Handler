@@ -1,6 +1,6 @@
 import { Client, Interaction as DJSInteraction } from "discord.js";
 import { Handler } from "./Handler";
-import { InteractionCommand, MessageContextMenu, UserContextMenu } from "../index";
+import { ComponentInteraction } from "../index";
 interface HandlerOptions {
     client: Client;
     directory?: string;
@@ -19,8 +19,7 @@ export declare class ComponentHandler extends Handler {
     client: Client;
     directory?: string;
     owners?: Array<string>;
-    components: Map<string, InteractionCommand | UserContextMenu | MessageContextMenu>;
-    private localUtils;
+    components: Map<string, ComponentInteraction>;
     constructor(options: HandlerOptions);
     /**
      * Loads component interactions into memory

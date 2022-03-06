@@ -8,7 +8,7 @@ export declare class Event {
     client: any;
     name: string;
     once: boolean;
-    constructor(handler: EventHandler, client: any, name: string, options?: EventOptions);
+    constructor(handler: EventHandler, filename: string, options?: EventOptions);
     run(args?: Array<any>): void;
 }
 export {};

@@ -10,7 +10,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@nortex/handler": "^2.0.0",
-    "discord.js": "^13.3.1"
+    "discord.js": "^13.6.0"
   }
 }

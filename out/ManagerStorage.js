@@ -15,14 +15,25 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var InteractionDirectoryReferenceError = /** @class */ (function (_super) {
-    __extends(InteractionDirectoryReferenceError, _super);
-    function InteractionDirectoryReferenceError(message) {
-        var _this = _super.call(this, message) || this;
-        _this.name = "InteractionDirectoryReferenceError";
-        _this.message = message;
-        return _this;
+exports.ManagerStorage = void 0;
+var ManagerStorage = /** @class */ (function (_super) {
+    __extends(ManagerStorage, _super);
+    function ManagerStorage() {
+        var options = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            options[_i] = arguments[_i];
+        }
+        return _super.apply(this, options) || this;
     }
-    return InteractionDirectoryReferenceError;
-}(Error));
-exports.default = InteractionDirectoryReferenceError;
+    ManagerStorage.prototype.add = function (element) {
+        this.push(element);
+    };
+    ManagerStorage.prototype.getByName = function (name) {
+        return this.find(function (element) { return element.name === name; });
+    };
+    ManagerStorage.prototype.exists = function (name) {
+        return this.getByName(name) !== undefined;
+    };
+    return ManagerStorage;
+}(Array));
+exports.ManagerStorage = ManagerStorage;

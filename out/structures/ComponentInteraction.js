@@ -3,17 +3,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ComponentInteraction = void 0;
 var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
 var ComponentInteraction = /** @class */ (function () {
-    function ComponentInteraction(handler, client, name, options) {
+    function ComponentInteraction(handler, filename, options) {
         if (!options)
             options = {};
+        if (!options.customId)
+            throw new Error("ComponentInteraction (".concat(filename, "): customId is required."));
+        if (!options.queryingMode)
+            options.queryingMode = "exact";
+        if (!["exact", "includes", "startsWith"].includes(options.queryingMode))
+            throw new Error(filename + ": Invalid querying mode for component interaction. Querying mode must be one of: exact, includes, startsWith.");
         this.handler = handler;
-        this.client = client;
+        this.client = handler.client;
         this.type = "COMPONENT";
         this.customId = options.customId;
-        // this.customId = typeof options.customId === "string" ? new RegExp(options.customId) : options.customId;
         this.name = this.customId;
-        if (!this.customId)
-            throw new Error("ComponentInteraction: customId is required.");
+        this.queryingMode = options.queryingMode || "exact";
     }
     /*z
      * @param {Interaction} interaction

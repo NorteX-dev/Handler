@@ -18,10 +18,10 @@ export class MessageContextMenu {
 	public userIds: Array<string>;
 	public guildIds: Array<string>;
 
-	constructor(handler: InteractionHandler, client: any, filename: string, options?: MessageContextMenuInteractionOptions) {
+	constructor(handler: InteractionHandler, filename: string, options?: MessageContextMenuInteractionOptions) {
 		if (!options) options = <MessageContextMenuInteractionOptions>{};
 		this.handler = handler;
-		this.client = client;
+		this.client = handler.client;
 		this.type = "MESSAGE";
 		this.name = options.name || filename;
 		this.userIds = options.userIds || [];

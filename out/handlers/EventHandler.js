@@ -52,7 +52,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EventHandler = void 0;
-var LocalUtils_1 = require("../util/LocalUtils");
 var glob_1 = require("glob");
 var path = require("path");
 var index_1 = require("../index");
@@ -67,7 +66,6 @@ var EventHandler = /** @class */ (function (_super) {
         _this.client = options.client;
         _this.directory = options.directory;
         _this.events = new Map();
-        _this.localUtils = new LocalUtils_1.LocalUtils();
         if (options.autoLoad === undefined || !options.autoLoad)
             _this.loadEvents();
         return _this;
@@ -99,10 +97,10 @@ var EventHandler = /** @class */ (function (_super) {
                             var parsedPath = path.parse(file);
                             var EventFile = require(file);
                             if (!EventFile)
-                                return { value: this_1.emit("debug", "".concat(parsedPath, " failed to load.")) };
+                                return { value: this_1.debug("".concat(parsedPath, " failed to load. The file was loaded but cannot be required.")) };
                             if (!this_1.localUtils.isClass(EventFile))
                                 throw new TypeError("Event ".concat(parsedPath.name, " doesn't export any of the correct classes."));
-                            var event_1 = new EventFile(this_1, this_1.client, parsedPath.name);
+                            var event_1 = new EventFile(this_1, parsedPath.name);
                             if (!(event_1 instanceof index_1.Event))
                                 throw new TypeError("Event file: ".concat(parsedPath.name, " doesn't extend the Event class."));
                             this_1.client[event_1.once ? "once" : "on"](event_1.name, function () {
@@ -112,7 +110,7 @@ var EventHandler = /** @class */ (function (_super) {
                                 }
                                 event_1.run.apply(event_1, args);
                             });
-                            this_1.emit("debug", "Set event \"".concat(event_1.name, "\" from file \"").concat(parsedPath.base, "\""));
+                            this_1.debug("Set event \"".concat(event_1.name, "\" from file \"").concat(parsedPath.base, "\""));
                             this_1.emit("load", event_1);
                         };
                         this_1 = this;

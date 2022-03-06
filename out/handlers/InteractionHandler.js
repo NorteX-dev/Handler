@@ -61,7 +61,6 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InteractionHandler = void 0;
-var LocalUtils_1 = require("../util/LocalUtils");
 var Handler_1 = require("./Handler");
 var glob_1 = require("glob");
 var path = require("path");
@@ -77,12 +76,11 @@ var InteractionHandler = /** @class */ (function (_super) {
         _this.directory = options.directory ? path.join(process.cwd(), options.directory) : undefined;
         _this.owners = options.owners || [];
         _this.interactions = new Map();
-        _this.localUtils = new LocalUtils_1.LocalUtils();
         if (options.autoLoad === undefined || !options.autoLoad)
             _this.loadInteractions();
         _this.client.on("ready", function () { return __awaiter(_this, void 0, void 0, function () {
             return __generator(this, function (_a) {
-                this.emit("debug", "Client.application assigned.");
+                this.debug("Client.application assigned.");
                 this.application = this.client.application;
                 return [2 /*return*/];
             });
@@ -105,25 +103,27 @@ var InteractionHandler = /** @class */ (function (_super) {
             return __generator(this, function (_a) {
                 if (!this.directory)
                     return [2 /*return*/, reject(new DirectoryReferenceError_1.default("Interactions directory is not set. Use setDirectory(path) prior."))];
-                (0, glob_1.glob)(this.directory + "/**/*.js", {}, function (err, files) { return __awaiter(_this, void 0, void 0, function () {
-                    var duplicates, _i, files_1, file, parsedPath, InteractionFile, interaction;
+                (0, glob_1.glob)(path.join(process.cwd(), this.directory), {}, function (err, files) { return __awaiter(_this, void 0, void 0, function () {
+                    var duplicates, _i, files_1, file, parsedPath, InteractionConstructor, interaction;
                     return __generator(this, function (_a) {
                         if (err)
                             throw err;
-                        this.emit("debug", "Found ".concat(files.length, " interaction files."));
+                        this.debug("Found ".concat(files.length, " interaction files."));
                         if (err)
                             return [2 /*return*/, reject(new DirectoryReferenceError_1.default("Supplied interactions directory is invalid. Please ensure it exists and is absolute."))];
                         duplicates = [];
                         for (_i = 0, files_1 = files; _i < files_1.length; _i++) {
                             file = files_1[_i];
                             parsedPath = path.parse(file);
-                            InteractionFile = require(file);
-                            if (!InteractionFile)
-                                return [2 /*return*/, this.emit("dubug", "".concat(parsedPath, " failed to load."))];
+                            InteractionConstructor = require(file);
+                            if (!InteractionConstructor) {
+                                this.debug("".concat(parsedPath, " failed to load. The file was loaded but cannot be required."));
+                                continue;
+                            }
                             // Check if is class
-                            if (!this.localUtils.isClass(InteractionFile))
-                                throw new TypeError("Interaction ".concat(parsedPath.name, " doesn't export any of the correct classes."));
-                            interaction = new InteractionFile(this, this.client, parsedPath.name.toLowerCase());
+                            if (!this.localUtils.isClass(InteractionConstructor))
+                                throw new TypeError("Interaction ".concat(parsedPath.name, " doesn't export a class."));
+                            interaction = new InteractionConstructor(this, parsedPath.name.toLowerCase());
                             // Check if initialized class is extending Command
                             if (!(interaction instanceof index_1.InteractionCommand || interaction instanceof index_1.UserContextMenu || interaction instanceof index_1.MessageContextMenu))
                                 throw new TypeError("Interaction file: ".concat(parsedPath.name, " doesn't extend one of the valid the interaction classes: CommandInteraction, UserContextMenuInteraction, MessageContextMenuInteraction. Use ComponentHandler to handle buttons, select menus and other components."));
@@ -132,9 +132,8 @@ var InteractionHandler = /** @class */ (function (_super) {
                                 duplicates.push(interaction);
                                 continue;
                             }
-                            // @ts-ignore - Fine to ignore since it's never going to be verified
                             this.interactions.set(interaction.type + "_" + interaction.name, interaction);
-                            this.emit("debug", "Loaded interaction \"".concat(interaction.name, "\" from file \"").concat(parsedPath.base, "\"."));
+                            this.debug("Loaded interaction \"".concat(interaction.name, "\" from file \"").concat(parsedPath.base, "\"."));
                             this.emit("load", interaction);
                         }
                         if (duplicates === null || duplicates === void 0 ? void 0 : duplicates.length)
@@ -264,12 +263,12 @@ var InteractionHandler = /** @class */ (function (_super) {
                         changesMade = false;
                         if (!force) return [3 /*break*/, 1];
                         // Forcing update, automatically assume changes were made
-                        this.emit("debug", "Skipping checks and updating interactions.");
+                        this.debug("Skipping checks and updating interactions.");
                         changesMade = true;
                         return [3 /*break*/, 4];
                     case 1:
                         // Fetch existing interactions and compare to loaded
-                        this.emit("debug", "Checking for differences.");
+                        this.debug("Checking for differences.");
                         if (!this.application)
                             throw new Error("updateInteractions(): client.application is undefined. Make sure you are executing updateInteractions() after the client has emitted the 'ready' event.");
                         return [4 /*yield*/, this.application.commands.fetch().catch(function (err) {
@@ -308,13 +307,13 @@ var InteractionHandler = /** @class */ (function (_super) {
                                 interactionsToSend_1.push({ type: "MESSAGE", name: interaction.name });
                             }
                             else {
-                                _this.emit("debug", "Interaction type ".concat(interaction.type, " is not supported."));
+                                _this.debug("Interaction type ".concat(interaction.type, " is not supported."));
                             }
                         });
                         // @ts-ignore
                         return [4 /*yield*/, this.application.commands.set(interactionsArray)
                                 .then(function (returned) {
-                                _this.emit("debug", "Updated interactions (".concat(returned.size, " returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes."));
+                                _this.debug("Updated interactions (".concat(returned.size, " returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes."));
                                 _this.emit("ready");
                             })
                                 .catch(function (err) {
@@ -325,7 +324,7 @@ var InteractionHandler = /** @class */ (function (_super) {
                         _a.sent();
                         return [3 /*break*/, 7];
                     case 6:
-                        this.emit("debug", "No changes in interactions - not refreshing.");
+                        this.debug("No changes in interactions - not refreshing.");
                         this.emit("ready");
                         _a.label = 7;
                     case 7: return [2 /*return*/];
@@ -365,7 +364,7 @@ var InteractionHandler = /** @class */ (function (_super) {
                 }
                 _loop_2 = function (remoteCmd) {
                     if (!existing.find(function (c) { return c.name === remoteCmd.name; })) {
-                        this_1.emit("debug", "Interactions match check failed because local interaction files are missing from the filesystem. Updating...");
+                        this_1.debug("Interactions match check failed because local interaction files are missing from the filesystem. Updating...");
                         changesMade = true;
                         return "break";
                     }

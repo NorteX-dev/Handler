@@ -1,12 +1,8 @@
-import DirectoryReferenceError from "../errors/DirectoryReferenceError";
 import ExecutionError from "../errors/ExecutionError";
 
 import { Client, Message } from "discord.js";
 import { Handler } from "./Handler";
 import { Command } from "../structures/Command";
-import { LocalUtils } from "../util/LocalUtils";
-import { glob } from "glob";
-import * as path from "path";
 
 interface HandlerOptions {
 	client: Client;
@@ -38,7 +34,6 @@ export class CommandHandler extends Handler {
 	public owners: string[];
 	private readonly userCooldowns: Map<string, number>;
 	private readonly guildCooldowns: Map<string, number>;
-	private localUtils: LocalUtils;
 
 	constructor(options: HandlerOptions) {
 		super(options);
@@ -48,7 +43,6 @@ export class CommandHandler extends Handler {
 		this.aliases = new Map();
 		this.userCooldowns = new Map();
 		this.guildCooldowns = new Map();
-		this.localUtils = new LocalUtils();
 		if (options.autoLoad === undefined || !options.autoLoad) this.loadCommands();
 		return this;
 	}
@@ -75,26 +69,35 @@ export class CommandHandler extends Handler {
 	 * @remarks
 	 * Requires @see {@link CommandHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
 	 *
-	 * @returns Map<string, Command>
+	 * @returns ManagerStorage
 	 * */
 	loadCommands() {
-		return new Promise((resolve, reject) => {
-			if (!this.directory) return reject(new DirectoryReferenceError("Command directory is not set. Use setDirectory(path) prior."));
-			glob(path.join(process.cwd(), this.directory), async (err: Error | null, files: string[]) => {
-				if (err) return reject(new DirectoryReferenceError("Supplied command directory is invalid. Please ensure it exists and is relative to project root."));
-				for (const file of files) {
-					const parsedPath = path.parse(file);
-					// Require command class
-					const CommandFile = require(file);
-					if (!CommandFile) return this.emit("dubug", `${parsedPath} failed to load.`);
-					// Check if is class
-					if (!this.localUtils.isClass(CommandFile)) throw new TypeError(`Command ${parsedPath.name} doesn't export any of the correct classes.`);
-					// Initialize command class
-					const cmd = new CommandFile(this, parsedPath.name);
-					this.registerCommand(cmd);
-					resolve(this.commands);
-				}
-			});
+		// return new Promise((resolve, reject) => {
+		// 	if (!this.directory) return reject(new DirectoryReferenceError("Command directory is not set. Use setDirectory(path) prior."));
+		// 	glob(path.join(process.cwd(), this.directory), async (err: Error | null, files: string[]) => {
+		// 		if (err) return reject(new DirectoryReferenceError("Supplied command directory is invalid. Please ensure it exists and is relative to project root."));
+		// 		if (!files.length) this.debug("No files found in supplied directory.");
+		// 		for (const file of files) {
+		// 			const parsedPath = path.parse(file);
+		// 			// Require command class
+		// 			const CommandConstructor = require(file);
+		// 			if (!CommandConstructor) return this.debug(`${parsedPath} failed to load. The file was loaded but cannot be required.`);
+		//
+		// 			if (!this.localUtils.isClass(CommandConstructor)) throw new TypeError(`Interaction ${parsedPath.name} doesn't export a class.`);
+		//
+		// 			const cmd = new CommandConstructor(this, parsedPath.name);
+		// 			// Check if is the right class
+		// 			if (!(cmd instanceof Command)) throw new TypeError(`Command ${parsedPath.name} is not a command Class.`);
+		// 			// Initialize command class
+		// 			this.registerCommand(cmd);
+		// 			resolve(this.commands);
+		// 		}
+		// 	});
+		// });
+		return new Promise(async (res, rej) => {
+			const files = await this.loadAndInstance().catch(rej);
+			files.forEach((cmd: Command) => this.registerCommand(cmd));
+			return res(this.commands);
 		});
 	}
 
@@ -102,15 +105,14 @@ export class CommandHandler extends Handler {
 	 * Manually register an instanced command. This should not be needed when using loadCommands().
 	 *
 	 * @returns Command
-	 *
-	 * @returns Map<string, Command>
 	 * */
 	registerCommand(command: Command) {
-		// if (!(command instanceof Command)) throw new TypeError("registerCommand(): command parameter must be an instance of Command.");
+		if (!(command instanceof Command)) throw new TypeError("registerCommand(): command parameter must be an instance of Command.");
+		// if (!!this.commands.getByName(command.name)) throw new Error(`Command ${command.name} cannot be registered twice.`);
 		this.commands.set(command.name, command);
-		if (command.aliases?.length) command.aliases.forEach((alias: string) => this.aliases.set(alias, command.name));
-		this.emit("debug", `Registered command "${command.name}".`);
+		if (command.aliases && command.aliases.length) command.aliases.forEach((alias: string) => this.aliases.set(alias, command.name));
 		this.emit("load", command);
+		this.debug(`Registered command "${command.name}".`);
 		return command;
 	}
 
@@ -135,9 +137,15 @@ export class CommandHandler extends Handler {
 				if (!command) return reject(new ExecutionError("Command not found.", "COMMAND_NOT_FOUND", { query: typedCommand }));
 
 				// Handle additional command parameters
-				if (!command.allowDm && message.channel.type === "DM") return reject(new ExecutionError("Command cannot be executed in DM.", "COMMAND_NOT_ALLOWED_IN_DM", { command }));
+				if (!command.allowDm && message.channel.type === "DM")
+					return reject(new ExecutionError("Command cannot be executed in DM.", "COMMAND_NOT_ALLOWED_IN_DM", { command }));
 
-				const failedReason: ExecutionError | undefined = await this.localUtils.verifyCommand(message, command, this.userCooldowns, this.guildCooldowns);
+				const failedReason: ExecutionError | undefined = await this.localUtils.verifyCommand(
+					message,
+					command,
+					this.userCooldowns,
+					this.guildCooldowns
+				);
 				if (failedReason) {
 					reject(failedReason);
 					return;

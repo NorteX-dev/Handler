@@ -15,16 +15,18 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-var CommandExecutionError = /** @class */ (function (_super) {
-    __extends(CommandExecutionError, _super);
-    function CommandExecutionError(message, code, parameters) {
-        var _this = _super.call(this, message) || this;
-        _this.name = "CommandExecutionError";
-        _this.code = code;
-        _this.message = message;
-        _this.parameters = parameters;
-        return _this;
+exports.ManagerStorage = void 0;
+var ManagerStorage = /** @class */ (function (_super) {
+    __extends(ManagerStorage, _super);
+    function ManagerStorage() {
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    return CommandExecutionError;
-}(Error));
-exports.default = CommandExecutionError;
+    ManagerStorage.prototype.add = function (element) {
+        this.push(element);
+    };
+    ManagerStorage.prototype.getByName = function (name) {
+        return this.find(function (element) { return element.name === name; });
+    };
+    return ManagerStorage;
+}(Array));
+exports.ManagerStorage = ManagerStorage;

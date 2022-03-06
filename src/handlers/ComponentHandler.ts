@@ -1,11 +1,10 @@
-import { Client, ClientApplication, Interaction as DJSInteraction } from "discord.js";
-import { LocalUtils } from "../util/LocalUtils";
+import { Client, Interaction as DJSInteraction } from "discord.js";
 import { Handler } from "./Handler";
 import { glob } from "glob";
 import * as path from "path";
 
 import DirectoryReferenceError from "../errors/DirectoryReferenceError";
-import { ComponentInteraction, InteractionCommand, MessageContextMenu, UserContextMenu } from "../index";
+import { ComponentInteraction } from "../index";
 
 interface HandlerOptions {
 	client: Client;
@@ -27,8 +26,7 @@ export class ComponentHandler extends Handler {
 	public directory?: string;
 	public owners?: Array<string>;
 
-	public components: Map<string, InteractionCommand | UserContextMenu | MessageContextMenu>;
-	private localUtils: LocalUtils;
+	public components: Map<string, ComponentInteraction>;
 
 	constructor(options: HandlerOptions) {
 		super(options);
@@ -36,7 +34,6 @@ export class ComponentHandler extends Handler {
 		this.client = options.client;
 		this.directory = options.directory ? path.join(process.cwd(), options.directory) : undefined;
 		this.components = new Map();
-		this.localUtils = new LocalUtils();
 		if (options.autoLoad === undefined || !options.autoLoad) this.loadComponents();
 		return this;
 	}
@@ -53,26 +50,26 @@ export class ComponentHandler extends Handler {
 	loadComponents() {
 		return new Promise(async (resolve, reject) => {
 			if (!this.directory) return reject(new DirectoryReferenceError("Components directory is not set. Use setDirectory(path) prior."));
-			glob(this.directory + "/**/*.js", {}, async (err: Error | null, files: string[]) => {
+			glob(path.join(process.cwd(), this.directory), {}, async (err: Error | null, files: string[]) => {
 				if (err) throw err;
-				this.emit("debug", `Found ${files.length} component files.`);
+				this.debug(`Found ${files.length} component files.`);
 				if (err) return reject(new DirectoryReferenceError("Supplied components directory is invalid. Please ensure it exists and is absolute."));
 				for (const file of files) {
 					const parsedPath = path.parse(file);
 					// Require command class
-					const InteractionFile = require(file);
-					if (!InteractionFile) return this.emit("dubug", `${parsedPath} failed to load.`);
+					const ComponentFile = require(file);
+					if (!ComponentFile) return this.debug(`${parsedPath} failed to load. The file was loaded but cannot be required.`);
 					// Check if is class
-					if (!this.localUtils.isClass(InteractionFile)) throw new TypeError(`Interaction ${parsedPath.name} doesn't export any of the correct classes.`);
+					if (!this.localUtils.isClass(ComponentFile)) throw new TypeError(`Interaction ${parsedPath.name} doesn't export any of the correct classes.`);
 					// Initialize command class
-					const component = new InteractionFile(this, this.client, parsedPath.name.toLowerCase());
+					const component = new ComponentFile(this, parsedPath.name.toLowerCase());
 					// Check if initialized class is extending Command
 					if (!(component instanceof ComponentInteraction))
 						throw new TypeError(`Component file: ${parsedPath.name} doesn't extend ComponentInteraction. Use InteractionHandler to handle interactions like commands and context menus.`);
 					// Save command to map
 					// @ts-ignore - Fine to ignore since it's never going to be verified
 					this.components.set(component.name, component);
-					this.emit("debug", `Loaded component "${component.name}" from file "${parsedPath.base}".`);
+					this.debug(`Loaded component "${component.name}" from file "${parsedPath.base}".`);
 					this.emit("load", component);
 				}
 				this.emit("ready");
@@ -104,7 +101,18 @@ export class ComponentHandler extends Handler {
 
 	private handleComponent(interaction: any, ...additionalOptions: any) {
 		return new Promise(async (resolve, reject) => {
-			const componentInteraction = this.components.get(interaction.customId.toLowerCase());
+			const componentsArray = Array.from(this.components.values());
+
+			const componentInteraction = componentsArray.find((componentObject) => {
+				if (componentObject.queryingMode === "exact") return componentObject.customId === interaction.customId;
+				if (componentObject.queryingMode === "includes") return interaction.customId.includes(componentObject.customId);
+				if (componentObject.queryingMode === "startsWith") return interaction.customId.startsWith(componentObject.customId);
+				return false;
+			});
+
+			if (!componentInteraction) return;
+
+			this.debug("Found matching interaction with the queryingMode " + componentInteraction.queryingMode + ": " + componentInteraction.customId);
 			if (!componentInteraction) return;
 
 			try {

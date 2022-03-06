@@ -18,12 +18,12 @@ export class UserContextMenu {
 	public userIds: Array<string>;
 	public guildIds: Array<string>;
 
-	constructor(handler: InteractionHandler, client: any, name: string, options?: UserContextMenuInteractionOptions) {
+	constructor(handler: InteractionHandler, filename: string, options?: UserContextMenuInteractionOptions) {
 		if (!options) options = <UserContextMenuInteractionOptions>{};
 		this.handler = handler;
-		this.client = client;
+		this.client = handler.client;
 		this.type = "USER";
-		this.name = options.name || name;
+		this.name = options.name || filename;
 		this.userIds = options.userIds || [];
 		this.guildIds = options.guildIds || [];
 		this.disabled = options.disabled || false;

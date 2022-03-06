@@ -3,13 +3,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserContextMenu = void 0;
 var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
 var UserContextMenu = /** @class */ (function () {
-    function UserContextMenu(handler, client, name, options) {
+    function UserContextMenu(handler, filename, options) {
         if (!options)
             options = {};
         this.handler = handler;
-        this.client = client;
+        this.client = handler.client;
         this.type = "USER";
-        this.name = options.name || name;
+        this.name = options.name || filename;
         this.userIds = options.userIds || [];
         this.guildIds = options.guildIds || [];
         this.disabled = options.disabled || false;

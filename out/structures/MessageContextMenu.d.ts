@@ -13,7 +13,7 @@ export declare class MessageContextMenu {
     disabled: boolean;
     userIds: Array<string>;
     guildIds: Array<string>;
-    constructor(handler: InteractionHandler, client: any, filename: string, options?: MessageContextMenuInteractionOptions);
+    constructor(handler: InteractionHandler, filename: string, options?: MessageContextMenuInteractionOptions);
     run(userContextMenuInteraction: any, ...additionalParams: any): void;
 }
 export {};

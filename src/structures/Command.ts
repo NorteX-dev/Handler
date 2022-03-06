@@ -90,15 +90,14 @@ export class Command {
 
 	/**
 	 * @param handler The command handler instance
-	 * @param client The Discord.js client instance
-	 * @param name Command name - if unspecified, the filename is taken into consideration
+	 * @param filename Command name - if unspecified, the filename is taken into consideration
 	 * @param options Additional command options @see {@link CommandOptions}
 	 * */
-	constructor(handler: CommandHandler, client: any, name: string, options?: CommandOptions) {
+	constructor(handler: CommandHandler, filename: string, options?: CommandOptions) {
 		if (!options) options = <CommandOptions>{};
 		this.handler = handler;
-		this.client = client;
-		this.name = options.name || name;
+		this.client = handler.client;
+		this.name = options.name || filename;
 		this.description = options.description || "";
 		this.category = options.category || "Miscellaneous";
 		this.aliases = options.aliases || [];

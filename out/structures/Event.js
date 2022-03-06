@@ -3,12 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Event = void 0;
 var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
 var Event = /** @class */ (function () {
-    function Event(handler, client, name, options) {
+    function Event(handler, filename, options) {
         if (!options)
             options = {};
         this.handler = handler;
-        this.client = client;
-        this.name = options.name || name;
+        this.client = handler.client;
+        this.name = options.name || filename;
         this.once = options.once || false;
     }
     Event.prototype.run = function (args) {

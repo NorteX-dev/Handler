@@ -61,12 +61,9 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommandHandler = void 0;
-var DirectoryReferenceError_1 = require("../errors/DirectoryReferenceError");
 var ExecutionError_1 = require("../errors/ExecutionError");
 var Handler_1 = require("./Handler");
-var LocalUtils_1 = require("../util/LocalUtils");
-var glob_1 = require("glob");
-var path = require("path");
+var Command_1 = require("../structures/Command");
 var CommandHandler = /** @class */ (function (_super) {
     __extends(CommandHandler, _super);
     function CommandHandler(options) {
@@ -78,7 +75,6 @@ var CommandHandler = /** @class */ (function (_super) {
         _this.aliases = new Map();
         _this.userCooldowns = new Map();
         _this.guildCooldowns = new Map();
-        _this.localUtils = new LocalUtils_1.LocalUtils();
         if (options.autoLoad === undefined || !options.autoLoad)
             _this.loadCommands();
         return _this;
@@ -106,52 +102,61 @@ var CommandHandler = /** @class */ (function (_super) {
      * @remarks
      * Requires @see {@link CommandHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
      *
-     * @returns Map<string, Command>
+     * @returns ManagerStorage
      * */
     CommandHandler.prototype.loadCommands = function () {
         var _this = this;
-        return new Promise(function (resolve, reject) {
-            if (!_this.directory)
-                return reject(new DirectoryReferenceError_1.default("Command directory is not set. Use setDirectory(path) prior."));
-            (0, glob_1.glob)(path.join(process.cwd(), _this.directory), function (err, files) { return __awaiter(_this, void 0, void 0, function () {
-                var _i, files_1, file, parsedPath, CommandFile, cmd;
-                return __generator(this, function (_a) {
-                    if (err)
-                        return [2 /*return*/, reject(new DirectoryReferenceError_1.default("Supplied command directory is invalid. Please ensure it exists and is relative to project root."))];
-                    for (_i = 0, files_1 = files; _i < files_1.length; _i++) {
-                        file = files_1[_i];
-                        parsedPath = path.parse(file);
-                        CommandFile = require(file);
-                        if (!CommandFile)
-                            return [2 /*return*/, this.emit("dubug", "".concat(parsedPath, " failed to load."))];
-                        // Check if is class
-                        if (!this.localUtils.isClass(CommandFile))
-                            throw new TypeError("Command ".concat(parsedPath.name, " doesn't export any of the correct classes."));
-                        cmd = new CommandFile(this, parsedPath.name);
-                        this.registerCommand(cmd);
-                        resolve(this.commands);
-                    }
-                    return [2 /*return*/];
-                });
-            }); });
-        });
+        // return new Promise((resolve, reject) => {
+        // 	if (!this.directory) return reject(new DirectoryReferenceError("Command directory is not set. Use setDirectory(path) prior."));
+        // 	glob(path.join(process.cwd(), this.directory), async (err: Error | null, files: string[]) => {
+        // 		if (err) return reject(new DirectoryReferenceError("Supplied command directory is invalid. Please ensure it exists and is relative to project root."));
+        // 		if (!files.length) this.debug("No files found in supplied directory.");
+        // 		for (const file of files) {
+        // 			const parsedPath = path.parse(file);
+        // 			// Require command class
+        // 			const CommandConstructor = require(file);
+        // 			if (!CommandConstructor) return this.debug(`${parsedPath} failed to load. The file was loaded but cannot be required.`);
+        //
+        // 			if (!this.localUtils.isClass(CommandConstructor)) throw new TypeError(`Interaction ${parsedPath.name} doesn't export a class.`);
+        //
+        // 			const cmd = new CommandConstructor(this, parsedPath.name);
+        // 			// Check if is the right class
+        // 			if (!(cmd instanceof Command)) throw new TypeError(`Command ${parsedPath.name} is not a command Class.`);
+        // 			// Initialize command class
+        // 			this.registerCommand(cmd);
+        // 			resolve(this.commands);
+        // 		}
+        // 	});
+        // });
+        return new Promise(function (res, rej) { return __awaiter(_this, void 0, void 0, function () {
+            var files;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.loadAndInstance().catch(rej)];
+                    case 1:
+                        files = _a.sent();
+                        files.forEach(function (cmd) { return _this.registerCommand(cmd); });
+                        return [2 /*return*/, res(this.commands)];
+                }
+            });
+        }); });
     };
     /**
      * Manually register an instanced command. This should not be needed when using loadCommands().
      *
      * @returns Command
-     *
-     * @returns Map<string, Command>
      * */
     CommandHandler.prototype.registerCommand = function (command) {
         var _this = this;
-        var _a;
-        // if (!(command instanceof Command)) throw new TypeError("registerCommand(): command parameter must be an instance of Command.");
+        if (!(command instanceof Command_1.Command))
+            throw new TypeError("registerCommand(): command parameter must be an instance of Command.");
+        // if (!!this.commands.getByName(command.name)) throw new Error(`Command ${command.name} cannot be registered twice.`);
         this.commands.set(command.name, command);
-        if ((_a = command.aliases) === null || _a === void 0 ? void 0 : _a.length)
+        if (command.aliases && command.aliases.length)
             command.aliases.forEach(function (alias) { return _this.aliases.set(alias, command.name); });
-        this.emit("debug", "Registered command \"".concat(command.name, "\"."));
         this.emit("load", command);
+        this.debug("Registered command \"".concat(command.name, "\"."));
         return command;
     };
     /**

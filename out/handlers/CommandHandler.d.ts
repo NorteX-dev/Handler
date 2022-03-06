@@ -30,7 +30,6 @@ export declare class CommandHandler extends Handler {
     owners: string[];
     private readonly userCooldowns;
     private readonly guildCooldowns;
-    private localUtils;
     constructor(options: HandlerOptions);
     /**
      * Sets a prefix
@@ -48,15 +47,13 @@ export declare class CommandHandler extends Handler {
      * @remarks
      * Requires @see {@link CommandHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
      *
-     * @returns Map<string, Command>
+     * @returns ManagerStorage
      * */
     loadCommands(): Promise<unknown>;
     /**
      * Manually register an instanced command. This should not be needed when using loadCommands().
      *
      * @returns Command
-     *
-     * @returns Map<string, Command>
      * */
     registerCommand(command: Command): Command;
     /**

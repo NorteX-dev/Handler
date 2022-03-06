@@ -28,7 +28,6 @@ export declare class InteractionHandler extends Handler {
     owners?: Array<string>;
     private application;
     interactions: Map<string, InteractionCommand | UserContextMenu | MessageContextMenu>;
-    private localUtils;
     constructor(options: HandlerOptions);
     /**
      * Loads interaction commands into memory

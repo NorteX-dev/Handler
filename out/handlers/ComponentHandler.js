@@ -61,7 +61,6 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ComponentHandler = void 0;
-var LocalUtils_1 = require("../util/LocalUtils");
 var Handler_1 = require("./Handler");
 var glob_1 = require("glob");
 var path = require("path");
@@ -76,7 +75,6 @@ var ComponentHandler = /** @class */ (function (_super) {
         _this.client = options.client;
         _this.directory = options.directory ? path.join(process.cwd(), options.directory) : undefined;
         _this.components = new Map();
-        _this.localUtils = new LocalUtils_1.LocalUtils();
         if (options.autoLoad === undefined || !options.autoLoad)
             _this.loadComponents();
         return _this;
@@ -97,31 +95,31 @@ var ComponentHandler = /** @class */ (function (_super) {
             return __generator(this, function (_a) {
                 if (!this.directory)
                     return [2 /*return*/, reject(new DirectoryReferenceError_1.default("Components directory is not set. Use setDirectory(path) prior."))];
-                (0, glob_1.glob)(this.directory + "/**/*.js", {}, function (err, files) { return __awaiter(_this, void 0, void 0, function () {
-                    var _i, files_1, file, parsedPath, InteractionFile, component;
+                (0, glob_1.glob)(path.join(process.cwd(), this.directory), {}, function (err, files) { return __awaiter(_this, void 0, void 0, function () {
+                    var _i, files_1, file, parsedPath, ComponentFile, component;
                     return __generator(this, function (_a) {
                         if (err)
                             throw err;
-                        this.emit("debug", "Found ".concat(files.length, " component files."));
+                        this.debug("Found ".concat(files.length, " component files."));
                         if (err)
                             return [2 /*return*/, reject(new DirectoryReferenceError_1.default("Supplied components directory is invalid. Please ensure it exists and is absolute."))];
                         for (_i = 0, files_1 = files; _i < files_1.length; _i++) {
                             file = files_1[_i];
                             parsedPath = path.parse(file);
-                            InteractionFile = require(file);
-                            if (!InteractionFile)
-                                return [2 /*return*/, this.emit("dubug", "".concat(parsedPath, " failed to load."))];
+                            ComponentFile = require(file);
+                            if (!ComponentFile)
+                                return [2 /*return*/, this.debug("".concat(parsedPath, " failed to load. The file was loaded but cannot be required."))];
                             // Check if is class
-                            if (!this.localUtils.isClass(InteractionFile))
+                            if (!this.localUtils.isClass(ComponentFile))
                                 throw new TypeError("Interaction ".concat(parsedPath.name, " doesn't export any of the correct classes."));
-                            component = new InteractionFile(this, this.client, parsedPath.name.toLowerCase());
+                            component = new ComponentFile(this, parsedPath.name.toLowerCase());
                             // Check if initialized class is extending Command
                             if (!(component instanceof index_1.ComponentInteraction))
                                 throw new TypeError("Component file: ".concat(parsedPath.name, " doesn't extend ComponentInteraction. Use InteractionHandler to handle interactions like commands and context menus."));
                             // Save command to map
                             // @ts-ignore - Fine to ignore since it's never going to be verified
                             this.components.set(component.name, component);
-                            this.emit("debug", "Loaded component \"".concat(component.name, "\" from file \"").concat(parsedPath.base, "\"."));
+                            this.debug("Loaded component \"".concat(component.name, "\" from file \"").concat(parsedPath.base, "\"."));
                             this.emit("load", component);
                         }
                         this.emit("ready");
@@ -164,9 +162,21 @@ var ComponentHandler = /** @class */ (function (_super) {
             additionalOptions[_i - 1] = arguments[_i];
         }
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-            var componentInteraction;
+            var componentsArray, componentInteraction;
             return __generator(this, function (_a) {
-                componentInteraction = this.components.get(interaction.customId.toLowerCase());
+                componentsArray = Array.from(this.components.values());
+                componentInteraction = componentsArray.find(function (componentObject) {
+                    if (componentObject.queryingMode === "exact")
+                        return componentObject.customId === interaction.customId;
+                    if (componentObject.queryingMode === "includes")
+                        return interaction.customId.includes(componentObject.customId);
+                    if (componentObject.queryingMode === "startsWith")
+                        return interaction.customId.startsWith(componentObject.customId);
+                    return false;
+                });
+                if (!componentInteraction)
+                    return [2 /*return*/];
+                this.debug("Found matching interaction with the queryingMode " + componentInteraction.queryingMode + ": " + componentInteraction.customId);
                 if (!componentInteraction)
                     return [2 /*return*/];
                 try {

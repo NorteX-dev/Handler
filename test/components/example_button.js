@@ -3,7 +3,8 @@ const { ComponentInteraction } = require("../../out/index");
 module.exports = class extends ComponentInteraction {
 	constructor(...args) {
 		super(...args, {
-			customId: "example_button",
+			customId: "example_butt",
+			queryingMode: "exact",
 		});
 	}
 

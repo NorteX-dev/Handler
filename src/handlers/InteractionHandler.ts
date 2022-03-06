@@ -1,5 +1,4 @@
 import { Client, ClientApplication, Interaction as DJSInteraction } from "discord.js";
-import { LocalUtils } from "../util/LocalUtils";
 import { Handler } from "./Handler";
 import { glob } from "glob";
 import * as path from "path";
@@ -37,7 +36,6 @@ export class InteractionHandler extends Handler {
 	private application: ClientApplication | null | undefined;
 
 	public interactions: Map<string, InteractionCommand | UserContextMenu | MessageContextMenu>;
-	private localUtils: LocalUtils;
 
 	constructor(options: HandlerOptions) {
 		super(options);
@@ -46,10 +44,9 @@ export class InteractionHandler extends Handler {
 		this.directory = options.directory ? path.join(process.cwd(), options.directory) : undefined;
 		this.owners = options.owners || [];
 		this.interactions = new Map();
-		this.localUtils = new LocalUtils();
 		if (options.autoLoad === undefined || !options.autoLoad) this.loadInteractions();
 		this.client.on("ready", async () => {
-			this.emit("debug", `Client.application assigned.`);
+			this.debug(`Client.application assigned.`);
 			this.application = this.client.application;
 		});
 		return this;
@@ -67,20 +64,23 @@ export class InteractionHandler extends Handler {
 	loadInteractions() {
 		return new Promise(async (resolve, reject) => {
 			if (!this.directory) return reject(new DirectoryReferenceError("Interactions directory is not set. Use setDirectory(path) prior."));
-			glob(this.directory + "/**/*.js", {}, async (err: Error | null, files: string[]) => {
+			glob(path.join(process.cwd(), this.directory), {}, async (err: Error | null, files: string[]) => {
 				if (err) throw err;
-				this.emit("debug", `Found ${files.length} interaction files.`);
+				this.debug(`Found ${files.length} interaction files.`);
 				if (err) return reject(new DirectoryReferenceError("Supplied interactions directory is invalid. Please ensure it exists and is absolute."));
 				const duplicates = [];
 				for (const file of files) {
 					const parsedPath = path.parse(file);
 					// Require command class
-					const InteractionFile = require(file);
-					if (!InteractionFile) return this.emit("dubug", `${parsedPath} failed to load.`);
+					const InteractionConstructor = require(file);
+					if (!InteractionConstructor) {
+						this.debug(`${parsedPath} failed to load. The file was loaded but cannot be required.`);
+						continue;
+					}
 					// Check if is class
-					if (!this.localUtils.isClass(InteractionFile)) throw new TypeError(`Interaction ${parsedPath.name} doesn't export any of the correct classes.`);
+					if (!this.localUtils.isClass(InteractionConstructor)) throw new TypeError(`Interaction ${parsedPath.name} doesn't export a class.`);
 					// Initialize command class
-					const interaction = new InteractionFile(this, this.client, parsedPath.name.toLowerCase());
+					const interaction = new InteractionConstructor(this, parsedPath.name.toLowerCase());
 					// Check if initialized class is extending Command
 					if (!(interaction instanceof InteractionCommand || interaction instanceof UserContextMenu || interaction instanceof MessageContextMenu))
 						throw new TypeError(
@@ -91,9 +91,8 @@ export class InteractionHandler extends Handler {
 						duplicates.push(interaction);
 						continue;
 					}
-					// @ts-ignore - Fine to ignore since it's never going to be verified
 					this.interactions.set(interaction.type + "_" + interaction.name, interaction);
-					this.emit("debug", `Loaded interaction "${interaction.name}" from file "${parsedPath.base}".`);
+					this.debug(`Loaded interaction "${interaction.name}" from file "${parsedPath.base}".`);
 					this.emit("load", interaction);
 				}
 				if (duplicates?.length) throw new Error(`Loading interaction with the same name: ${duplicates.map((d) => d.name).join(", ")}.`);
@@ -182,11 +181,11 @@ export class InteractionHandler extends Handler {
 		let changesMade = false;
 		if (force) {
 			// Forcing update, automatically assume changes were made
-			this.emit("debug", "Skipping checks and updating interactions.");
+			this.debug("Skipping checks and updating interactions.");
 			changesMade = true;
 		} else {
 			// Fetch existing interactions and compare to loaded
-			this.emit("debug", "Checking for differences.");
+			this.debug("Checking for differences.");
 			if (!this.application)
 				throw new Error("updateInteractions(): client.application is undefined. Make sure you are executing updateInteractions() after the client has emitted the 'ready' event.");
 			const fetchedInteractions = await this.application.commands.fetch().catch((err) => {
@@ -215,20 +214,20 @@ export class InteractionHandler extends Handler {
 				} else if (interaction.type === "MESSAGE" && interaction instanceof MessageContextMenu) {
 					interactionsToSend.push({ type: "MESSAGE", name: interaction.name });
 				} else {
-					this.emit("debug", `Interaction type ${interaction.type} is not supported.`);
+					this.debug(`Interaction type ${interaction.type} is not supported.`);
 				}
 			});
 			// @ts-ignore
 			await this.application!.commands.set(interactionsArray)
 				.then((returned) => {
-					this.emit("debug", `Updated interactions (${returned.size} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`);
+					this.debug(`Updated interactions (${returned.size} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`);
 					this.emit("ready");
 				})
 				.catch((err) => {
 					throw new Error(`Can't update client commands: ${err}`);
 				});
 		} else {
-			this.emit("debug", "No changes in interactions - not refreshing.");
+			this.debug("No changes in interactions - not refreshing.");
 			this.emit("ready");
 		}
 	}
@@ -250,7 +249,7 @@ export class InteractionHandler extends Handler {
 		}
 		for (let remoteCmd of fetched) {
 			if (!existing.find((c) => c.name === remoteCmd.name)) {
-				this.emit("debug", "Interactions match check failed because local interaction files are missing from the filesystem. Updating...");
+				this.debug("Interactions match check failed because local interaction files are missing from the filesystem. Updating...");
 				changesMade = true;
 				break;
 			}

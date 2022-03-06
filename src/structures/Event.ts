@@ -13,11 +13,11 @@ export class Event {
 	public name: string;
 	public once: boolean;
 
-	constructor(handler: EventHandler, client: any, name: string, options?: EventOptions) {
+	constructor(handler: EventHandler, filename: string, options?: EventOptions) {
 		if (!options) options = <EventOptions>{};
 		this.handler = handler;
-		this.client = client;
-		this.name = options.name || name;
+		this.client = handler.client;
+		this.name = options.name || filename;
 		this.once = options.once || false;
 	}
 

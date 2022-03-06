@@ -5,16 +5,15 @@ var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
 var Command = /** @class */ (function () {
     /**
      * @param handler The command handler instance
-     * @param client The Discord.js client instance
-     * @param name Command name - if unspecified, the filename is taken into consideration
+     * @param filename Command name - if unspecified, the filename is taken into consideration
      * @param options Additional command options @see {@link CommandOptions}
      * */
-    function Command(handler, client, name, options) {
+    function Command(handler, filename, options) {
         if (!options)
             options = {};
         this.handler = handler;
-        this.client = client;
-        this.name = options.name || name;
+        this.client = handler.client;
+        this.name = options.name || filename;
         this.description = options.description || "";
         this.category = options.category || "Miscellaneous";
         this.aliases = options.aliases || [];

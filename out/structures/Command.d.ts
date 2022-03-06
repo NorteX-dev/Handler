@@ -85,11 +85,10 @@ export declare class Command {
     disabled: boolean;
     /**
      * @param handler The command handler instance
-     * @param client The Discord.js client instance
-     * @param name Command name - if unspecified, the filename is taken into consideration
+     * @param filename Command name - if unspecified, the filename is taken into consideration
      * @param options Additional command options @see {@link CommandOptions}
      * */
-    constructor(handler: CommandHandler, client: any, name: string, options?: CommandOptions);
+    constructor(handler: CommandHandler, filename: string, options?: CommandOptions);
     /**
      * @param message The Discord.js message object
      * @param args The command arguments

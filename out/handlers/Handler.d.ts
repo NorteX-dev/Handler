@@ -1,6 +1,7 @@
 /// <reference types="node" />
 import { Client } from "discord.js";
 import { EventEmitter } from "events";
+import { LocalUtils } from "../util/LocalUtils";
 interface HandlerOptions {
     client: Client;
     directory?: string | undefined;
@@ -15,6 +16,7 @@ export declare class Handler extends EventEmitter {
      * */
     client: Client;
     directory?: string;
+    localUtils: LocalUtils;
     constructor(options: HandlerOptions);
     /**
      * Sets directory for commands
@@ -26,5 +28,7 @@ export declare class Handler extends EventEmitter {
      * @param value
      * */
     setDirectory(value: string): this;
+    debug(message: string): void;
+    loadAndInstance(): Promise<any>;
 }
 export {};

@@ -22,7 +22,7 @@ export declare class InteractionCommand {
     disabled: boolean;
     defaultPermission: boolean;
     permissions: any[];
-    constructor(handler: InteractionHandler, client: any, filename: string, options?: ApplicationCommandOptions);
+    constructor(handler: InteractionHandler, filename: string, options?: ApplicationCommandOptions);
     run(interaction: any, ...additionalParams: any): void;
 }
 export {};

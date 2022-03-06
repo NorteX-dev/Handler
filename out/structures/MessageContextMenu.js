@@ -3,11 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.MessageContextMenu = void 0;
 var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
 var MessageContextMenu = /** @class */ (function () {
-    function MessageContextMenu(handler, client, filename, options) {
+    function MessageContextMenu(handler, filename, options) {
         if (!options)
             options = {};
         this.handler = handler;
-        this.client = client;
+        this.client = handler.client;
         this.type = "MESSAGE";
         this.name = options.name || filename;
         this.userIds = options.userIds || [];

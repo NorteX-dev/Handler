@@ -1,6 +1,7 @@
 import { CommandHandler } from "../handlers/CommandHandler";
 interface ComponentInteractionOptions {
     customId: string;
+    queryingMode: "exact" | "includes" | "startsWith";
 }
 export declare class ComponentInteraction {
     handler: CommandHandler;
@@ -8,7 +9,8 @@ export declare class ComponentInteraction {
     type: string;
     customId: string;
     name: string;
-    constructor(handler: CommandHandler, client: any, name: string, options?: ComponentInteractionOptions);
+    queryingMode: string;
+    constructor(handler: CommandHandler, filename: string, options?: ComponentInteractionOptions);
     run(interaction: any, ...additionalParams: any): void;
 }
 export {};

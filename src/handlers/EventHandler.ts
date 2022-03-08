@@ -1,9 +1,6 @@
 import { Client } from "discord.js";
-import { glob } from "glob";
-import * as path from "path";
 
-import { Event } from "../index";
-import DirectoryReferenceError from "../errors/DirectoryReferenceError";
+import { Command, Event } from "../index";
 import { Handler } from "./Handler";
 
 interface HandlerOptions {
@@ -28,42 +25,38 @@ export class EventHandler extends Handler {
 		this.client = options.client;
 		this.directory = options.directory;
 		this.events = new Map();
-		if (options.autoLoad === undefined || !options.autoLoad) this.loadEvents();
+		if (options.autoLoad === undefined) this.loadEvents();
 		return this;
 	}
 
 	/**
 	 * Loads events & creates the event emitter handlers.
 	 *
-	 * @returns EventHandler
+	 * @returns Promise<EventHandler>
 	 *
 	 * @remarks
 	 * Requires @see {@link EventHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
-	 *
-	 * @returns Map<string, Event>
 	 * */
 	loadEvents() {
-		return new Promise(async (resolve, reject) => {
-			if (!this.directory) return reject(new DirectoryReferenceError("Events directory is not set. Use setDirectory(path) prior."));
-			glob(path.join(process.cwd(), this.directory), async (err: Error | null, files: string[]) => {
-				if (err) return reject(new DirectoryReferenceError("Supplied events directory is invalid. Please ensure it exists and is absolute."));
-				for (const file of files) {
-					delete require.cache[file];
-					const parsedPath = path.parse(file);
-					const EventFile = require(file);
-					if (!EventFile) return this.debug(`${parsedPath} failed to load. The file was loaded but cannot be required.`);
-					if (!this.localUtils.isClass(EventFile)) throw new TypeError(`Event ${parsedPath.name} doesn't export any of the correct classes.`);
-					const event = new EventFile(this, parsedPath.name);
-					if (!(event instanceof Event)) throw new TypeError(`Event file: ${parsedPath.name} doesn't extend the Event class.`);
-					this.client[event.once ? "once" : "on"](event.name, (...args) => {
-						event.run(...args);
-					});
-					this.debug(`Set event "${event.name}" from file "${parsedPath.base}"`);
-					this.emit("load", event);
-				}
-				this.emit("ready");
-				resolve(this.events);
-			});
+		return new Promise(async (res, rej) => {
+			const files = await this.loadAndInstance().catch(rej);
+			files.forEach((event: Event) => this.registerEvent(event));
+			return res(files);
 		});
+	}
+
+	/**
+	 * Manually register an instanced event. This should not be needed when using loadEvents().
+	 *
+	 * @returns Command
+	 * */
+	registerEvent(event: Event) {
+		if (!(event instanceof Event)) throw new TypeError("registerCommand(): event parameter must be an instance of Event.");
+		this.client[event.once ? "once" : "on"](event.name, (...args) => {
+			event.run(...args);
+		});
+		this.emit("load", event);
+		this.debug(`Registered command "${event.name}".`);
+		return event;
 	}
 }

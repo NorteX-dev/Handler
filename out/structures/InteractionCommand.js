@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InteractionCommand = void 0;
-var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
-var InteractionCommand = /** @class */ (function () {
-    function InteractionCommand(handler, filename, options) {
+const MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
+class InteractionCommand {
+    constructor(handler, filename, options) {
         if (!options)
             options = {};
         if (!options.name || !options.description)
@@ -21,13 +21,9 @@ var InteractionCommand = /** @class */ (function () {
         this.defaultPermission = options.defaultPermission || true;
         this.permissions = options.permissions || [];
     }
-    InteractionCommand.prototype.run = function (interaction) {
-        var additionalParams = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            additionalParams[_i - 1] = arguments[_i];
-        }
+    run(interaction, ...additionalParams) {
         throw new MethodNotOverridenError_1.default("run() method on " + this.name + " interaction is not present.");
-    };
-    return InteractionCommand;
-}());
+    }
+}
 exports.InteractionCommand = InteractionCommand;
+//# sourceMappingURL=InteractionCommand.js.map

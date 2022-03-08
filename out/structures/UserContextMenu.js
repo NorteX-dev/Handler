@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserContextMenu = void 0;
-var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
-var UserContextMenu = /** @class */ (function () {
-    function UserContextMenu(handler, filename, options) {
+const MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
+class UserContextMenu {
+    constructor(handler, filename, options) {
         if (!options)
             options = {};
         this.handler = handler;
@@ -14,13 +14,9 @@ var UserContextMenu = /** @class */ (function () {
         this.guildIds = options.guildIds || [];
         this.disabled = options.disabled || false;
     }
-    UserContextMenu.prototype.run = function (userContextMenuInteraction) {
-        var additionalParams = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            additionalParams[_i - 1] = arguments[_i];
-        }
+    run(userContextMenuInteraction, ...additionalParams) {
         throw new MethodNotOverridenError_1.default("run() method on " + this.name + " interaction is not present.");
-    };
-    return UserContextMenu;
-}());
+    }
+}
 exports.UserContextMenu = UserContextMenu;
+//# sourceMappingURL=UserContextMenu.js.map

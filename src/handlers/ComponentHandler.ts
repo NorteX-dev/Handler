@@ -1,9 +1,6 @@
 import { Client, Interaction as DJSInteraction } from "discord.js";
 import { Handler } from "./Handler";
-import { glob } from "glob";
 import * as path from "path";
-
-import DirectoryReferenceError from "../errors/DirectoryReferenceError";
 import { ComponentInteraction } from "../index";
 
 interface HandlerOptions {
@@ -34,7 +31,7 @@ export class ComponentHandler extends Handler {
 		this.client = options.client;
 		this.directory = options.directory ? path.join(process.cwd(), options.directory) : undefined;
 		this.components = new Map();
-		if (options.autoLoad === undefined || !options.autoLoad) this.loadComponents();
+		if (options.autoLoad === undefined) this.loadComponents();
 		return this;
 	}
 
@@ -48,34 +45,29 @@ export class ComponentHandler extends Handler {
 	 * Run {@link ComponentHandler.runComponent()} to be invoked to run the ocmmand on an event.
 	 * */
 	loadComponents() {
-		return new Promise(async (resolve, reject) => {
-			if (!this.directory) return reject(new DirectoryReferenceError("Components directory is not set. Use setDirectory(path) prior."));
-			glob(path.join(process.cwd(), this.directory), {}, async (err: Error | null, files: string[]) => {
-				if (err) throw err;
-				this.debug(`Found ${files.length} component files.`);
-				if (err) return reject(new DirectoryReferenceError("Supplied components directory is invalid. Please ensure it exists and is absolute."));
-				for (const file of files) {
-					const parsedPath = path.parse(file);
-					// Require command class
-					const ComponentFile = require(file);
-					if (!ComponentFile) return this.debug(`${parsedPath} failed to load. The file was loaded but cannot be required.`);
-					// Check if is class
-					if (!this.localUtils.isClass(ComponentFile)) throw new TypeError(`Interaction ${parsedPath.name} doesn't export any of the correct classes.`);
-					// Initialize command class
-					const component = new ComponentFile(this, parsedPath.name.toLowerCase());
-					// Check if initialized class is extending Command
-					if (!(component instanceof ComponentInteraction))
-						throw new TypeError(`Component file: ${parsedPath.name} doesn't extend ComponentInteraction. Use InteractionHandler to handle interactions like commands and context menus.`);
-					// Save command to map
-					// @ts-ignore - Fine to ignore since it's never going to be verified
-					this.components.set(component.name, component);
-					this.debug(`Loaded component "${component.name}" from file "${parsedPath.base}".`);
-					this.emit("load", component);
-				}
-				this.emit("ready");
-				resolve(this.components);
-			});
+		return new Promise(async (res, rej) => {
+			const files = await this.loadAndInstance().catch(rej);
+			files.forEach((components: ComponentInteraction) => this.registerComponent(components));
+			return res(this.components);
 		});
+	}
+
+	/**
+	 * Manually register an instanced component interaction. This should not be needed when using loadComponents().
+	 *
+	 * @returns Interaction
+	 * */
+	//
+	registerComponent(component: ComponentInteraction) {
+		if (!(component instanceof ComponentInteraction))
+			throw new TypeError(
+				"registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu."
+			);
+		if (this.components.get(component.customId)) throw new Error(`Component ${component.name} cannot be registered twice.`);
+		this.components.set(component.customId, component);
+		this.debug(`Loaded interaction "${component.name}".`);
+		this.emit("load", component);
+		return component;
 	}
 
 	/**
@@ -112,7 +104,9 @@ export class ComponentHandler extends Handler {
 
 			if (!componentInteraction) return;
 
-			this.debug("Found matching interaction with the queryingMode " + componentInteraction.queryingMode + ": " + componentInteraction.customId);
+			this.debug(
+				"Found matching interaction with the queryingMode " + componentInteraction.queryingMode + ": " + componentInteraction.customId
+			);
 			if (!componentInteraction) return;
 
 			try {

@@ -1,9 +1,5 @@
-import { Client, ClientApplication, Interaction as DJSInteraction } from "discord.js";
+import { Client, Interaction as DJSInteraction } from "discord.js";
 import { Handler } from "./Handler";
-import { glob } from "glob";
-import * as path from "path";
-
-import DirectoryReferenceError from "../errors/DirectoryReferenceError";
 import ExecutionError from "../errors/ExecutionError";
 import { InteractionCommand, MessageContextMenu, UserContextMenu } from "../index";
 
@@ -26,14 +22,13 @@ export class InteractionHandler extends Handler {
 	 * @returns InteractionHandler
 	 * @example
 	 * ```js
-	 * const { InteractionHandler } = require("@nortex-dev/handler");
-	 * const handler = new InteractionHandler({ client: client });
+	 * const { InteractionHandler } = require("@nortex/handler");
+	 * const handler = new InteractionHandler({ client, directory: "./interactions" });
 	 * ```
 	 * */
 	public client: Client;
 	public directory?: string;
 	public owners?: Array<string>;
-	private application: ClientApplication | null | undefined;
 
 	public interactions: Map<string, InteractionCommand | UserContextMenu | MessageContextMenu>;
 
@@ -41,14 +36,12 @@ export class InteractionHandler extends Handler {
 		super(options);
 		if (!options.client) throw new ReferenceError("InteractionHandler(): options.client is required.");
 		this.client = options.client;
-		this.directory = options.directory ? path.join(process.cwd(), options.directory) : undefined;
+		this.directory = options.directory ?? undefined;
 		this.owners = options.owners || [];
 		this.interactions = new Map();
-		if (options.autoLoad === undefined || !options.autoLoad) this.loadInteractions();
-		this.client.on("ready", async () => {
-			this.debug(`Client.application assigned.`);
-			this.application = this.client.application;
-		});
+		if (options.autoLoad === undefined) {
+			this.loadInteractions();
+		}
 		return this;
 	}
 
@@ -59,53 +52,37 @@ export class InteractionHandler extends Handler {
 	 *
 	 * @remarks
 	 * Requires @see {@link InteractionHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
-	 * Run {@link InteractionHandler.runInteraction()} to be invoked to run the ocmmand on an event.
+	 * {@link InteractionHandler.runInteraction} has to be run on the interactionCreate event to invoke the command run.
 	 * */
 	loadInteractions() {
-		return new Promise(async (resolve, reject) => {
-			if (!this.directory) return reject(new DirectoryReferenceError("Interactions directory is not set. Use setDirectory(path) prior."));
-			glob(path.join(process.cwd(), this.directory), {}, async (err: Error | null, files: string[]) => {
-				if (err) throw err;
-				this.debug(`Found ${files.length} interaction files.`);
-				if (err) return reject(new DirectoryReferenceError("Supplied interactions directory is invalid. Please ensure it exists and is absolute."));
-				const duplicates = [];
-				for (const file of files) {
-					const parsedPath = path.parse(file);
-					// Require command class
-					const InteractionConstructor = require(file);
-					if (!InteractionConstructor) {
-						this.debug(`${parsedPath} failed to load. The file was loaded but cannot be required.`);
-						continue;
-					}
-					// Check if is class
-					if (!this.localUtils.isClass(InteractionConstructor)) throw new TypeError(`Interaction ${parsedPath.name} doesn't export a class.`);
-					// Initialize command class
-					const interaction = new InteractionConstructor(this, parsedPath.name.toLowerCase());
-					// Check if initialized class is extending Command
-					if (!(interaction instanceof InteractionCommand || interaction instanceof UserContextMenu || interaction instanceof MessageContextMenu))
-						throw new TypeError(
-							`Interaction file: ${parsedPath.name} doesn't extend one of the valid the interaction classes: CommandInteraction, UserContextMenuInteraction, MessageContextMenuInteraction. Use ComponentHandler to handle buttons, select menus and other components.`
-						);
-					// Save command to map
-					if (this.interactions.get(interaction.type + "_" + interaction.name)) {
-						duplicates.push(interaction);
-						continue;
-					}
-					this.interactions.set(interaction.type + "_" + interaction.name, interaction);
-					this.debug(`Loaded interaction "${interaction.name}" from file "${parsedPath.base}".`);
-					this.emit("load", interaction);
-				}
-				if (duplicates?.length) throw new Error(`Loading interaction with the same name: ${duplicates.map((d) => d.name).join(", ")}.`);
-				resolve(this.interactions);
-			});
+		return new Promise(async (res, rej) => {
+			const files = await this.loadAndInstance(false).catch(rej);
+			files.forEach((interaction: InteractionCommand | UserContextMenu | MessageContextMenu) => this.registerInteraction(interaction));
+			return res(this.interactions);
 		});
+	}
+
+	/**
+	 * Manually register an instanced interaction. This should not be needed when using loadInteractions().
+	 *
+	 * @returns Interaction
+	 * */
+	registerInteraction(interaction: InteractionCommand | UserContextMenu | MessageContextMenu) {
+		if (!(interaction instanceof InteractionCommand || interaction instanceof UserContextMenu || interaction instanceof MessageContextMenu))
+			throw new TypeError(
+				"registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu."
+			);
+		if (this.interactions.get(interaction.name)) throw new Error(`Interaction ${interaction.name} cannot be registered twice.`);
+		this.interactions.set(interaction.type + "_" + interaction.name, interaction);
+		this.debug(`Loaded interaction "${interaction.name}".`);
+		this.emit("load", interaction);
+		return interaction;
 	}
 
 	/**
 	 * Attempts to run the interaction. Returns a promise with the interaction if run succeeded, or rejects with an execution error.
 	 *
 	 * @returns Promise<Interaction>
-	 *
 	 * */
 	runInteraction(interaction: DJSInteraction, ...additionalOptions: any) {
 		return new Promise((res, rej) => {
@@ -155,7 +132,9 @@ export class InteractionHandler extends Handler {
 	 * */
 	private handleContextMenuInteraction(interaction: any, ...additionalOptions: any) {
 		return new Promise(async (resolve, reject) => {
-			const contextMenuInt = this.interactions.get("USER_" + interaction.commandName.toLowerCase()) || this.interactions.get("MESSAGE_" + interaction.commandName.toLowerCase());
+			const contextMenuInt =
+				this.interactions.get("USER_" + interaction.commandName.toLowerCase()) ||
+				this.interactions.get("MESSAGE_" + interaction.commandName.toLowerCase());
 			if (!contextMenuInt) return;
 
 			if (interaction.targetType === "USER" && contextMenuInt.type !== "USER") return;
@@ -177,6 +156,13 @@ export class InteractionHandler extends Handler {
 		});
 	}
 
+	/**
+	 * Compare the local version of the interactions to the ones in Discord API and update if needed.
+	 *
+	 * @returns Interaction
+	 *
+	 * @param {boolean} [force=false] Skip checks and set commands even if the local version is up to date.
+	 * */
 	public async updateInteractions(force: boolean = false) {
 		let changesMade = false;
 		if (force) {
@@ -186,9 +172,12 @@ export class InteractionHandler extends Handler {
 		} else {
 			// Fetch existing interactions and compare to loaded
 			this.debug("Checking for differences.");
-			if (!this.application)
-				throw new Error("updateInteractions(): client.application is undefined. Make sure you are executing updateInteractions() after the client has emitted the 'ready' event.");
-			const fetchedInteractions = await this.application.commands.fetch().catch((err) => {
+			if (!this.client.application)
+				throw new Error(
+					"updateInteractions(): client.application is undefined. Make sure you are executing updateInteractions() after the client has emitted the 'ready' event."
+				);
+
+			const fetchedInteractions = await this.client.application.commands.fetch().catch((err) => {
 				throw new Error(`Can't fetch client commands: ${err}`);
 			});
 			if (!fetchedInteractions) throw new Error("Interactions weren't fetched.");
@@ -197,7 +186,9 @@ export class InteractionHandler extends Handler {
 
 		if (changesMade) {
 			// Filter out message components
-			const interactionsArray = Array.from(this.interactions, ([_key, interaction]) => interaction).filter((r) => ["CHAT_INPUT", "USER", "MESSAGE"].includes(r.type));
+			const interactionsArray = Array.from(this.interactions, ([_key, interaction]) => interaction).filter((r) =>
+				["CHAT_INPUT", "USER", "MESSAGE"].includes(r.type)
+			);
 			let interactionsToSend = [];
 			interactionsArray.forEach((interaction) => {
 				if (interaction.type === "CHAT_INPUT" && interaction instanceof InteractionCommand) {
@@ -217,10 +208,13 @@ export class InteractionHandler extends Handler {
 					this.debug(`Interaction type ${interaction.type} is not supported.`);
 				}
 			});
-			// @ts-ignore
-			await this.application!.commands.set(interactionsArray)
+			await this.client.application?.commands
+				// @ts-ignore
+				.set(interactionsArray)
 				.then((returned) => {
-					this.debug(`Updated interactions (${returned.size} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`);
+					this.debug(
+						`Updated interactions (${returned.size} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`
+					);
 					this.emit("ready");
 				})
 				.catch((err) => {

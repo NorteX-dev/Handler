@@ -6,13 +6,7 @@ import * as path from "path";
 import { glob } from "glob";
 import * as fs from "fs";
 import { LocalUtils } from "../util/LocalUtils";
-import { Command } from "../structures/Command";
 import { CommandHandler } from "./CommandHandler";
-import { ComponentInteraction } from "../structures/ComponentInteraction";
-import { Event } from "../structures/Event";
-import { InteractionCommand } from "../structures/InteractionCommand";
-import { UserContextMenu } from "../structures/UserContextMenu";
-import { MessageContextMenu } from "../structures/MessageContextMenu";
 
 interface HandlerOptions {
 	client: Client;
@@ -51,7 +45,9 @@ export class Handler extends EventEmitter {
 	 * */
 	setDirectory(value: string) {
 		if (!value) throw new DirectoryReferenceError("setDirectory(): path parameter is required.");
-		this.directory = path.join(process.cwd(), value);
+		const dirPath = path.join(process.cwd(), this.directory);
+		if (!fs.existsSync(dirPath)) throw new DirectoryReferenceError(`setDirectory(...): Directory ${dirPath} does not exist.`);
+		this.directory = value;
 		return this;
 	}
 
@@ -59,8 +55,9 @@ export class Handler extends EventEmitter {
 		this.emit("debug", message);
 	}
 
-	loadAndInstance() {
+	loadAndInstance(emitReady: boolean = true) {
 		return new Promise<any>(async (resolve, reject) => {
+			this.debug(`Loading files from ${this.directory}.`);
 			let instances: any[] = [];
 			if (!this.directory) return reject(new DirectoryReferenceError("Directory is not set. Use setDirectory(path) prior."));
 			const dirPath = path.join(process.cwd(), this.directory);
@@ -74,25 +71,10 @@ export class Handler extends EventEmitter {
 					if (!Constructor) return this.debug(`${parsedPath} failed to load. The file was loaded but cannot be required.`);
 					if (!this.localUtils.isClass(Constructor)) throw new TypeError(`File ${parsedPath.name} doesn't export a class.`);
 					const instance = new Constructor(this, parsedPath.name);
-					const superclassName = Object.getPrototypeOf(this).constructor.name;
-					if (superclassName === "CommandHandler") {
-						if (!(instance instanceof Command)) this.debug(`${parsedPath.name} is not an instance of Command.`);
-					} else if (superclassName === "EventHandler") {
-						if (!(instance instanceof Event)) this.debug(`${parsedPath.name} is not an instance of Event.`);
-					} else if (superclassName === "InteractionHandler") {
-						if (
-							!(instance instanceof InteractionCommand || instance instanceof UserContextMenu || instance instanceof MessageContextMenu)
-						)
-							this.debug(`${parsedPath.name} is not an instance of either: InteractionCommand, UserContextMenu or MessageContextMenu.`);
-					} else if (superclassName === "ComponentHandler") {
-						if (!(instance instanceof ComponentInteraction)) this.debug(`${parsedPath.name} is not an instance of ComponentInteraction.`);
-					} else {
-						// Who knows?
-						this.debug(`${parsedPath.name} is not using a supported class: ${superclassName}.`);
-					}
-					this.debug(`Instantiated ${instance.customId || instance.name} from file ${parsedPath.name}${parsedPath.ext}`);
+					this.debug(`Instantiated "${instance.customId || instance.name}" from file ${parsedPath.name}${parsedPath.ext}.`);
 					instances.push(instance);
 				}
+				if (emitReady) this.emit("ready");
 				resolve(instances);
 			});
 		});

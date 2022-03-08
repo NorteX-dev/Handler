@@ -43,7 +43,7 @@ export class CommandHandler extends Handler {
 		this.aliases = new Map();
 		this.userCooldowns = new Map();
 		this.guildCooldowns = new Map();
-		if (options.autoLoad === undefined || !options.autoLoad) this.loadCommands();
+		if (options.autoLoad === undefined) this.loadCommands();
 		return this;
 	}
 
@@ -64,36 +64,12 @@ export class CommandHandler extends Handler {
 	/**
 	 * Loads classic message commands into memory
 	 *
-	 * @returns CommandHandlers
+	 * @returns Map<string, Command>
 	 *
 	 * @remarks
 	 * Requires @see {@link CommandHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
-	 *
-	 * @returns ManagerStorage
 	 * */
 	loadCommands() {
-		// return new Promise((resolve, reject) => {
-		// 	if (!this.directory) return reject(new DirectoryReferenceError("Command directory is not set. Use setDirectory(path) prior."));
-		// 	glob(path.join(process.cwd(), this.directory), async (err: Error | null, files: string[]) => {
-		// 		if (err) return reject(new DirectoryReferenceError("Supplied command directory is invalid. Please ensure it exists and is relative to project root."));
-		// 		if (!files.length) this.debug("No files found in supplied directory.");
-		// 		for (const file of files) {
-		// 			const parsedPath = path.parse(file);
-		// 			// Require command class
-		// 			const CommandConstructor = require(file);
-		// 			if (!CommandConstructor) return this.debug(`${parsedPath} failed to load. The file was loaded but cannot be required.`);
-		//
-		// 			if (!this.localUtils.isClass(CommandConstructor)) throw new TypeError(`Interaction ${parsedPath.name} doesn't export a class.`);
-		//
-		// 			const cmd = new CommandConstructor(this, parsedPath.name);
-		// 			// Check if is the right class
-		// 			if (!(cmd instanceof Command)) throw new TypeError(`Command ${parsedPath.name} is not a command Class.`);
-		// 			// Initialize command class
-		// 			this.registerCommand(cmd);
-		// 			resolve(this.commands);
-		// 		}
-		// 	});
-		// });
 		return new Promise(async (res, rej) => {
 			const files = await this.loadAndInstance().catch(rej);
 			files.forEach((cmd: Command) => this.registerCommand(cmd));
@@ -108,7 +84,7 @@ export class CommandHandler extends Handler {
 	 * */
 	registerCommand(command: Command) {
 		if (!(command instanceof Command)) throw new TypeError("registerCommand(): command parameter must be an instance of Command.");
-		// if (!!this.commands.getByName(command.name)) throw new Error(`Command ${command.name} cannot be registered twice.`);
+		if (this.commands.get(command.name)) throw new Error(`Command ${command.name} cannot be registered twice.`);
 		this.commands.set(command.name, command);
 		if (command.aliases && command.aliases.length) command.aliases.forEach((alias: string) => this.aliases.set(alias, command.name));
 		this.emit("load", command);

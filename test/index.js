@@ -2,28 +2,28 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const { Client, Intents } = require("discord.js");
-const { CommandHandler } = require("../out");
+const { InteractionHandler } = require("../out");
+const { intersection } = require("lodash");
 
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
 
-const cmdHandler = new CommandHandler({
+const interactionHandler = new InteractionHandler({
 	client: client,
 	directory: "./test/commands",
 });
-cmdHandler.on("load", (command) => {
+
+interactionHandler.on("load", (command) => {
 	console.log("Interaction " + command.name + " has been loaded.");
 });
-cmdHandler.on("ready", () => {
+interactionHandler.on("ready", () => {
 	console.log("All files loaded!");
 });
-cmdHandler.on("debug", (debug) => {
+interactionHandler.on("debug", (debug) => {
 	console.log(`[Debug] ${debug}`);
 });
 
-client.on("messageCreate", (message) => {
-	cmdHandler.runCommand(message).catch((err) => {
-		console.log(err);
-	});
+client.on("ready", () => {
+	interactionHandler.updateInteractions();
 });
 
 client.login(process.env.TOKEN).then(() => {

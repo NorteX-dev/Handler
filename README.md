@@ -94,10 +94,10 @@ After creating the handler, you should handle the command execution on a `messag
 ```js
 client.on("messageCreate", message => {
   handler.runCommand(message).then(() => {
-	// Command was executed
+    // Command was executed
   }).catch(err => {
-	// Command was not executed properly, for example from a lack of permissions.
-	message.reply("Error: " + err.message);
+    // Command was not executed properly, for example from a lack of permissions.
+    message.reply("Error: " + err.message);
   });
 });
 ```

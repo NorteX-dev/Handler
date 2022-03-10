@@ -105,4 +105,3 @@ class ComponentHandler extends Handler_1.Handler {
     }
 }
 exports.ComponentHandler = ComponentHandler;
-//# sourceMappingURL=ComponentHandler.js.map

@@ -45,4 +45,3 @@ class Command {
     }
 }
 exports.Command = Command;
-//# sourceMappingURL=Command.js.map

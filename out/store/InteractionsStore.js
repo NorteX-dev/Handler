@@ -25,4 +25,3 @@ class InteractionsStore extends Array {
     }
 }
 exports.default = InteractionsStore;
-//# sourceMappingURL=InteractionsStore.js.map

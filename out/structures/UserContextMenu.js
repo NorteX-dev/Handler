@@ -19,4 +19,3 @@ class UserContextMenu {
     }
 }
 exports.UserContextMenu = UserContextMenu;
-//# sourceMappingURL=UserContextMenu.js.map

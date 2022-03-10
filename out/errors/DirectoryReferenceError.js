@@ -8,4 +8,3 @@ class DirectoryReferenceError extends Error {
     }
 }
 exports.default = DirectoryReferenceError;
-//# sourceMappingURL=DirectoryReferenceError.js.map

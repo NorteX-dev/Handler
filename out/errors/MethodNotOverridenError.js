@@ -8,4 +8,3 @@ class CommandDirectoryReferenceError extends Error {
     }
 }
 exports.default = CommandDirectoryReferenceError;
-//# sourceMappingURL=MethodNotOverridenError.js.map

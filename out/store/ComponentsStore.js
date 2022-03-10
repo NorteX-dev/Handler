@@ -22,4 +22,3 @@ class ComponentsStore extends Array {
     }
 }
 exports.default = ComponentsStore;
-//# sourceMappingURL=ComponentsStore.js.map

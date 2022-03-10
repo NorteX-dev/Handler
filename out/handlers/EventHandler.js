@@ -63,4 +63,3 @@ class EventHandler extends Handler_1.Handler {
     }
 }
 exports.EventHandler = EventHandler;
-//# sourceMappingURL=EventHandler.js.map

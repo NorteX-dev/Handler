@@ -11,6 +11,13 @@ interface ManyClientsInterface {
 	components?: any;
 }
 
+interface HandlersInterface {
+	commandHandler?: CommandHandler;
+	eventHandler?: EventHandler;
+	interactionHandler?: InteractionHandler;
+	componentHandler?: ComponentHandler;
+}
+
 export class Util {
 	private client: Client;
 	constructor(client: Client) {
@@ -39,7 +46,7 @@ export class Util {
 	 * */
 	public static createMany(client: Client, options: ManyClientsInterface) {
 		if (!client || !options) throw new Error("createMany(): Invalid client or directories.");
-		let handlers = {
+		let handlers: HandlersInterface = {
 			commandHandler: null,
 			eventHandler: null,
 			interactionHandler: null,

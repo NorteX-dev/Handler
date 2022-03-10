@@ -8,5 +8,4 @@ node_modules
 .env
 .env.development
 tsconfig.json
-README.md
 things to add.txt

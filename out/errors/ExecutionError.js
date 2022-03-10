@@ -10,4 +10,3 @@ class ExecutionError extends Error {
     }
 }
 exports.default = ExecutionError;
-//# sourceMappingURL=ExecutionError.js.map

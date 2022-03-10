@@ -26,4 +26,3 @@ class InteractionCommand {
     }
 }
 exports.InteractionCommand = InteractionCommand;
-//# sourceMappingURL=InteractionCommand.js.map

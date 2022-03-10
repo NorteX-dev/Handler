@@ -170,4 +170,3 @@ class Pagination extends events_1.EventEmitter {
     }
 }
 exports.Pagination = Pagination;
-//# sourceMappingURL=Pagination.js.map

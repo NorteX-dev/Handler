@@ -1,1 +1,0 @@
-{"version":3,"file":"MethodNotOverridenError.js","sourceRoot":"","sources":["../../src/errors/MethodNotOverridenError.ts"],"names":[],"mappings":";;AAAA,MAAM,8BAA+B,SAAQ,KAAK;IACjD,YAAY,OAAe;QAC1B,KAAK,CAAC,OAAO,CAAC,CAAC;QACf,IAAI,CAAC,IAAI,GAAG,oBAAoB,CAAC;QACjC,IAAI,CAAC,OAAO,GAAG,OAAO,CAAC;IACxB,CAAC;CACD;AAED,kBAAe,8BAA8B,CAAC"}

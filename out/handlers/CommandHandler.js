@@ -123,4 +123,3 @@ class CommandHandler extends Handler_1.Handler {
     }
 }
 exports.CommandHandler = CommandHandler;
-//# sourceMappingURL=CommandHandler.js.map

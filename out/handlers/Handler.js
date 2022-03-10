@@ -80,4 +80,3 @@ class Handler extends events_1.EventEmitter {
     }
 }
 exports.Handler = Handler;
-//# sourceMappingURL=Handler.js.map

@@ -235,4 +235,3 @@ class InteractionHandler extends Handler_1.Handler {
     }
 }
 exports.InteractionHandler = InteractionHandler;
-//# sourceMappingURL=InteractionHandler.js.map

@@ -19,4 +19,3 @@ class MessageContextMenu {
     }
 }
 exports.MessageContextMenu = MessageContextMenu;
-//# sourceMappingURL=MessageContextMenu.js.map

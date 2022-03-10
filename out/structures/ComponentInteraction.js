@@ -28,4 +28,3 @@ class ComponentInteraction {
     }
 }
 exports.ComponentInteraction = ComponentInteraction;
-//# sourceMappingURL=ComponentInteraction.js.map

@@ -22,4 +22,3 @@ class CommandsStore extends Array {
     }
 }
 exports.default = CommandsStore;
-//# sourceMappingURL=CommandsStore.js.map

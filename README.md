@@ -69,9 +69,6 @@ client.on("messageCreate", message => {
 });
 ```
 
-
-
-
 <a id="changelog"></a>
 ### Changelog v4.2 to v5
 Breaking changes:

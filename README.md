@@ -17,39 +17,6 @@
 - [Installation](#installation)
 - [Usage](#usage)
 
-<a id="changelog"></a>
-### Changelog v4.2 to v5
-Breaking changes:
-- **Paths supplied to each handlers' constructors should now be relative instead of absolute, like "./path/to/directory". Make sure you input paths relative to the project ROOT (`process.cwd()`) and not the file you're executing the code in.**
-- Arguments passed into the `super` constructor of each handler should now be (handler, name) instead of (handler, client, name). You can get the client instance from `handler.client`.
-- `setCommandDirectory(absolutePath)` has been changed to `setDirectory(relativePath)`.
-- `setInteractionDirectory(absolutePath)` has been changed to `setDirectory(relativePath)`.
-- `setEventsDirectory(absolutePath)` has been changed to `setDirectory(relativePath)`.
-- Removed `disableInbteractionModification` and `forceInteractionUpdate`. You now have to execute `interactionHandler.updateInteractions()` manually, in a `ready` event.
-> Information: `interactionHandler.updateInteractions()` will by default check if anything has changed and if not, stop the refreshing.
-  Run `interactionHandler.updateInteractions(true)` to forcibly update all interactions.
-  Remember however that you might be ratelimited by the Discord API after doing refreshing interactions too many times.
-- Listening to the error event with `.on("error")` is now removed in favor of catching exceptions returned from the runCommand() or runInteraction() (or similar) promise
-
-Added:
-- **ComponentHandler() - a handler specifically for handling message components (interactions with customId's), like buttons, select menus and modal responses.**
-- registerCommand(commandInstance) is now public and documented. It allows for manual registration of commands and takes the instanced command as the parameter.
-- Added createMany() static method on the Util class useful for creating multiple handlers at once
-- For components, you can optionally specify an option: `queryingMode` which is a string and must be either of: `exact, includes, startsWith`. Defaults to `exact`.
-  If `includes` mode is set, any interactions that **include** the customId specified, will be matched & executed. Similar for `startsWith`, however for interactions which customIds **start with** the custom id specified in options.
-   This is particularly useful for passing in custom IDs or values in the end of the custom ID since there is no way of passing custom data through component interactions.
-
-Other changes:
-- Changed Map's to custom Store classe whichs are a classes extending Array, which provides all array methods + some specific methods
-- CommandDirectoryReferenceError, EventsDirectoryReferenceError and InteractionDirectoryReferenceError have been merged into DirectoryReferenceError.
-- CommandExecutionError and InteractionExecutionError have been merged into ExecutionError.
-- The COMMAND_NOT_FOUND error will now provide a `query` key inside the params instead of `typedCommand`.
-- the `LocalUtils()` constructor should now be empty.
-- Documented `runCommand()`, `runInteraction()` methods.
-- Fixed clarification on loadEvents() docs description.
-- Multiple miscellaneous code refactors
-- Fixed typo in event name causing the event to not fire properly
-
 <a id="todos"></a>
 ### TODOs
 - Argument handler - automatic prompting if argument was not provided (with option to explicitely disable prompting).
@@ -101,3 +68,39 @@ client.on("messageCreate", message => {
   });
 });
 ```
+
+
+
+
+<a id="changelog"></a>
+### Changelog v4.2 to v5
+Breaking changes:
+- **Paths supplied to each handlers' constructors should now be relative instead of absolute, like "./path/to/directory". Make sure you input paths relative to the project ROOT (`process.cwd()`) and not the file you're executing the code in.**
+- Arguments passed into the `super` constructor of each handler should now be (handler, name) instead of (handler, client, name). You can get the client instance from `handler.client`.
+- `setCommandDirectory(absolutePath)` has been changed to `setDirectory(relativePath)`.
+- `setInteractionDirectory(absolutePath)` has been changed to `setDirectory(relativePath)`.
+- `setEventsDirectory(absolutePath)` has been changed to `setDirectory(relativePath)`.
+- Removed `disableInbteractionModification` and `forceInteractionUpdate`. You now have to execute `interactionHandler.updateInteractions()` manually, in a `ready` event.
+> Information: `interactionHandler.updateInteractions()` will by default check if anything has changed and if not, stop the refreshing.
+Run `interactionHandler.updateInteractions(true)` to forcibly update all interactions.
+Remember however that you might be ratelimited by the Discord API after doing refreshing interactions too many times.
+- Listening to the error event with `.on("error")` is now removed in favor of catching exceptions returned from the runCommand() or runInteraction() (or similar) promise
+
+Added:
+- **ComponentHandler() - a handler specifically for handling message components (interactions with customId's), like buttons, select menus and modal responses.**
+- registerCommand(commandInstance) is now public and documented. It allows for manual registration of commands and takes the instanced command as the parameter.
+- Added createMany() static method on the Util class useful for creating multiple handlers at once
+- For components, you can optionally specify an option: `queryingMode` which is a string and must be either of: `exact, includes, startsWith`. Defaults to `exact`.
+  If `includes` mode is set, any interactions that **include** the customId specified, will be matched & executed. Similar for `startsWith`, however for interactions which customIds **start with** the custom id specified in options.
+  This is particularly useful for passing in custom IDs or values in the end of the custom ID since there is no way of passing custom data through component interactions.
+
+Other changes:
+- Changed Map's to custom Store classe whichs are a classes extending Array, which provides all array methods + some specific methods
+- CommandDirectoryReferenceError, EventsDirectoryReferenceError and InteractionDirectoryReferenceError have been merged into DirectoryReferenceError.
+- CommandExecutionError and InteractionExecutionError have been merged into ExecutionError.
+- The COMMAND_NOT_FOUND error will now provide a `query` key inside the params instead of `typedCommand`.
+- the `LocalUtils()` constructor should now be empty.
+- Documented `runCommand()`, `runInteraction()` methods.
+- Fixed clarification on loadEvents() docs description.
+- Multiple miscellaneous code refactors
+- Fixed typo in event name causing the event to not fire properly

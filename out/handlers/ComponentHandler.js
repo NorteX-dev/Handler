@@ -11,17 +11,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ComponentHandler = void 0;
 const Handler_1 = require("./Handler");
-const path = require("path");
 const index_1 = require("../index");
+const ComponentsStore_1 = require("../store/ComponentsStore");
 class ComponentHandler extends Handler_1.Handler {
     constructor(options) {
         super(options);
         if (!options.client)
             throw new ReferenceError("ComponentHandler(): options.client is required.");
         this.client = options.client;
-        this.directory = options.directory ? path.join(process.cwd(), options.directory) : undefined;
-        this.components = new Map();
-        if (options.autoLoad === undefined)
+        this.directory = options.directory ? options.directory : undefined;
+        this.components = new ComponentsStore_1.default();
+        if (options.autoLoad === undefined || options.autoLoad === false)
             this.loadComponents();
         return this;
     }
@@ -50,9 +50,9 @@ class ComponentHandler extends Handler_1.Handler {
     registerComponent(component) {
         if (!(component instanceof index_1.ComponentInteraction))
             throw new TypeError("registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu.");
-        if (this.components.get(component.customId))
-            throw new Error(`Component ${component.name} cannot be registered twice.`);
-        this.components.set(component.customId, component);
+        if (this.components.getByCid(component.customId))
+            throw new Error(`Component '${component.name}' cannot be registered twice.`);
+        this.components.add(component);
         this.debug(`Loaded interaction "${component.name}".`);
         this.emit("load", component);
         return component;
@@ -79,8 +79,7 @@ class ComponentHandler extends Handler_1.Handler {
     }
     handleComponent(interaction, ...additionalOptions) {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            const componentsArray = Array.from(this.components.values());
-            const componentInteraction = componentsArray.find((componentObject) => {
+            const componentInteraction = this.components.find((componentObject) => {
                 if (componentObject.queryingMode === "exact")
                     return componentObject.customId === interaction.customId;
                 if (componentObject.queryingMode === "includes")
@@ -91,7 +90,7 @@ class ComponentHandler extends Handler_1.Handler {
             });
             if (!componentInteraction)
                 return;
-            this.debug("Found matching interaction with the queryingMode " + componentInteraction.queryingMode + ": " + componentInteraction.customId);
+            this.debug(`Found matching interaction with the queryingMode ${componentInteraction.queryingMode}: ${componentInteraction.customId}`);
             if (!componentInteraction)
                 return;
             try {

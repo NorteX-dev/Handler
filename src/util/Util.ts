@@ -1,4 +1,15 @@
 import { Client } from "discord.js";
+import { CommandHandler } from "../handlers/CommandHandler";
+import { EventHandler } from "../handlers/EventHandler";
+import { InteractionHandler } from "../handlers/InteractionHandler";
+import { ComponentHandler } from "../handlers/ComponentHandler";
+
+interface ManyClientsInterface {
+	commands?: any;
+	events?: any;
+	interactions?: any;
+	components?: any;
+}
 
 export class Util {
 	private client: Client;
@@ -7,52 +18,44 @@ export class Util {
 	}
 
 	/**
-	 * Truncates an string to a maximum length.
+	 * Util function for creating many handlers at once.
 	 *
-	 * @param str String to transform
-	 * @param length Maximum length of the string - default 100
-	 * @param dontAddDots If true, won't add the 3 dots at the end - default false
-	 * */
-	public static truncateString(str: string, length: number = 100, dontAddDots: boolean = false) {
-		return str.length > length ? str.slice(0, length) + `${dontAddDots ? "" : "..."}` : str;
-	}
-
-	/**
-	 * Trims an array to a maximum length
+	 * @returns Object<string, AnyHandler>
 	 *
-	 * @param arr Array to transform
-	 * @param length Maximum length of the array - default 10
-	 * @param dontPushMoreItemsString If true, won't push the "x more items..." string into the array - default false
-	 * */
-	public static truncateArray(arr: Array<any>, length: number = 10, dontPushMoreItemsString: boolean = false) {
-		if (arr.length > length) {
-			const sliced = arr.slice(0, length);
-			if (!dontPushMoreItemsString) sliced.push(arr.length - length + " more items...");
-			return sliced;
-		} else return arr;
-	}
-
-	/**
-	 * Transforms a PermissionResolvable (or an array of them) name(s) (such as "MANAGE_GUILD") to a more user-friendly style: "Manage Guild".
+	 * @param client The client instance to create handlers with.
+	 * @param {ManyClientsInterface} options An object with the key as the handler names, and the values as the options (excl. the client option) being passed into their constructors.
 	 *
-	 * @param permission The permission flag (or array of flags) to transform
+	 * @example
+	 * const handlers = Util.createMany(client, {
+	 *  commands: {
+	 *    directory: "./commands",
+	 *    prefix: "!"
+	 *  },
+	 *  interactions: {
+	 *    directory: "./interactions",
+	 *    autoLoad: false,
+	 *  }
+	 * }
 	 * */
-	public static toReadablePermission(permission: string | Array<string>) {
-		if (!Array.isArray(permission))
-			return permission
-				.toLowerCase()
-				.replace(/_/g, " ")
-				.split(" ")
-				.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-				.join(" ");
-		else
-			return permission.map((perm) => {
-				return perm
-					.toLowerCase()
-					.replace(/_/g, " ")
-					.split(" ")
-					.map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-					.join(" ");
-			});
+	public static createMany(client: Client, options: ManyClientsInterface) {
+		if (!client || !options) throw new Error("createMany(): Invalid client or directories.");
+		let handlers = {
+			commandHandler: null,
+			eventHandler: null,
+			interactionHandler: null,
+			componentHandler: null,
+		};
+		const keys: string[] = Object.keys(options);
+		for (let key of keys) {
+			if (key === "commands") handlers.commandHandler = new CommandHandler({ client, ...options[key] });
+			else if (key === "events") handlers.eventHandler = new EventHandler({ client, ...options[key] });
+			else if (key === "interactions") handlers.interactionHandler = new InteractionHandler({ client, ...options[key] });
+			else if (key === "components") handlers.componentHandler = new ComponentHandler({ client, ...options[key] });
+			else
+				throw new Error(
+					`createMany(): Invalid key '${key}' inside 'options'. Valid keys are 'commands', 'events', 'interactions', and 'components'.`
+				);
+		}
+		return handlers;
 	}
 }

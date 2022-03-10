@@ -1,59 +1,57 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Util = void 0;
+const CommandHandler_1 = require("../handlers/CommandHandler");
+const EventHandler_1 = require("../handlers/EventHandler");
+const InteractionHandler_1 = require("../handlers/InteractionHandler");
+const ComponentHandler_1 = require("../handlers/ComponentHandler");
 class Util {
     constructor(client) {
         this.client = client;
     }
     /**
-     * Truncates an string to a maximum length.
+     * Util function for creating many handlers at once.
      *
-     * @param str String to transform
-     * @param length Maximum length of the string - default 100
-     * @param dontAddDots If true, won't add the 3 dots at the end - default false
-     * */
-    static truncateString(str, length = 100, dontAddDots = false) {
-        return str.length > length ? str.slice(0, length) + `${dontAddDots ? "" : "..."}` : str;
-    }
-    /**
-     * Trims an array to a maximum length
+     * @returns Object<string, AnyHandler>
      *
-     * @param arr Array to transform
-     * @param length Maximum length of the array - default 10
-     * @param dontPushMoreItemsString If true, won't push the "x more items..." string into the array - default false
+     * @param client The client instance to create handlers with.
+     * @param {ManyClientsInterface} options An object with the key as the handler names, and the values as the options (excl. the client option) being passed into their constructors.
+     *
+     * @example
+     * const handlers = Util.createMany(client, {
+     *  commands: {
+     *    directory: "./commands",
+     *    prefix: "!"
+     *  },
+     *  interactions: {
+     *    directory: "./interactions",
+     *    autoLoad: false,
+     *  }
+     * }
      * */
-    static truncateArray(arr, length = 10, dontPushMoreItemsString = false) {
-        if (arr.length > length) {
-            const sliced = arr.slice(0, length);
-            if (!dontPushMoreItemsString)
-                sliced.push(arr.length - length + " more items...");
-            return sliced;
+    static createMany(client, options) {
+        if (!client || !options)
+            throw new Error("createMany(): Invalid client or directories.");
+        let handlers = {
+            commandHandler: null,
+            eventHandler: null,
+            interactionHandler: null,
+            componentHandler: null,
+        };
+        const keys = Object.keys(options);
+        for (let key of keys) {
+            if (key === "commands")
+                handlers.commandHandler = new CommandHandler_1.CommandHandler(Object.assign({ client }, options[key]));
+            else if (key === "events")
+                handlers.eventHandler = new EventHandler_1.EventHandler(Object.assign({ client }, options[key]));
+            else if (key === "interactions")
+                handlers.interactionHandler = new InteractionHandler_1.InteractionHandler(Object.assign({ client }, options[key]));
+            else if (key === "components")
+                handlers.componentHandler = new ComponentHandler_1.ComponentHandler(Object.assign({ client }, options[key]));
+            else
+                throw new Error(`createMany(): Invalid key '${key}' inside 'options'. Valid keys are 'commands', 'events', 'interactions', and 'components'.`);
         }
-        else
-            return arr;
-    }
-    /**
-     * Transforms a PermissionResolvable (or an array of them) name(s) (such as "MANAGE_GUILD") to a more user-friendly style: "Manage Guild".
-     *
-     * @param permission The permission flag (or array of flags) to transform
-     * */
-    static toReadablePermission(permission) {
-        if (!Array.isArray(permission))
-            return permission
-                .toLowerCase()
-                .replace(/_/g, " ")
-                .split(" ")
-                .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                .join(" ");
-        else
-            return permission.map((perm) => {
-                return perm
-                    .toLowerCase()
-                    .replace(/_/g, " ")
-                    .split(" ")
-                    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                    .join(" ");
-            });
+        return handlers;
     }
 }
 exports.Util = Util;

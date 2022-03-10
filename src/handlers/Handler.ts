@@ -29,8 +29,8 @@ export class Handler extends EventEmitter {
 		super();
 		if (!options.client) throw new ReferenceError("Handler(): options.client is required.");
 		this.client = options.client;
-		this.directory = options.directory;
 		this.localUtils = new LocalUtils();
+		if (options.directory) this.setDirectory(options.directory);
 		return this;
 	}
 
@@ -44,10 +44,10 @@ export class Handler extends EventEmitter {
 	 * @param value
 	 * */
 	setDirectory(value: string) {
-		if (!value) throw new DirectoryReferenceError("setDirectory(): path parameter is required.");
-		const dirPath = path.join(process.cwd(), this.directory);
+		if (!value) throw new DirectoryReferenceError("setDirectory(): 'path' parameter is required.");
+		const dirPath = path.join(process.cwd(), value);
 		if (!fs.existsSync(dirPath)) throw new DirectoryReferenceError(`setDirectory(...): Directory ${dirPath} does not exist.`);
-		this.directory = value;
+		this.directory = dirPath;
 		return this;
 	}
 
@@ -59,10 +59,14 @@ export class Handler extends EventEmitter {
 		return new Promise<any>(async (resolve, reject) => {
 			this.debug(`Loading files from ${this.directory}.`);
 			let instances: any[] = [];
-			if (!this.directory) return reject(new DirectoryReferenceError("Directory is not set. Use setDirectory(path) prior."));
-			const dirPath = path.join(process.cwd(), this.directory);
-			if (!fs.existsSync(dirPath)) return reject(new DirectoryReferenceError(`Directory ${dirPath} does not exist.`));
-			glob(dirPath + "/**/*.js", async (err: Error | null, files: string[]) => {
+			if (!this.directory)
+				return reject(
+					new DirectoryReferenceError(
+						"Directory is not set. Use setDirectory(path) or specify a 'directory' key to the constructor prior to loading."
+					)
+				);
+			if (!fs.existsSync(this.directory)) return reject(new DirectoryReferenceError(`Directory "${this.directory}" does not exist.`));
+			glob(this.directory + "/**/*.js", async (err: Error | null, files: string[]) => {
 				if (err) return reject(new DirectoryReferenceError("Error while loading files: " + err.message));
 				if (!files.length) this.debug("No files found in supplied directory.");
 				for (const file of files) {

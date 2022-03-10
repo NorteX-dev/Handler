@@ -22,8 +22,9 @@ class Handler extends events_1.EventEmitter {
         if (!options.client)
             throw new ReferenceError("Handler(): options.client is required.");
         this.client = options.client;
-        this.directory = options.directory;
         this.localUtils = new LocalUtils_1.LocalUtils();
+        if (options.directory)
+            this.setDirectory(options.directory);
         return this;
     }
     /**
@@ -37,11 +38,11 @@ class Handler extends events_1.EventEmitter {
      * */
     setDirectory(value) {
         if (!value)
-            throw new DirectoryReferenceError_1.default("setDirectory(): path parameter is required.");
-        const dirPath = path.join(process.cwd(), this.directory);
+            throw new DirectoryReferenceError_1.default("setDirectory(): 'path' parameter is required.");
+        const dirPath = path.join(process.cwd(), value);
         if (!fs.existsSync(dirPath))
             throw new DirectoryReferenceError_1.default(`setDirectory(...): Directory ${dirPath} does not exist.`);
-        this.directory = value;
+        this.directory = dirPath;
         return this;
     }
     debug(message) {
@@ -52,11 +53,10 @@ class Handler extends events_1.EventEmitter {
             this.debug(`Loading files from ${this.directory}.`);
             let instances = [];
             if (!this.directory)
-                return reject(new DirectoryReferenceError_1.default("Directory is not set. Use setDirectory(path) prior."));
-            const dirPath = path.join(process.cwd(), this.directory);
-            if (!fs.existsSync(dirPath))
-                return reject(new DirectoryReferenceError_1.default(`Directory ${dirPath} does not exist.`));
-            (0, glob_1.glob)(dirPath + "/**/*.js", (err, files) => __awaiter(this, void 0, void 0, function* () {
+                return reject(new DirectoryReferenceError_1.default("Directory is not set. Use setDirectory(path) or specify a 'directory' key to the constructor prior to loading."));
+            if (!fs.existsSync(this.directory))
+                return reject(new DirectoryReferenceError_1.default(`Directory "${this.directory}" does not exist.`));
+            (0, glob_1.glob)(this.directory + "/**/*.js", (err, files) => __awaiter(this, void 0, void 0, function* () {
                 if (err)
                     return reject(new DirectoryReferenceError_1.default("Error while loading files: " + err.message));
                 if (!files.length)

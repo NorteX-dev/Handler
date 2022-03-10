@@ -13,14 +13,21 @@ exports.EventHandler = void 0;
 const index_1 = require("../index");
 const Handler_1 = require("./Handler");
 class EventHandler extends Handler_1.Handler {
+    /**
+     * Initializes an event handler on the client.
+     *
+     * @returns EventHandler
+     * @param options The options to initialize the handler with.
+     * @param options.client The client to initialize the handler with.
+     * @param options.autoLoad Whether or not to automatically load the events.
+     * @param options.directory The directory to load the events from.
+     * */
     constructor(options) {
         super(options);
         if (!options.client)
             throw new ReferenceError("EventHandler(): options.client is required.");
         this.client = options.client;
-        this.directory = options.directory;
-        this.events = new Map();
-        if (options.autoLoad === undefined)
+        if (options.autoLoad === undefined || options.autoLoad === false)
             this.loadEvents();
         return this;
     }
@@ -36,7 +43,7 @@ class EventHandler extends Handler_1.Handler {
         return new Promise((res, rej) => __awaiter(this, void 0, void 0, function* () {
             const files = yield this.loadAndInstance().catch(rej);
             files.forEach((event) => this.registerEvent(event));
-            return res(files);
+            return res(this);
         }));
     }
     /**

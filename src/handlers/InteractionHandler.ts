@@ -1,7 +1,8 @@
-import { Client, Interaction as DJSInteraction } from "discord.js";
+import { ApplicationCommand, Client, Collection, Interaction as DJSInteraction, Snowflake } from "discord.js";
 import { Handler } from "./Handler";
 import ExecutionError from "../errors/ExecutionError";
 import { InteractionCommand, MessageContextMenu, UserContextMenu } from "../index";
+import InteractionsStore from "../store/InteractionsStore";
 
 interface HandlerOptions {
 	client: Client;
@@ -9,6 +10,8 @@ interface HandlerOptions {
 	autoLoad?: boolean;
 	owners?: Array<string>;
 }
+
+type InteractionRunnable = InteractionCommand | UserContextMenu | MessageContextMenu;
 
 export class InteractionHandler extends Handler {
 	/**
@@ -30,18 +33,15 @@ export class InteractionHandler extends Handler {
 	public directory?: string;
 	public owners?: Array<string>;
 
-	public interactions: Map<string, InteractionCommand | UserContextMenu | MessageContextMenu>;
+	public interactions: InteractionsStore;
 
 	constructor(options: HandlerOptions) {
 		super(options);
 		if (!options.client) throw new ReferenceError("InteractionHandler(): options.client is required.");
 		this.client = options.client;
-		this.directory = options.directory ?? undefined;
 		this.owners = options.owners || [];
-		this.interactions = new Map();
-		if (options.autoLoad === undefined) {
-			this.loadInteractions();
-		}
+		this.interactions = new InteractionsStore();
+		if (options.autoLoad === undefined || options.autoLoad === false) this.loadInteractions();
 		return this;
 	}
 
@@ -67,13 +67,13 @@ export class InteractionHandler extends Handler {
 	 *
 	 * @returns Interaction
 	 * */
-	registerInteraction(interaction: InteractionCommand | UserContextMenu | MessageContextMenu) {
+	registerInteraction(interaction: InteractionRunnable) {
 		if (!(interaction instanceof InteractionCommand || interaction instanceof UserContextMenu || interaction instanceof MessageContextMenu))
 			throw new TypeError(
 				"registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu."
 			);
-		if (this.interactions.get(interaction.name)) throw new Error(`Interaction ${interaction.name} cannot be registered twice.`);
-		this.interactions.set(interaction.type + "_" + interaction.name, interaction);
+		if (this.interactions.getByName(interaction.name)) throw new Error(`Interaction ${interaction.name} cannot be registered twice.`);
+		this.interactions.add(interaction);
 		this.debug(`Loaded interaction "${interaction.name}".`);
 		this.emit("load", interaction);
 		return interaction;
@@ -108,8 +108,16 @@ export class InteractionHandler extends Handler {
 	 * */
 	private handleCommandInteraction(interaction: any, ...additionalOptions: any) {
 		return new Promise(async (res, rej) => {
-			const applicationCommand = this.interactions.get("CHAT_INPUT_" + interaction.commandName.toLowerCase());
+			const applicationCommand = this.interactions.getByNameAndType(interaction.commandName.toLowerCase(), "CHAT_INPUT");
 			if (!applicationCommand) return;
+			if (
+				!(
+					applicationCommand instanceof InteractionCommand ||
+					applicationCommand instanceof UserContextMenu ||
+					applicationCommand instanceof MessageContextMenu
+				)
+			)
+				throw new ExecutionError("Attempting to run non-interaction class with runInteraction().", "INVALID_CLASS");
 
 			const failedReason: ExecutionError | undefined = await this.localUtils.verifyInteraction(interaction, applicationCommand);
 			if (failedReason) {
@@ -133,8 +141,9 @@ export class InteractionHandler extends Handler {
 	private handleContextMenuInteraction(interaction: any, ...additionalOptions: any) {
 		return new Promise(async (resolve, reject) => {
 			const contextMenuInt =
-				this.interactions.get("USER_" + interaction.commandName.toLowerCase()) ||
-				this.interactions.get("MESSAGE_" + interaction.commandName.toLowerCase());
+				this.interactions.getByNameAndType(interaction.commandName.toLowerCase(), "USER") ||
+				this.interactions.getByNameAndType(interaction.commandName.toLowerCase(), "MESSAGE");
+
 			if (!contextMenuInt) return;
 
 			if (interaction.targetType === "USER" && contextMenuInt.type !== "USER") return;
@@ -164,6 +173,11 @@ export class InteractionHandler extends Handler {
 	 * @param {boolean} [force=false] Skip checks and set commands even if the local version is up to date.
 	 * */
 	public async updateInteractions(force: boolean = false) {
+		if (!this.client.application)
+			throw new Error(
+				"updateInteractions(): client.application is undefined. Make sure you are executing updateInteractions() after the client has emitted the 'ready' event."
+			);
+
 		let changesMade = false;
 		if (force) {
 			// Forcing update, automatically assume changes were made
@@ -172,25 +186,21 @@ export class InteractionHandler extends Handler {
 		} else {
 			// Fetch existing interactions and compare to loaded
 			this.debug("Checking for differences.");
-			if (!this.client.application)
-				throw new Error(
-					"updateInteractions(): client.application is undefined. Make sure you are executing updateInteractions() after the client has emitted the 'ready' event."
-				);
 
 			const fetchedInteractions = await this.client.application.commands.fetch().catch((err) => {
-				throw new Error(`Can't fetch client commands: ${err}`);
+				throw new Error(
+					`Can't fetch client commands: ${err.message}.\nMake sure you are executing updateInteractions() after the client has emitted the 'ready' event and 'this.client.application' is populated.`
+				);
 			});
 			if (!fetchedInteractions) throw new Error("Interactions weren't fetched.");
-			changesMade = await this.checkDiff(fetchedInteractions);
+			changesMade = this.checkDiff(fetchedInteractions);
 		}
 
 		if (changesMade) {
 			// Filter out message components
-			const interactionsArray = Array.from(this.interactions, ([_key, interaction]) => interaction).filter((r) =>
-				["CHAT_INPUT", "USER", "MESSAGE"].includes(r.type)
-			);
+			const interactions = this.interactions.filter((r) => ["CHAT_INPUT", "USER", "MESSAGE"].includes(r.type));
 			let interactionsToSend = [];
-			interactionsArray.forEach((interaction) => {
+			interactions.forEach((interaction) => {
 				if (interaction.type === "CHAT_INPUT" && interaction instanceof InteractionCommand) {
 					interactionsToSend.push({
 						type: "CHAT_INPUT",
@@ -208,9 +218,9 @@ export class InteractionHandler extends Handler {
 					this.debug(`Interaction type ${interaction.type} is not supported.`);
 				}
 			});
-			await this.client.application?.commands
+			await this.client.application.commands
 				// @ts-ignore
-				.set(interactionsArray)
+				.set(interactions)
 				.then((returned) => {
 					this.debug(
 						`Updated interactions (${returned.size} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`
@@ -229,26 +239,29 @@ export class InteractionHandler extends Handler {
 	/**
 	 * @ignore
 	 * */
-	private async checkDiff(interactions: any) {
-		const fetched = Array.from(interactions, ([_, data]) => data);
-		const existing = Array.from(this.interactions, ([_, data]) => data);
+	private checkDiff(interactions: Collection<Snowflake, ApplicationCommand>) {
+		const fetched = Array.from(interactions.values()); // Collection to array conversion
+		// Assume no changes made
 		let changesMade = false;
-		for (let localCmd of existing) {
+		for (let localCmd of this.interactions) {
 			const remoteCmd = fetched.find((f) => f.name === localCmd.name);
 			if (!remoteCmd) {
+				// Handle created commands
+				this.debug("Interactions match check failed because there are new files created in the filesystem. Updating...");
 				changesMade = true;
 				break;
 			}
+			// Handle changed commands
 			changesMade = !remoteCmd.equals(localCmd);
 		}
+		// Handle deleted commands
 		for (let remoteCmd of fetched) {
-			if (!existing.find((c) => c.name === remoteCmd.name)) {
+			if (!this.interactions.getByName(remoteCmd.name)) {
 				this.debug("Interactions match check failed because local interaction files are missing from the filesystem. Updating...");
 				changesMade = true;
 				break;
 			}
 		}
-		// Assume match
 		return changesMade;
 	}
 }

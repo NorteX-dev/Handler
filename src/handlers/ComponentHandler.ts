@@ -1,7 +1,7 @@
 import { Client, Interaction as DJSInteraction } from "discord.js";
 import { Handler } from "./Handler";
-import * as path from "path";
 import { ComponentInteraction } from "../index";
+import ComponentsStore from "../store/ComponentsStore";
 
 interface HandlerOptions {
 	client: Client;
@@ -22,16 +22,15 @@ export class ComponentHandler extends Handler {
 	public client: Client;
 	public directory?: string;
 	public owners?: Array<string>;
-
-	public components: Map<string, ComponentInteraction>;
+	public components: ComponentsStore;
 
 	constructor(options: HandlerOptions) {
 		super(options);
 		if (!options.client) throw new ReferenceError("ComponentHandler(): options.client is required.");
 		this.client = options.client;
-		this.directory = options.directory ? path.join(process.cwd(), options.directory) : undefined;
-		this.components = new Map();
-		if (options.autoLoad === undefined) this.loadComponents();
+		this.directory = options.directory ? options.directory : undefined;
+		this.components = new ComponentsStore();
+		if (options.autoLoad === undefined || options.autoLoad === false) this.loadComponents();
 		return this;
 	}
 
@@ -63,8 +62,8 @@ export class ComponentHandler extends Handler {
 			throw new TypeError(
 				"registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu."
 			);
-		if (this.components.get(component.customId)) throw new Error(`Component ${component.name} cannot be registered twice.`);
-		this.components.set(component.customId, component);
+		if (this.components.getByCid(component.customId)) throw new Error(`Component '${component.name}' cannot be registered twice.`);
+		this.components.add(component);
 		this.debug(`Loaded interaction "${component.name}".`);
 		this.emit("load", component);
 		return component;
@@ -93,9 +92,7 @@ export class ComponentHandler extends Handler {
 
 	private handleComponent(interaction: any, ...additionalOptions: any) {
 		return new Promise(async (resolve, reject) => {
-			const componentsArray = Array.from(this.components.values());
-
-			const componentInteraction = componentsArray.find((componentObject) => {
+			const componentInteraction = this.components.find((componentObject) => {
 				if (componentObject.queryingMode === "exact") return componentObject.customId === interaction.customId;
 				if (componentObject.queryingMode === "includes") return interaction.customId.includes(componentObject.customId);
 				if (componentObject.queryingMode === "startsWith") return interaction.customId.startsWith(componentObject.customId);
@@ -104,9 +101,7 @@ export class ComponentHandler extends Handler {
 
 			if (!componentInteraction) return;
 
-			this.debug(
-				"Found matching interaction with the queryingMode " + componentInteraction.queryingMode + ": " + componentInteraction.customId
-			);
+			this.debug(`Found matching interaction with the queryingMode ${componentInteraction.queryingMode}: ${componentInteraction.customId}`);
 			if (!componentInteraction) return;
 
 			try {

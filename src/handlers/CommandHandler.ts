@@ -3,10 +3,11 @@ import ExecutionError from "../errors/ExecutionError";
 import { Client, Message } from "discord.js";
 import { Handler } from "./Handler";
 import { Command } from "../structures/Command";
+import CommandsStore from "../store/CommandsStore";
 
 interface HandlerOptions {
 	client: Client;
-	autoLoad: boolean;
+	autoLoad?: boolean;
 	directory?: string;
 	prefix?: string;
 	owners?: Array<string>;
@@ -28,7 +29,7 @@ export class CommandHandler extends Handler {
 	 * const handler = new CommandHandler({ client: client });
 	 * ```
 	 * */
-	public commands: Map<string, Command>;
+	public commands: CommandsStore;
 	public aliases: Map<string, string>;
 	public prefix?: string[];
 	public owners: string[];
@@ -37,13 +38,13 @@ export class CommandHandler extends Handler {
 
 	constructor(options: HandlerOptions) {
 		super(options);
-		this.setPrefix(options.prefix ?? "?");
 		this.owners = options.owners || [];
-		this.commands = new Map();
+		this.commands = new CommandsStore();
 		this.aliases = new Map();
 		this.userCooldowns = new Map();
 		this.guildCooldowns = new Map();
-		if (options.autoLoad === undefined) this.loadCommands();
+		this.setPrefix(options.prefix ?? "?");
+		if (options.autoLoad === undefined || options.autoLoad === false) this.loadCommands();
 		return this;
 	}
 
@@ -64,13 +65,13 @@ export class CommandHandler extends Handler {
 	/**
 	 * Loads classic message commands into memory
 	 *
-	 * @returns Map<string, Command>
+	 * @returns CommandsStore
 	 *
 	 * @remarks
 	 * Requires @see {@link CommandHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
 	 * */
 	loadCommands() {
-		return new Promise(async (res, rej) => {
+		return new Promise<CommandsStore>(async (res, rej) => {
 			const files = await this.loadAndInstance().catch(rej);
 			files.forEach((cmd: Command) => this.registerCommand(cmd));
 			return res(this.commands);
@@ -83,9 +84,9 @@ export class CommandHandler extends Handler {
 	 * @returns Command
 	 * */
 	registerCommand(command: Command) {
-		if (!(command instanceof Command)) throw new TypeError("registerCommand(): command parameter must be an instance of Command.");
+		if (!(command instanceof Command)) throw new TypeError(`registerCommand(): command parameter is not an instance of Command.`);
 		if (this.commands.get(command.name)) throw new Error(`Command ${command.name} cannot be registered twice.`);
-		this.commands.set(command.name, command);
+		this.commands.add(command);
 		if (command.aliases && command.aliases.length) command.aliases.forEach((alias: string) => this.aliases.set(alias, command.name));
 		this.emit("load", command);
 		this.debug(`Registered command "${command.name}".`);
@@ -95,7 +96,7 @@ export class CommandHandler extends Handler {
 	/**
 	 * Attempts to run the interaction. Returns a promise with the interaction if run succeeded, or rejects with an execution error.
 	 *
-	 * @returns Promise<<Command>
+	 * @returns Promise<Command>
 	 * */
 	runCommand(message: Message, ...additionalOptions: any) {
 		return new Promise<Command>(async (resolve, reject) => {
@@ -111,6 +112,8 @@ export class CommandHandler extends Handler {
 				// @ts-ignore
 				const command = this.commands.get(typedCommand.toLowerCase()) || this.commands.get(this.aliases.get(typedCommand.toLowerCase()));
 				if (!command) return reject(new ExecutionError("Command not found.", "COMMAND_NOT_FOUND", { query: typedCommand }));
+				if (!(command instanceof Command))
+					return reject(new ExecutionError("Attempting to run non-command class with runCommand().", "INVALID_CLASS"));
 
 				// Handle additional command parameters
 				if (!command.allowDm && message.channel.type === "DM")

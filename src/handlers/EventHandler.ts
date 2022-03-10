@@ -13,19 +13,18 @@ export class EventHandler extends Handler {
 	/**
 	 * Initializes an event handler on the client.
 	 *
-	 * @param client Discord.JS Client Instance
-	 * @param directory Event files directory
 	 * @returns EventHandler
+	 * @param options The options to initialize the handler with.
+	 * @param options.client The client to initialize the handler with.
+	 * @param options.autoLoad Whether or not to automatically load the events.
+	 * @param options.directory The directory to load the events from.
 	 * */
-	public events: Map<string, Event>;
 
 	constructor(options: HandlerOptions) {
 		super(options);
 		if (!options.client) throw new ReferenceError("EventHandler(): options.client is required.");
 		this.client = options.client;
-		this.directory = options.directory;
-		this.events = new Map();
-		if (options.autoLoad === undefined) this.loadEvents();
+		if (options.autoLoad === undefined || options.autoLoad === false) this.loadEvents();
 		return this;
 	}
 
@@ -38,10 +37,10 @@ export class EventHandler extends Handler {
 	 * Requires @see {@link EventHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
 	 * */
 	loadEvents() {
-		return new Promise(async (res, rej) => {
+		return new Promise<EventHandler>(async (res, rej) => {
 			const files = await this.loadAndInstance().catch(rej);
 			files.forEach((event: Event) => this.registerEvent(event));
-			return res(files);
+			return res(this);
 		});
 	}
 

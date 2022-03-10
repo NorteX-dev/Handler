@@ -13,17 +13,18 @@ exports.CommandHandler = void 0;
 const ExecutionError_1 = require("../errors/ExecutionError");
 const Handler_1 = require("./Handler");
 const Command_1 = require("../structures/Command");
+const CommandsStore_1 = require("../store/CommandsStore");
 class CommandHandler extends Handler_1.Handler {
     constructor(options) {
         var _a;
         super(options);
-        this.setPrefix((_a = options.prefix) !== null && _a !== void 0 ? _a : "?");
         this.owners = options.owners || [];
-        this.commands = new Map();
+        this.commands = new CommandsStore_1.default();
         this.aliases = new Map();
         this.userCooldowns = new Map();
         this.guildCooldowns = new Map();
-        if (options.autoLoad === undefined)
+        this.setPrefix((_a = options.prefix) !== null && _a !== void 0 ? _a : "?");
+        if (options.autoLoad === undefined || options.autoLoad === false)
             this.loadCommands();
         return this;
     }
@@ -45,7 +46,7 @@ class CommandHandler extends Handler_1.Handler {
     /**
      * Loads classic message commands into memory
      *
-     * @returns Map<string, Command>
+     * @returns CommandsStore
      *
      * @remarks
      * Requires @see {@link CommandHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
@@ -64,10 +65,10 @@ class CommandHandler extends Handler_1.Handler {
      * */
     registerCommand(command) {
         if (!(command instanceof Command_1.Command))
-            throw new TypeError("registerCommand(): command parameter must be an instance of Command.");
+            throw new TypeError(`registerCommand(): command parameter is not an instance of Command.`);
         if (this.commands.get(command.name))
             throw new Error(`Command ${command.name} cannot be registered twice.`);
-        this.commands.set(command.name, command);
+        this.commands.add(command);
         if (command.aliases && command.aliases.length)
             command.aliases.forEach((alias) => this.aliases.set(alias, command.name));
         this.emit("load", command);
@@ -77,7 +78,7 @@ class CommandHandler extends Handler_1.Handler {
     /**
      * Attempts to run the interaction. Returns a promise with the interaction if run succeeded, or rejects with an execution error.
      *
-     * @returns Promise<<Command>
+     * @returns Promise<Command>
      * */
     runCommand(message, ...additionalOptions) {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
@@ -97,6 +98,8 @@ class CommandHandler extends Handler_1.Handler {
                 const command = this.commands.get(typedCommand.toLowerCase()) || this.commands.get(this.aliases.get(typedCommand.toLowerCase()));
                 if (!command)
                     return reject(new ExecutionError_1.default("Command not found.", "COMMAND_NOT_FOUND", { query: typedCommand }));
+                if (!(command instanceof Command_1.Command))
+                    return reject(new ExecutionError_1.default("Attempting to run non-command class with runCommand().", "INVALID_CLASS"));
                 // Handle additional command parameters
                 if (!command.allowDm && message.channel.type === "DM")
                     return reject(new ExecutionError_1.default("Command cannot be executed in DM.", "COMMAND_NOT_ALLOWED_IN_DM", { command }));

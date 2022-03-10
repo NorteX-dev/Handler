@@ -11,20 +11,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.InteractionHandler = void 0;
 const Handler_1 = require("./Handler");
+const ExecutionError_1 = require("../errors/ExecutionError");
 const index_1 = require("../index");
+const InteractionsStore_1 = require("../store/InteractionsStore");
 class InteractionHandler extends Handler_1.Handler {
     constructor(options) {
-        var _a;
         super(options);
         if (!options.client)
             throw new ReferenceError("InteractionHandler(): options.client is required.");
         this.client = options.client;
-        this.directory = (_a = options.directory) !== null && _a !== void 0 ? _a : undefined;
         this.owners = options.owners || [];
-        this.interactions = new Map();
-        if (options.autoLoad === undefined) {
+        this.interactions = new InteractionsStore_1.default();
+        if (options.autoLoad === undefined || options.autoLoad === false)
             this.loadInteractions();
-        }
         return this;
     }
     /**
@@ -51,9 +50,9 @@ class InteractionHandler extends Handler_1.Handler {
     registerInteraction(interaction) {
         if (!(interaction instanceof index_1.InteractionCommand || interaction instanceof index_1.UserContextMenu || interaction instanceof index_1.MessageContextMenu))
             throw new TypeError("registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu.");
-        if (this.interactions.get(interaction.name))
+        if (this.interactions.getByName(interaction.name))
             throw new Error(`Interaction ${interaction.name} cannot be registered twice.`);
-        this.interactions.set(interaction.type + "_" + interaction.name, interaction);
+        this.interactions.add(interaction);
         this.debug(`Loaded interaction "${interaction.name}".`);
         this.emit("load", interaction);
         return interaction;
@@ -87,9 +86,13 @@ class InteractionHandler extends Handler_1.Handler {
      * */
     handleCommandInteraction(interaction, ...additionalOptions) {
         return new Promise((res, rej) => __awaiter(this, void 0, void 0, function* () {
-            const applicationCommand = this.interactions.get("CHAT_INPUT_" + interaction.commandName.toLowerCase());
+            const applicationCommand = this.interactions.getByNameAndType(interaction.commandName.toLowerCase(), "CHAT_INPUT");
             if (!applicationCommand)
                 return;
+            if (!(applicationCommand instanceof index_1.InteractionCommand ||
+                applicationCommand instanceof index_1.UserContextMenu ||
+                applicationCommand instanceof index_1.MessageContextMenu))
+                throw new ExecutionError_1.default("Attempting to run non-interaction class with runInteraction().", "INVALID_CLASS");
             const failedReason = yield this.localUtils.verifyInteraction(interaction, applicationCommand);
             if (failedReason) {
                 rej(failedReason);
@@ -110,8 +113,8 @@ class InteractionHandler extends Handler_1.Handler {
      * */
     handleContextMenuInteraction(interaction, ...additionalOptions) {
         return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-            const contextMenuInt = this.interactions.get("USER_" + interaction.commandName.toLowerCase()) ||
-                this.interactions.get("MESSAGE_" + interaction.commandName.toLowerCase());
+            const contextMenuInt = this.interactions.getByNameAndType(interaction.commandName.toLowerCase(), "USER") ||
+                this.interactions.getByNameAndType(interaction.commandName.toLowerCase(), "MESSAGE");
             if (!contextMenuInt)
                 return;
             if (interaction.targetType === "USER" && contextMenuInt.type !== "USER")
@@ -141,8 +144,9 @@ class InteractionHandler extends Handler_1.Handler {
      * @param {boolean} [force=false] Skip checks and set commands even if the local version is up to date.
      * */
     updateInteractions(force = false) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            if (!this.client.application)
+                throw new Error("updateInteractions(): client.application is undefined. Make sure you are executing updateInteractions() after the client has emitted the 'ready' event.");
             let changesMade = false;
             if (force) {
                 // Forcing update, automatically assume changes were made
@@ -152,20 +156,18 @@ class InteractionHandler extends Handler_1.Handler {
             else {
                 // Fetch existing interactions and compare to loaded
                 this.debug("Checking for differences.");
-                if (!this.client.application)
-                    throw new Error("updateInteractions(): client.application is undefined. Make sure you are executing updateInteractions() after the client has emitted the 'ready' event.");
                 const fetchedInteractions = yield this.client.application.commands.fetch().catch((err) => {
-                    throw new Error(`Can't fetch client commands: ${err}`);
+                    throw new Error(`Can't fetch client commands: ${err.message}.\nMake sure you are executing updateInteractions() after the client has emitted the 'ready' event and 'this.client.application' is populated.`);
                 });
                 if (!fetchedInteractions)
                     throw new Error("Interactions weren't fetched.");
-                changesMade = yield this.checkDiff(fetchedInteractions);
+                changesMade = this.checkDiff(fetchedInteractions);
             }
             if (changesMade) {
                 // Filter out message components
-                const interactionsArray = Array.from(this.interactions, ([_key, interaction]) => interaction).filter((r) => ["CHAT_INPUT", "USER", "MESSAGE"].includes(r.type));
+                const interactions = this.interactions.filter((r) => ["CHAT_INPUT", "USER", "MESSAGE"].includes(r.type));
                 let interactionsToSend = [];
-                interactionsArray.forEach((interaction) => {
+                interactions.forEach((interaction) => {
                     if (interaction.type === "CHAT_INPUT" && interaction instanceof index_1.InteractionCommand) {
                         interactionsToSend.push({
                             type: "CHAT_INPUT",
@@ -186,12 +188,16 @@ class InteractionHandler extends Handler_1.Handler {
                         this.debug(`Interaction type ${interaction.type} is not supported.`);
                     }
                 });
-                yield ((_a = this.client.application) === null || _a === void 0 ? void 0 : _a.commands.set(interactionsArray).then((returned) => {
+                yield this.client.application.commands
+                    // @ts-ignore
+                    .set(interactions)
+                    .then((returned) => {
                     this.debug(`Updated interactions (${returned.size} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`);
                     this.emit("ready");
-                }).catch((err) => {
+                })
+                    .catch((err) => {
                     throw new Error(`Can't update client commands: ${err}`);
-                }));
+                });
             }
             else {
                 this.debug("No changes in interactions - not refreshing.");
@@ -203,28 +209,29 @@ class InteractionHandler extends Handler_1.Handler {
      * @ignore
      * */
     checkDiff(interactions) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const fetched = Array.from(interactions, ([_, data]) => data);
-            const existing = Array.from(this.interactions, ([_, data]) => data);
-            let changesMade = false;
-            for (let localCmd of existing) {
-                const remoteCmd = fetched.find((f) => f.name === localCmd.name);
-                if (!remoteCmd) {
-                    changesMade = true;
-                    break;
-                }
-                changesMade = !remoteCmd.equals(localCmd);
+        const fetched = Array.from(interactions.values()); // Collection to array conversion
+        // Assume no changes made
+        let changesMade = false;
+        for (let localCmd of this.interactions) {
+            const remoteCmd = fetched.find((f) => f.name === localCmd.name);
+            if (!remoteCmd) {
+                // Handle created commands
+                this.debug("Interactions match check failed because there are new files created in the filesystem. Updating...");
+                changesMade = true;
+                break;
             }
-            for (let remoteCmd of fetched) {
-                if (!existing.find((c) => c.name === remoteCmd.name)) {
-                    this.debug("Interactions match check failed because local interaction files are missing from the filesystem. Updating...");
-                    changesMade = true;
-                    break;
-                }
+            // Handle changed commands
+            changesMade = !remoteCmd.equals(localCmd);
+        }
+        // Handle deleted commands
+        for (let remoteCmd of fetched) {
+            if (!this.interactions.getByName(remoteCmd.name)) {
+                this.debug("Interactions match check failed because local interaction files are missing from the filesystem. Updating...");
+                changesMade = true;
+                break;
             }
-            // Assume match
-            return changesMade;
-        });
+        }
+        return changesMade;
     }
 }
 exports.InteractionHandler = InteractionHandler;

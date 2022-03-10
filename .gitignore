@@ -2,4 +2,5 @@ node_modules
 .idea
 /test/.env
 .env
+test
 /test/node_modules

@@ -9,6 +9,8 @@
 > "Interactions" are slash commands and context menus, such as `/ban user:Username`.
 > 
 > "Events" are the normal events of Discord.js such as `messageCreate`, `guildMemberAdd`.
+> 
+> "Components" are interactions of message component type, like buttons and select menus.
 
 #### Table of Contents:
 - [Changelog [v4.2 to v5]](#changelog)
@@ -81,13 +83,10 @@ handler.on("load", command => {
   // Emits when a command is loaded
   console.log("Loaded", command.name);
 })
-handler.on("error", e => {
-  // Emits when an internal exception occurs in the code
-  console.error(e);
-});
+// Listening to debug is not required but might come in useful when developing.
 handler.on("debug", e => {
   // Emits additional debug information
-  console.log(`[Debug] ${e.message}`); // Logging debug is not required but very useful when creating the bot.
+  console.log(`[Debug] ${e.message}`);
 });
 ```
 

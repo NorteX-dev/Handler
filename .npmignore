@@ -1,2 +1,12 @@
 src
 test
+node_modules
+.prettierrc
+.idea
+.vscode
+.gitignore
+.env
+.env.development
+tsconfig.json
+README.md
+things to add.txt

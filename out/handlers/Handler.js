@@ -54,10 +54,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Handler = void 0;
 var DirectoryReferenceError_1 = require("../errors/DirectoryReferenceError");
 var events_1 = require("events");
-var path = require("path");
 var glob_1 = require("glob");
-var fs = require("fs");
 var LocalUtils_1 = require("../util/LocalUtils");
+var path = require("path");
+var fs = require("fs");
 var Handler = /** @class */ (function (_super) {
     __extends(Handler, _super);
     function Handler(options) {

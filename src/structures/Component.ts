@@ -29,7 +29,7 @@ export class Component {
 			);
 	}
 
-	/*z
+	/*
 	 * @param {Interaction} interaction
 	 * @override
 	 * */

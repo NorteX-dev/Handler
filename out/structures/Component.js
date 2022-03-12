@@ -18,7 +18,7 @@ var Component = /** @class */ (function () {
         if (!["exact", "includes", "startsWith"].includes(options.queryingMode))
             throw new Error(filename + ": Invalid querying mode for component interaction. Querying mode must be one of: exact, includes, startsWith.");
     }
-    /*z
+    /*
      * @param {Interaction} interaction
      * @override
      * */

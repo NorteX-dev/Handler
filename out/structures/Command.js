@@ -1,14 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Command = void 0;
-const MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
-class Command {
+var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
+var Command = /** @class */ (function () {
     /**
      * @param handler The command handler instance
      * @param filename Command name - if unspecified, the filename is taken into consideration
      * @param options Additional command options @see {@link CommandOptions}
      * */
-    constructor(handler, filename, options) {
+    function Command(handler, filename, options) {
         if (!options)
             options = {};
         this.handler = handler;
@@ -40,8 +40,13 @@ class Command {
      *
      * @override
      * */
-    run(message, args, ...additionalParams) {
+    Command.prototype.run = function (message, args) {
+        var additionalParams = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            additionalParams[_i - 2] = arguments[_i];
+        }
         throw new MethodNotOverridenError_1.default("run() method on " + this.name + " command is not present.");
-    }
-}
+    };
+    return Command;
+}());
 exports.Command = Command;

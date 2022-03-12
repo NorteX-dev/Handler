@@ -1,24 +1,45 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 Object.defineProperty(exports, "__esModule", { value: true });
-class CommandsStore extends Array {
-    constructor() {
-        super();
+var CommandsStore = /** @class */ (function (_super) {
+    __extends(CommandsStore, _super);
+    function CommandsStore() {
+        return _super.call(this) || this;
     }
-    get size() {
-        return this.length;
-    }
-    add(element) {
+    Object.defineProperty(CommandsStore.prototype, "size", {
+        get: function () {
+            return this.length;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    CommandsStore.prototype.add = function (element) {
         this.push(element);
         return element;
-    }
-    remove(element) {
+    };
+    CommandsStore.prototype.remove = function (element) {
         if (this.indexOf(element) === -1)
             return false;
         this.splice(this.indexOf(element), 1);
         return true;
-    }
-    get(name) {
-        return this.find((e) => e.name === name);
-    }
-}
+    };
+    CommandsStore.prototype.get = function (name) {
+        return this.find(function (e) { return e.name === name; });
+    };
+    return CommandsStore;
+}(Array));
 exports.default = CommandsStore;

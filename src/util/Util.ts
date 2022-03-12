@@ -47,10 +47,10 @@ export class Util {
 	public static createMany(client: Client, options: ManyClientsInterface) {
 		if (!client || !options) throw new Error("createMany(): Invalid client or directories.");
 		let handlers: HandlersInterface = {
-			commandHandler: null,
-			eventHandler: null,
-			interactionHandler: null,
-			componentHandler: null,
+			commandHandler: undefined,
+			eventHandler: undefined,
+			interactionHandler: undefined,
+			componentHandler: undefined,
 		};
 		const keys: string[] = Object.keys(options);
 		for (let key of keys) {

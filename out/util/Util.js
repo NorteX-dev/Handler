@@ -1,12 +1,23 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Util = void 0;
-const CommandHandler_1 = require("../handlers/CommandHandler");
-const EventHandler_1 = require("../handlers/EventHandler");
-const InteractionHandler_1 = require("../handlers/InteractionHandler");
-const ComponentHandler_1 = require("../handlers/ComponentHandler");
-class Util {
-    constructor(client) {
+var CommandHandler_1 = require("../handlers/CommandHandler");
+var EventHandler_1 = require("../handlers/EventHandler");
+var InteractionHandler_1 = require("../handlers/InteractionHandler");
+var ComponentHandler_1 = require("../handlers/ComponentHandler");
+var Util = /** @class */ (function () {
+    function Util(client) {
         this.client = client;
     }
     /**
@@ -29,29 +40,31 @@ class Util {
      *  }
      * }
      * */
-    static createMany(client, options) {
+    Util.createMany = function (client, options) {
         if (!client || !options)
             throw new Error("createMany(): Invalid client or directories.");
-        let handlers = {
-            commandHandler: null,
-            eventHandler: null,
-            interactionHandler: null,
-            componentHandler: null,
+        var handlers = {
+            commandHandler: undefined,
+            eventHandler: undefined,
+            interactionHandler: undefined,
+            componentHandler: undefined,
         };
-        const keys = Object.keys(options);
-        for (let key of keys) {
+        var keys = Object.keys(options);
+        for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
+            var key = keys_1[_i];
             if (key === "commands")
-                handlers.commandHandler = new CommandHandler_1.CommandHandler(Object.assign({ client }, options[key]));
+                handlers.commandHandler = new CommandHandler_1.CommandHandler(__assign({ client: client }, options[key]));
             else if (key === "events")
-                handlers.eventHandler = new EventHandler_1.EventHandler(Object.assign({ client }, options[key]));
+                handlers.eventHandler = new EventHandler_1.EventHandler(__assign({ client: client }, options[key]));
             else if (key === "interactions")
-                handlers.interactionHandler = new InteractionHandler_1.InteractionHandler(Object.assign({ client }, options[key]));
+                handlers.interactionHandler = new InteractionHandler_1.InteractionHandler(__assign({ client: client }, options[key]));
             else if (key === "components")
-                handlers.componentHandler = new ComponentHandler_1.ComponentHandler(Object.assign({ client }, options[key]));
+                handlers.componentHandler = new ComponentHandler_1.ComponentHandler(__assign({ client: client }, options[key]));
             else
-                throw new Error(`createMany(): Invalid key '${key}' inside 'options'. Valid keys are 'commands', 'events', 'interactions', and 'components'.`);
+                throw new Error("createMany(): Invalid key '".concat(key, "' inside 'options'. Valid keys are 'commands', 'events', 'interactions', and 'components'."));
         }
         return handlers;
-    }
-}
+    };
+    return Util;
+}());
 exports.Util = Util;

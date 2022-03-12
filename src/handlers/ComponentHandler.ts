@@ -28,7 +28,6 @@ export class ComponentHandler extends Handler {
 		super(options);
 		if (!options.client) throw new ReferenceError("ComponentHandler(): options.client is required.");
 		this.client = options.client;
-		this.directory = options.directory ? options.directory : undefined;
 		this.components = new ComponentsStore();
 		if (options.autoLoad === undefined || options.autoLoad === false) this.loadComponents();
 		return this;

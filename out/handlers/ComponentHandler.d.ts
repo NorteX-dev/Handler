@@ -40,10 +40,10 @@ export declare class ComponentHandler extends Handler {
     /**
      * Attempts to run the interaction. Returns a promise with the interaction if run succeeded, or rejects with an execution error.
      *
-     * @returns Promise<Interaction>
+     * @returns Promise<Component>
      *
      * */
-    runComponent(interaction: DJSInteraction, ...additionalOptions: any): Promise<unknown>;
+    runComponent(interaction: DJSInteraction, ...additionalOptions: any): Promise<Component>;
     private handleComponent;
 }
 export {};

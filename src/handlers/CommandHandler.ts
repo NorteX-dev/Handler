@@ -109,7 +109,9 @@ export class CommandHandler extends Handler {
 				if (!typedCommand) return;
 				typedCommand = typedCommand.trim();
 				// @ts-ignore
-				const command = this.commands.get(typedCommand.toLowerCase()) || this.commands.get(this.aliases.get(typedCommand.toLowerCase()));
+				const command =
+					this.commands.find((c) => c.name === typedCommand.toLowerCase()) ||
+					this.commands.find((c) => c.name === this.aliases.get(typedCommand.toLowerCase()));
 				if (!command) return reject(new ExecutionError("Command not found.", "COMMAND_NOT_FOUND", { query: typedCommand }));
 				if (!(command instanceof Command))
 					return reject(new ExecutionError("Attempting to run non-command class with runCommand().", "INVALID_CLASS"));

@@ -70,11 +70,11 @@ export class ComponentHandler extends Handler {
 	/**
 	 * Attempts to run the interaction. Returns a promise with the interaction if run succeeded, or rejects with an execution error.
 	 *
-	 * @returns Promise<Interaction>
+	 * @returns Promise<Component>
 	 *
 	 * */
 	runComponent(interaction: DJSInteraction, ...additionalOptions: any) {
-		return new Promise((res, rej) => {
+		return new Promise<Component>((res, rej) => {
 			if (interaction.user.bot) return rej("Bot users can't run component interactions.");
 			if (!(interaction.isCommand() || interaction.isContextMenu())) {
 				this.handleComponent(interaction, ...additionalOptions)
@@ -89,7 +89,7 @@ export class ComponentHandler extends Handler {
 	}
 
 	private handleComponent(interaction: any, ...additionalOptions: any) {
-		return new Promise(async (resolve, reject) => {
+		return new Promise<Component>(async (resolve, reject) => {
 			const componentInteraction = this.components.find((componentObject) => {
 				if (componentObject.queryingMode === "exact") return componentObject.customId === interaction.customId;
 				if (componentObject.queryingMode === "includes") return interaction.customId.includes(componentObject.customId);

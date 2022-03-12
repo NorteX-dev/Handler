@@ -148,56 +148,73 @@ var CommandHandler = /** @class */ (function (_super) {
             additionalOptions[_i - 1] = arguments[_i];
         }
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
-            var prefixes, _i, prefixes_1, prefix, _a, typedCommand, args, command, failedReason;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
+            var prefixes, _loop_1, this_1, _i, prefixes_1, prefix, state_1;
+            var _this = this;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
                     case 0:
                         if (!message.partial) return [3 /*break*/, 2];
                         return [4 /*yield*/, message.fetch()];
                     case 1:
-                        _b.sent();
-                        _b.label = 2;
+                        _a.sent();
+                        _a.label = 2;
                     case 2:
                         prefixes = this.prefix;
                         if (!prefixes || !prefixes.length)
                             prefixes = ["?"];
+                        _loop_1 = function (prefix) {
+                            var _b, typedCommand, args, command, failedReason;
+                            return __generator(this, function (_c) {
+                                switch (_c.label) {
+                                    case 0:
+                                        if (!message.content.startsWith(prefix))
+                                            return [2 /*return*/, "continue"];
+                                        _b = message.content.slice(prefix.length).trim().split(/ +/g), typedCommand = _b[0], args = _b.slice(1);
+                                        if (!typedCommand)
+                                            return [2 /*return*/, { value: void 0 }];
+                                        typedCommand = typedCommand.trim();
+                                        command = this_1.commands.find(function (c) { return c.name === typedCommand.toLowerCase(); }) ||
+                                            this_1.commands.find(function (c) { return c.name === _this.aliases.get(typedCommand.toLowerCase()); });
+                                        if (!command)
+                                            return [2 /*return*/, { value: reject(new ExecutionError_1.default("Command not found.", "COMMAND_NOT_FOUND", { query: typedCommand })) }];
+                                        if (!(command instanceof Command_1.Command))
+                                            return [2 /*return*/, { value: reject(new ExecutionError_1.default("Attempting to run non-command class with runCommand().", "INVALID_CLASS")) }];
+                                        // Handle additional command parameters
+                                        if (!command.allowDm && message.channel.type === "DM")
+                                            return [2 /*return*/, { value: reject(new ExecutionError_1.default("Command cannot be executed in DM.", "COMMAND_NOT_ALLOWED_IN_DM", { command: command })) }];
+                                        return [4 /*yield*/, this_1.localUtils.verifyCommand(message, command, this_1.userCooldowns, this_1.guildCooldowns)];
+                                    case 1:
+                                        failedReason = _c.sent();
+                                        if (failedReason) {
+                                            reject(failedReason);
+                                            return [2 /*return*/, { value: void 0 }];
+                                        }
+                                        if (command.usage)
+                                            command.usage = "".concat(prefix).concat(command.name, " ").concat(command.usage) || "";
+                                        try {
+                                            command.run.apply(command, __spreadArray([message, args], additionalOptions, false));
+                                            resolve(command);
+                                        }
+                                        catch (ex) {
+                                            console.error(ex);
+                                            reject(ex);
+                                        }
+                                        return [2 /*return*/];
+                                }
+                            });
+                        };
+                        this_1 = this;
                         _i = 0, prefixes_1 = prefixes;
-                        _b.label = 3;
+                        _a.label = 3;
                     case 3:
                         if (!(_i < prefixes_1.length)) return [3 /*break*/, 6];
                         prefix = prefixes_1[_i];
-                        if (!message.content.startsWith(prefix))
-                            return [3 /*break*/, 5];
-                        _a = message.content.slice(prefix.length).trim().split(/ +/g), typedCommand = _a[0], args = _a.slice(1);
-                        if (!typedCommand)
-                            return [2 /*return*/];
-                        typedCommand = typedCommand.trim();
-                        command = this.commands.get(typedCommand.toLowerCase()) || this.commands.get(this.aliases.get(typedCommand.toLowerCase()));
-                        if (!command)
-                            return [2 /*return*/, reject(new ExecutionError_1.default("Command not found.", "COMMAND_NOT_FOUND", { query: typedCommand }))];
-                        if (!(command instanceof Command_1.Command))
-                            return [2 /*return*/, reject(new ExecutionError_1.default("Attempting to run non-command class with runCommand().", "INVALID_CLASS"))];
-                        // Handle additional command parameters
-                        if (!command.allowDm && message.channel.type === "DM")
-                            return [2 /*return*/, reject(new ExecutionError_1.default("Command cannot be executed in DM.", "COMMAND_NOT_ALLOWED_IN_DM", { command: command }))];
-                        return [4 /*yield*/, this.localUtils.verifyCommand(message, command, this.userCooldowns, this.guildCooldowns)];
+                        return [5 /*yield**/, _loop_1(prefix)];
                     case 4:
-                        failedReason = _b.sent();
-                        if (failedReason) {
-                            reject(failedReason);
-                            return [2 /*return*/];
-                        }
-                        if (command.usage)
-                            command.usage = "".concat(prefix).concat(command.name, " ").concat(command.usage) || "";
-                        try {
-                            command.run.apply(command, __spreadArray([message, args], additionalOptions, false));
-                            resolve(command);
-                        }
-                        catch (ex) {
-                            console.error(ex);
-                            reject(ex);
-                        }
-                        _b.label = 5;
+                        state_1 = _a.sent();
+                        if (typeof state_1 === "object")
+                            return [2 /*return*/, state_1.value];
+                        _a.label = 5;
                     case 5:
                         _i++;
                         return [3 /*break*/, 3];

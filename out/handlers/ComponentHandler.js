@@ -118,7 +118,7 @@ var ComponentHandler = /** @class */ (function (_super) {
     /**
      * Attempts to run the interaction. Returns a promise with the interaction if run succeeded, or rejects with an execution error.
      *
-     * @returns Promise<Interaction>
+     * @returns Promise<Component>
      *
      * */
     ComponentHandler.prototype.runComponent = function (interaction) {

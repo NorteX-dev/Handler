@@ -2,7 +2,6 @@ import { ApplicationCommand, Client, Collection, Interaction as DJSInteraction, 
 import { Handler } from "./Handler";
 import ExecutionError from "../errors/ExecutionError";
 import { InteractionCommand, MessageContextMenu, UserContextMenu } from "../index";
-import InteractionsStore from "../store/InteractionsStore";
 
 interface HandlerOptions {
 	client: Client;
@@ -30,17 +29,16 @@ export class InteractionHandler extends Handler {
 	 * ```
 	 * */
 	public client: Client;
+	public interactions: InteractionRunnable[];
 	public directory?: string;
 	public owners?: Array<string>;
-
-	public interactions: InteractionsStore;
 
 	constructor(options: HandlerOptions) {
 		super(options);
 		if (!options.client) throw new ReferenceError("InteractionHandler(): options.client is required.");
 		this.client = options.client;
 		this.owners = options.owners || [];
-		this.interactions = new InteractionsStore();
+		this.interactions = [];
 		if (options.autoLoad === undefined || options.autoLoad === false) this.loadInteractions();
 		return this;
 	}
@@ -72,8 +70,9 @@ export class InteractionHandler extends Handler {
 			throw new TypeError(
 				"registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu."
 			);
-		if (this.interactions.getByName(interaction.name)) throw new Error(`Interaction ${interaction.name} cannot be registered twice.`);
-		this.interactions.add(interaction);
+		if (this.interactions.find((c) => c.name === interaction.name))
+			throw new Error(`Interaction ${interaction.name} cannot be registered twice.`);
+		this.interactions.push(interaction);
 		this.debug(`Loaded interaction "${interaction.name}".`);
 		this.emit("load", interaction);
 		return interaction;
@@ -108,7 +107,7 @@ export class InteractionHandler extends Handler {
 	 * */
 	private handleCommandInteraction(interaction: any, ...additionalOptions: any) {
 		return new Promise(async (res, rej) => {
-			const applicationCommand = this.interactions.getByNameAndType(interaction.commandName.toLowerCase(), "CHAT_INPUT");
+			const applicationCommand = this.interactions.find((i) => i.name === interaction.commandName.toLowerCase() && i.type === "CHAT_INPUT");
 			if (!applicationCommand) return;
 			if (
 				!(
@@ -141,8 +140,8 @@ export class InteractionHandler extends Handler {
 	private handleContextMenuInteraction(interaction: any, ...additionalOptions: any) {
 		return new Promise(async (resolve, reject) => {
 			const contextMenuInt =
-				this.interactions.getByNameAndType(interaction.commandName.toLowerCase(), "USER") ||
-				this.interactions.getByNameAndType(interaction.commandName.toLowerCase(), "MESSAGE");
+				this.interactions.find((i) => i.name === interaction.commandName.toLowerCase() && i.type === "USER") ||
+				this.interactions.find((i) => i.name === interaction.commandName.toLowerCase() && i.type === "MESSAGE");
 
 			if (!contextMenuInt) return;
 
@@ -252,11 +251,12 @@ export class InteractionHandler extends Handler {
 				break;
 			}
 			// Handle changed commands
+			// @ts-ignore Fine to ignore since we are only comparing a select amount of properties
 			changesMade = !remoteCmd.equals(localCmd);
 		}
 		// Handle deleted commands
 		for (let remoteCmd of fetched) {
-			if (!this.interactions.getByName(remoteCmd.name)) {
+			if (!this.interactions.find((i) => i.name === remoteCmd.name)) {
 				this.debug("Interactions match check failed because local interaction files are missing from the filesystem. Updating...");
 				changesMade = true;
 				break;

@@ -1,7 +1,6 @@
 import { Client, Interaction as DJSInteraction } from "discord.js";
 import { Handler } from "./Handler";
 import { Component } from "../index";
-import ComponentsStore from "../store/ComponentsStore";
 
 interface HandlerOptions {
 	client: Client;
@@ -22,13 +21,13 @@ export class ComponentHandler extends Handler {
 	public client: Client;
 	public directory?: string;
 	public owners?: Array<string>;
-	public components: ComponentsStore;
+	public components: Component[];
 
 	constructor(options: HandlerOptions) {
 		super(options);
 		if (!options.client) throw new ReferenceError("ComponentHandler(): options.client is required.");
 		this.client = options.client;
-		this.components = new ComponentsStore();
+		this.components = [];
 		if (options.autoLoad === undefined || options.autoLoad === false) this.loadComponents();
 		return this;
 	}
@@ -55,14 +54,14 @@ export class ComponentHandler extends Handler {
 	 *
 	 * @returns Interaction
 	 * */
-	//
 	registerComponent(component: Component) {
 		if (!(component instanceof Component))
 			throw new TypeError(
 				"registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu."
 			);
-		if (this.components.getByCid(component.customId)) throw new Error(`Component '${component.customId}' cannot be registered twice.`);
-		this.components.add(component);
+		if (this.components.find((c) => c.customId === component.customId))
+			throw new Error(`Component '${component.customId}' cannot be registered twice.`);
+		this.components.push(component);
 		this.debug(`Loaded interaction "${component.customId}".`);
 		this.emit("load", component);
 		return component;

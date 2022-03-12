@@ -18,15 +18,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var CommandsStore = /** @class */ (function (_super) {
     __extends(CommandsStore, _super);
     function CommandsStore() {
-        return _super.call(this) || this;
+        return _super !== null && _super.apply(this, arguments) || this;
     }
-    Object.defineProperty(CommandsStore.prototype, "size", {
-        get: function () {
-            return this.length;
-        },
-        enumerable: false,
-        configurable: true
-    });
+    CommandsStore.prototype.get = function (name) {
+        return this.find(function (e) { return e.name === name; });
+    };
     CommandsStore.prototype.add = function (element) {
         this.push(element);
         return element;
@@ -37,9 +33,13 @@ var CommandsStore = /** @class */ (function (_super) {
         this.splice(this.indexOf(element), 1);
         return true;
     };
-    CommandsStore.prototype.get = function (name) {
-        return this.find(function (e) { return e.name === name; });
-    };
+    Object.defineProperty(CommandsStore.prototype, "size", {
+        get: function () {
+            return this.length;
+        },
+        enumerable: false,
+        configurable: true
+    });
     return CommandsStore;
 }(Array));
 exports.default = CommandsStore;

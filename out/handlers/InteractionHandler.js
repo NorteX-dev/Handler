@@ -64,7 +64,6 @@ exports.InteractionHandler = void 0;
 var Handler_1 = require("./Handler");
 var ExecutionError_1 = require("../errors/ExecutionError");
 var index_1 = require("../index");
-var InteractionsStore_1 = require("../store/InteractionsStore");
 var InteractionHandler = /** @class */ (function (_super) {
     __extends(InteractionHandler, _super);
     function InteractionHandler(options) {
@@ -73,7 +72,7 @@ var InteractionHandler = /** @class */ (function (_super) {
             throw new ReferenceError("InteractionHandler(): options.client is required.");
         _this.client = options.client;
         _this.owners = options.owners || [];
-        _this.interactions = new InteractionsStore_1.default();
+        _this.interactions = [];
         if (options.autoLoad === undefined || options.autoLoad === false)
             _this.loadInteractions();
         return _this;
@@ -111,9 +110,9 @@ var InteractionHandler = /** @class */ (function (_super) {
     InteractionHandler.prototype.registerInteraction = function (interaction) {
         if (!(interaction instanceof index_1.InteractionCommand || interaction instanceof index_1.UserContextMenu || interaction instanceof index_1.MessageContextMenu))
             throw new TypeError("registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu.");
-        if (this.interactions.getByName(interaction.name))
+        if (this.interactions.find(function (c) { return c.name === interaction.name; }))
             throw new Error("Interaction ".concat(interaction.name, " cannot be registered twice."));
-        this.interactions.add(interaction);
+        this.interactions.push(interaction);
         this.debug("Loaded interaction \"".concat(interaction.name, "\"."));
         this.emit("load", interaction);
         return interaction;
@@ -159,7 +158,7 @@ var InteractionHandler = /** @class */ (function (_super) {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        applicationCommand = this.interactions.getByNameAndType(interaction.commandName.toLowerCase(), "CHAT_INPUT");
+                        applicationCommand = this.interactions.find(function (i) { return i.name === interaction.commandName.toLowerCase() && i.type === "CHAT_INPUT"; });
                         if (!applicationCommand)
                             return [2 /*return*/];
                         if (!(applicationCommand instanceof index_1.InteractionCommand ||
@@ -200,8 +199,8 @@ var InteractionHandler = /** @class */ (function (_super) {
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
-                        contextMenuInt = this.interactions.getByNameAndType(interaction.commandName.toLowerCase(), "USER") ||
-                            this.interactions.getByNameAndType(interaction.commandName.toLowerCase(), "MESSAGE");
+                        contextMenuInt = this.interactions.find(function (i) { return i.name === interaction.commandName.toLowerCase() && i.type === "USER"; }) ||
+                            this.interactions.find(function (i) { return i.name === interaction.commandName.toLowerCase() && i.type === "MESSAGE"; });
                         if (!contextMenuInt)
                             return [2 /*return*/];
                         if (interaction.targetType === "USER" && contextMenuInt.type !== "USER")
@@ -326,6 +325,7 @@ var InteractionHandler = /** @class */ (function (_super) {
                 return "break";
             }
             // Handle changed commands
+            // @ts-ignore Fine to ignore since we are only comparing a select amount of properties
             changesMade = !remoteCmd.equals(localCmd);
         };
         var this_1 = this;
@@ -335,14 +335,20 @@ var InteractionHandler = /** @class */ (function (_super) {
             if (state_1 === "break")
                 break;
         }
+        var _loop_2 = function (remoteCmd) {
+            if (!this_2.interactions.find(function (i) { return i.name === remoteCmd.name; })) {
+                this_2.debug("Interactions match check failed because local interaction files are missing from the filesystem. Updating...");
+                changesMade = true;
+                return "break";
+            }
+        };
+        var this_2 = this;
         // Handle deleted commands
         for (var _b = 0, fetched_1 = fetched; _b < fetched_1.length; _b++) {
             var remoteCmd = fetched_1[_b];
-            if (!this.interactions.getByName(remoteCmd.name)) {
-                this.debug("Interactions match check failed because local interaction files are missing from the filesystem. Updating...");
-                changesMade = true;
+            var state_2 = _loop_2(remoteCmd);
+            if (state_2 === "break")
                 break;
-            }
         }
         return changesMade;
     };

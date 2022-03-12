@@ -63,7 +63,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ComponentHandler = void 0;
 var Handler_1 = require("./Handler");
 var index_1 = require("../index");
-var ComponentsStore_1 = require("../store/ComponentsStore");
 var ComponentHandler = /** @class */ (function (_super) {
     __extends(ComponentHandler, _super);
     function ComponentHandler(options) {
@@ -71,7 +70,7 @@ var ComponentHandler = /** @class */ (function (_super) {
         if (!options.client)
             throw new ReferenceError("ComponentHandler(): options.client is required.");
         _this.client = options.client;
-        _this.components = new ComponentsStore_1.default();
+        _this.components = [];
         if (options.autoLoad === undefined || options.autoLoad === false)
             _this.loadComponents();
         return _this;
@@ -106,13 +105,12 @@ var ComponentHandler = /** @class */ (function (_super) {
      *
      * @returns Interaction
      * */
-    //
     ComponentHandler.prototype.registerComponent = function (component) {
         if (!(component instanceof index_1.Component))
             throw new TypeError("registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu.");
-        if (this.components.getByCid(component.customId))
+        if (this.components.find(function (c) { return c.customId === component.customId; }))
             throw new Error("Component '".concat(component.customId, "' cannot be registered twice."));
-        this.components.add(component);
+        this.components.push(component);
         this.debug("Loaded interaction \"".concat(component.customId, "\"."));
         this.emit("load", component);
         return component;

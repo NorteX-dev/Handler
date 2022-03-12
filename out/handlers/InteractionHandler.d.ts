@@ -1,7 +1,6 @@
 import { Client, Interaction as DJSInteraction } from "discord.js";
 import { Handler } from "./Handler";
 import { InteractionCommand, MessageContextMenu, UserContextMenu } from "../index";
-import InteractionsStore from "../store/InteractionsStore";
 interface HandlerOptions {
     client: Client;
     directory?: string;
@@ -26,9 +25,9 @@ export declare class InteractionHandler extends Handler {
      * ```
      * */
     client: Client;
+    interactions: InteractionRunnable[];
     directory?: string;
     owners?: Array<string>;
-    interactions: InteractionsStore;
     constructor(options: HandlerOptions);
     /**
      * Loads interaction commands into memory

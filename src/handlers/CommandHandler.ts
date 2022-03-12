@@ -3,7 +3,6 @@ import ExecutionError from "../errors/ExecutionError";
 import { Client, Message } from "discord.js";
 import { Handler } from "./Handler";
 import { Command } from "../structures/Command";
-import CommandsStore from "../store/CommandsStore";
 
 interface HandlerOptions {
 	client: Client;
@@ -29,7 +28,7 @@ export class CommandHandler extends Handler {
 	 * const handler = new CommandHandler({ client: client });
 	 * ```
 	 * */
-	public commands: CommandsStore;
+	public commands: Command[];
 	public aliases: Map<string, string>;
 	public prefix?: string[];
 	public owners: string[];
@@ -39,7 +38,7 @@ export class CommandHandler extends Handler {
 	constructor(options: HandlerOptions) {
 		super(options);
 		this.owners = options.owners || [];
-		this.commands = new CommandsStore();
+		this.commands = [];
 		this.aliases = new Map();
 		this.userCooldowns = new Map();
 		this.guildCooldowns = new Map();
@@ -65,13 +64,13 @@ export class CommandHandler extends Handler {
 	/**
 	 * Loads classic message commands into memory
 	 *
-	 * @returns CommandsStore
+	 * @returns Command[]
 	 *
 	 * @remarks
 	 * Requires @see {@link CommandHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
 	 * */
 	loadCommands() {
-		return new Promise<CommandsStore>(async (res, rej) => {
+		return new Promise<Command[]>(async (res, rej) => {
 			const files = await this.loadAndInstance().catch(rej);
 			files.forEach((cmd: Command) => this.registerCommand(cmd));
 			return res(this.commands);
@@ -85,8 +84,8 @@ export class CommandHandler extends Handler {
 	 * */
 	registerCommand(command: Command) {
 		if (!(command instanceof Command)) throw new TypeError(`registerCommand(): command parameter is not an instance of Command.`);
-		if (this.commands.get(command.name)) throw new Error(`Command ${command.name} cannot be registered twice.`);
-		this.commands.add(command);
+		if (this.commands.find((c) => c.name === command.name)) throw new Error(`Command ${command.name} cannot be registered twice.`);
+		this.commands.push(command);
 		if (command.aliases && command.aliases.length) command.aliases.forEach((alias: string) => this.aliases.set(alias, command.name));
 		this.emit("load", command);
 		this.debug(`Registered command "${command.name}".`);

@@ -20,13 +20,9 @@ var ComponentsStore = /** @class */ (function (_super) {
     function ComponentsStore() {
         return _super.call(this) || this;
     }
-    Object.defineProperty(ComponentsStore.prototype, "size", {
-        get: function () {
-            return this.length;
-        },
-        enumerable: false,
-        configurable: true
-    });
+    ComponentsStore.prototype.get = function (customId) {
+        return this.find(function (e) { return e.customId === customId; });
+    };
     ComponentsStore.prototype.add = function (element) {
         this.push(element);
         return element;
@@ -37,9 +33,13 @@ var ComponentsStore = /** @class */ (function (_super) {
         this.splice(this.indexOf(element), 1);
         return true;
     };
-    ComponentsStore.prototype.getByCid = function (customId) {
-        return this.find(function (e) { return e.customId === customId; });
-    };
+    Object.defineProperty(ComponentsStore.prototype, "size", {
+        get: function () {
+            return this.length;
+        },
+        enumerable: false,
+        configurable: true
+    });
     return ComponentsStore;
 }(Array));
 exports.default = ComponentsStore;

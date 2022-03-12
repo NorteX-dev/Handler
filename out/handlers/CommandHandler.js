@@ -64,14 +64,13 @@ exports.CommandHandler = void 0;
 var ExecutionError_1 = require("../errors/ExecutionError");
 var Handler_1 = require("./Handler");
 var Command_1 = require("../structures/Command");
-var CommandsStore_1 = require("../store/CommandsStore");
 var CommandHandler = /** @class */ (function (_super) {
     __extends(CommandHandler, _super);
     function CommandHandler(options) {
         var _a;
         var _this = _super.call(this, options) || this;
         _this.owners = options.owners || [];
-        _this.commands = new CommandsStore_1.default();
+        _this.commands = [];
         _this.aliases = new Map();
         _this.userCooldowns = new Map();
         _this.guildCooldowns = new Map();
@@ -98,7 +97,7 @@ var CommandHandler = /** @class */ (function (_super) {
     /**
      * Loads classic message commands into memory
      *
-     * @returns CommandsStore
+     * @returns Command[]
      *
      * @remarks
      * Requires @see {@link CommandHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
@@ -128,9 +127,9 @@ var CommandHandler = /** @class */ (function (_super) {
         var _this = this;
         if (!(command instanceof Command_1.Command))
             throw new TypeError("registerCommand(): command parameter is not an instance of Command.");
-        if (this.commands.get(command.name))
+        if (this.commands.find(function (c) { return c.name === command.name; }))
             throw new Error("Command ".concat(command.name, " cannot be registered twice."));
-        this.commands.add(command);
+        this.commands.push(command);
         if (command.aliases && command.aliases.length)
             command.aliases.forEach(function (alias) { return _this.aliases.set(alias, command.name); });
         this.emit("load", command);

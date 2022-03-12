@@ -1,8 +1,8 @@
 import { Component } from "../structures/Component";
 export default class ComponentsStore extends Array {
     constructor();
-    get size(): number;
+    get(customId: string): Component;
     add(element: Component): Component;
     remove(element: Component): boolean;
-    getByCid(customId: string): Component;
+    get size(): number;
 }

@@ -1,7 +1,6 @@
 import { Client, Message } from "discord.js";
 import { Handler } from "./Handler";
 import { Command } from "../structures/Command";
-import CommandsStore from "../store/CommandsStore";
 interface HandlerOptions {
     client: Client;
     autoLoad?: boolean;
@@ -25,7 +24,7 @@ export declare class CommandHandler extends Handler {
      * const handler = new CommandHandler({ client: client });
      * ```
      * */
-    commands: CommandsStore;
+    commands: Command[];
     aliases: Map<string, string>;
     prefix?: string[];
     owners: string[];
@@ -43,12 +42,12 @@ export declare class CommandHandler extends Handler {
     /**
      * Loads classic message commands into memory
      *
-     * @returns CommandsStore
+     * @returns Command[]
      *
      * @remarks
      * Requires @see {@link CommandHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
      * */
-    loadCommands(): Promise<CommandsStore>;
+    loadCommands(): Promise<Command[]>;
     /**
      * Manually register an instanced command. This should not be needed when using loadCommands().
      *

@@ -1,6 +1,6 @@
 import { Client, Interaction as DJSInteraction } from "discord.js";
 import { Handler } from "./Handler";
-import { ComponentInteraction } from "../index";
+import { Component } from "../index";
 import ComponentsStore from "../store/ComponentsStore";
 interface HandlerOptions {
     client: Client;
@@ -37,7 +37,7 @@ export declare class ComponentHandler extends Handler {
      *
      * @returns Interaction
      * */
-    registerComponent(component: ComponentInteraction): ComponentInteraction;
+    registerComponent(component: Component): Component;
     /**
      * Attempts to run the interaction. Returns a promise with the interaction if run succeeded, or rejects with an execution error.
      *

@@ -1,6 +1,6 @@
 import { Client, Interaction as DJSInteraction } from "discord.js";
 import { Handler } from "./Handler";
-import { ComponentInteraction } from "../index";
+import { Component } from "../index";
 import ComponentsStore from "../store/ComponentsStore";
 
 interface HandlerOptions {
@@ -45,7 +45,7 @@ export class ComponentHandler extends Handler {
 	loadComponents() {
 		return new Promise(async (res, rej) => {
 			const files = await this.loadAndInstance().catch(rej);
-			files.forEach((components: ComponentInteraction) => this.registerComponent(components));
+			files.forEach((components: Component) => this.registerComponent(components));
 			return res(this.components);
 		});
 	}
@@ -56,14 +56,14 @@ export class ComponentHandler extends Handler {
 	 * @returns Interaction
 	 * */
 	//
-	registerComponent(component: ComponentInteraction) {
-		if (!(component instanceof ComponentInteraction))
+	registerComponent(component: Component) {
+		if (!(component instanceof Component))
 			throw new TypeError(
 				"registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu."
 			);
-		if (this.components.getByCid(component.customId)) throw new Error(`Component '${component.name}' cannot be registered twice.`);
+		if (this.components.getByCid(component.customId)) throw new Error(`Component '${component.customId}' cannot be registered twice.`);
 		this.components.add(component);
-		this.debug(`Loaded interaction "${component.name}".`);
+		this.debug(`Loaded interaction "${component.customId}".`);
 		this.emit("load", component);
 		return component;
 	}

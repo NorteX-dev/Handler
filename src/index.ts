@@ -6,7 +6,7 @@ import { Command } from "./structures/Command";
 import { InteractionCommand } from "./structures/InteractionCommand";
 import { UserContextMenu } from "./structures/UserContextMenu";
 import { MessageContextMenu } from "./structures/MessageContextMenu";
-import { ComponentInteraction } from "./structures/ComponentInteraction";
+import { Component } from "./structures/Component";
 import { Event } from "./structures/Event";
 import { Util } from "./util/Util";
 import { Pagination } from "./util/Pagination";
@@ -25,7 +25,8 @@ export {
 	InteractionCommand,
 	UserContextMenu,
 	MessageContextMenu,
-	ComponentInteraction,
+	// Structures - ComponentHandler
+	Component,
 	// Util and other
 	Pagination,
 	Util,

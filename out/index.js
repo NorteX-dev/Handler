@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Util = exports.Pagination = exports.ComponentInteraction = exports.MessageContextMenu = exports.UserContextMenu = exports.InteractionCommand = exports.Event = exports.Command = exports.ComponentHandler = exports.EventHandler = exports.InteractionHandler = exports.CommandHandler = void 0;
+exports.Util = exports.Pagination = exports.Component = exports.MessageContextMenu = exports.UserContextMenu = exports.InteractionCommand = exports.Event = exports.Command = exports.ComponentHandler = exports.EventHandler = exports.InteractionHandler = exports.CommandHandler = void 0;
 var CommandHandler_1 = require("./handlers/CommandHandler");
 Object.defineProperty(exports, "CommandHandler", { enumerable: true, get: function () { return CommandHandler_1.CommandHandler; } });
 var InteractionHandler_1 = require("./handlers/InteractionHandler");
@@ -17,8 +17,8 @@ var UserContextMenu_1 = require("./structures/UserContextMenu");
 Object.defineProperty(exports, "UserContextMenu", { enumerable: true, get: function () { return UserContextMenu_1.UserContextMenu; } });
 var MessageContextMenu_1 = require("./structures/MessageContextMenu");
 Object.defineProperty(exports, "MessageContextMenu", { enumerable: true, get: function () { return MessageContextMenu_1.MessageContextMenu; } });
-var ComponentInteraction_1 = require("./structures/ComponentInteraction");
-Object.defineProperty(exports, "ComponentInteraction", { enumerable: true, get: function () { return ComponentInteraction_1.ComponentInteraction; } });
+var Component_1 = require("./structures/Component");
+Object.defineProperty(exports, "Component", { enumerable: true, get: function () { return Component_1.Component; } });
 var Event_1 = require("./structures/Event");
 Object.defineProperty(exports, "Event", { enumerable: true, get: function () { return Event_1.Event; } });
 var Util_1 = require("./util/Util");

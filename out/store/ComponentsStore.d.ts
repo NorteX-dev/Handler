@@ -1,8 +1,8 @@
-import { ComponentInteraction } from "../structures/ComponentInteraction";
+import { Component } from "../structures/Component";
 export default class ComponentsStore extends Array {
     constructor();
     get size(): number;
-    add(element: ComponentInteraction): ComponentInteraction;
-    remove(element: ComponentInteraction): boolean;
-    getByCid(customId: string): ComponentInteraction;
+    add(element: Component): Component;
+    remove(element: Component): boolean;
+    getByCid(customId: string): Component;
 }

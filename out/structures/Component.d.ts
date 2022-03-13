@@ -1,9 +1,9 @@
-import { ComponentHandler } from "../handlers/ComponentHandler";
+import ComponentHandler from "../handlers/ComponentHandler";
 interface ComponentOptions {
     customId: string;
     queryingMode: "exact" | "includes" | "startsWith";
 }
-export declare class Component {
+export default class Component {
     handler: ComponentHandler;
     client: any;
     type: string;

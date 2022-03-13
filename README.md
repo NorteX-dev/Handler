@@ -85,18 +85,21 @@ Remember however that you might be ratelimited by the Discord API after doing re
 
 Added:
 - **ComponentHandler() - a handler specifically for handling message components (interactions with customId's), like buttons, select menus and modal responses.**
-- registerCommand(commandInstance) is now public and documented. It allows for manual registration of commands and takes the instanced command as the parameter.
-- Added createMany() static method on the Util class useful for creating multiple handlers at once
 - For components, you can optionally specify an option: `queryingMode` which is a string and must be either of: `exact, includes, startsWith`. Defaults to `exact`.
+- CommandHandler: Added `parameters[]` which is type `Parameter[]` and allows for handling of parameters with automatic prompting. Refer to the documentation of the `Parameter` interface for more information.
+- Added createMany() static method on the Util class useful for creating multiple handlers at once
+- registerCommand(commandInstance) is now public and documented. It allows for manual registration of commands and takes the instanced command as the parameter.
   If `includes` mode is set, any interactions that **include** the customId specified, will be matched & executed. Similar for `startsWith`, however for interactions which customIds **start with** the custom id specified in options.
   This is particularly useful for passing in custom IDs or values in the end of the custom ID since there is no way of passing custom data through component interactions.
+- Added a static util method to Util class - createMessageLink - which creates a `https://discord.com/channels` link to a message or channel in Discord.
+- 
 
 Other changes:
 - Changed Map's to custom Store classe whichs are a classes extending Array, which provides all array methods + some specific methods
 - CommandDirectoryReferenceError, EventsDirectoryReferenceError and InteractionDirectoryReferenceError have been merged into DirectoryReferenceError.
 - CommandExecutionError and InteractionExecutionError have been merged into ExecutionError.
 - The COMMAND_NOT_FOUND error will now provide a `query` key inside the params instead of `typedCommand`.
-- the `LocalUtils()` constructor should now be empty.
+- the `Verificators()` constructor should now be empty.
 - Documented `runCommand()`, `runInteraction()` methods.
 - Fixed clarification on loadEvents() docs description.
 - Multiple miscellaneous code refactors

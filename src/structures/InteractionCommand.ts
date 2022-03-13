@@ -1,7 +1,7 @@
 import MethodNotOverridenError from "../errors/MethodNotOverridenError";
 
 import { ApplicationCommandOptionData } from "discord.js";
-import { InteractionHandler } from "../handlers/InteractionHandler";
+import InteractionHandler from "../handlers/InteractionHandler";
 
 interface ApplicationCommandOptions {
 	name: string;
@@ -14,7 +14,7 @@ interface ApplicationCommandOptions {
 	permissions: any[];
 }
 
-export class InteractionCommand {
+export default class InteractionCommand {
 	public handler: InteractionHandler;
 	public client: any;
 	public type: string;

@@ -1,29 +1,33 @@
-import { Command } from "../structures/Command";
 import ExecutionError from "../errors/ExecutionError";
 import { Interaction, Permissions } from "discord.js";
-import { UserContextMenu } from "../structures/UserContextMenu";
-import { InteractionCommand } from "../structures/InteractionCommand";
-import { MessageContextMenu } from "../structures/MessageContextMenu";
+import Command from "../structures/Command";
+import UserContextMenu from "../structures/UserContextMenu";
+import InteractionCommand from "../structures/InteractionCommand";
+import MessageContextMenu from "../structures/MessageContextMenu";
 
 /**
  * @ignore
  * */
-export class LocalUtils {
-	constructor() {}
-
-	isClass(input: any) {
+export default class Verificators {
+	static isClass(input: any) {
 		return typeof input === `function` && typeof input.prototype === `object` && input.toString().substring(0, 5) === `class`;
 	}
 
-	isOwner(owners: Array<string> | undefined, userId: string) {
+	static isOwner(owners: Array<string> | undefined, userId: string) {
 		if (!owners || !owners.length) return false;
 		return owners.includes(userId);
 	}
 
-	async verifyCommand(message: any, commandObject: Command, userCooldowns: Map<string, number>, guildCooldowns: Map<string, number>): Promise<ExecutionError | undefined> {
+	static async verifyCommand(
+		message: any,
+		commandObject: Command,
+		userCooldowns: Map<string, number>,
+		guildCooldowns: Map<string, number>
+	): Promise<ExecutionError | undefined> {
 		return new Promise((res) => {
 			// "disabled" field
-			if (commandObject.disabled && !this.isOwner(commandObject.handler.owners, message.author.id)) return res(new ExecutionError("The command is disabled.", "DISABLED"));
+			if (commandObject.disabled && !this.isOwner(commandObject.handler.owners, message.author.id))
+				return res(new ExecutionError("The command is disabled.", "DISABLED"));
 			// "guildIds" field
 			if (message.guild && commandObject.guildIds && commandObject.guildIds.length && !commandObject.guildIds.includes(message.guild.id))
 				return res(new ExecutionError("This guild ID is not whitelisted.", "GUILD_ID_NOT_WHITELISTED", { guildId: message.guild.id }));
@@ -33,16 +37,21 @@ export class LocalUtils {
 			// "onlyDm" field
 			if (commandObject.onlyDm && message.channel.type !== "DM") return res(new ExecutionError("Command is DM only.", "COMMAND_DM_0NLY"));
 			// "nsfw" field
-			if (commandObject.nsfw && !message.channel.nsfw) return res(new ExecutionError("Command is marked as NSFW-channels only.", "NSFW_COMMAND_USED_IN_NON_NSFW_CHANNEL"));
+			if (commandObject.nsfw && !message.channel.nsfw)
+				return res(new ExecutionError("Command is marked as NSFW-channels only.", "NSFW_COMMAND_USED_IN_NON_NSFW_CHANNEL"));
 			// "userCooldown" field
 			if (commandObject.userCooldown && commandObject.userCooldown > 0) {
 				const useAfter = userCooldowns.get(message.author.id);
 				if (useAfter && useAfter > Date.now())
 					return res(
-						new ExecutionError(`User is on cooldown for ${((Number(useAfter || 0) - Date.now()) / 1000).toFixed(1)} seconds.`, "USER_COOLDOWN", {
-							totalCooldown: commandObject.userCooldown,
-							remainingCooldown: (Number(useAfter || 0) - Date.now()) / 1000,
-						})
+						new ExecutionError(
+							`User is on cooldown for ${((Number(useAfter || 0) - Date.now()) / 1000).toFixed(1)} seconds.`,
+							"USER_COOLDOWN",
+							{
+								totalCooldown: commandObject.userCooldown,
+								remainingCooldown: (Number(useAfter || 0) - Date.now()) / 1000,
+							}
+						)
 					);
 				const millis: number = parseInt(commandObject.userCooldown.toString()) * 1000;
 				userCooldowns.set(message.author.id, Date.now() + millis);
@@ -52,10 +61,14 @@ export class LocalUtils {
 				const useAfter = guildCooldowns.get(message.guild.id);
 				if (useAfter && useAfter > Date.now())
 					return res(
-						new ExecutionError(`Guild is on cooldown for ${((Number(useAfter || 0) - Date.now()) / 1000).toFixed(1)} seconds.`, "GUILD_COOLDOWN", {
-							totalCooldown: commandObject.guildCooldown,
-							remainingCooldown: (Number(useAfter || 0) - Date.now()) / 1000,
-						})
+						new ExecutionError(
+							`Guild is on cooldown for ${((Number(useAfter || 0) - Date.now()) / 1000).toFixed(1)} seconds.`,
+							"GUILD_COOLDOWN",
+							{
+								totalCooldown: commandObject.guildCooldown,
+								remainingCooldown: (Number(useAfter || 0) - Date.now()) / 1000,
+							}
+						)
 					);
 				const millis: number = parseInt(commandObject.guildCooldown.toString()) * 1000;
 				guildCooldowns.set(message.guild.id, Date.now() + millis);
@@ -69,7 +82,11 @@ export class LocalUtils {
 					return flag;
 				});
 				if (!memberPermissions.has(mappedPermissions))
-					return res(new ExecutionError("User does not have the required permissions.", "USER_PERMISSIONS_MISSING", { missingPermissions: memberPermissions.missing(mappedPermissions) }));
+					return res(
+						new ExecutionError("User does not have the required permissions.", "USER_PERMISSIONS_MISSING", {
+							missingPermissions: memberPermissions.missing(mappedPermissions),
+						})
+					);
 			}
 			if (commandObject.botPermissions && commandObject.botPermissions.length) {
 				const botMember = message.guild.members.cache.get(commandObject.client.user?.id);
@@ -81,7 +98,11 @@ export class LocalUtils {
 					return flag;
 				});
 				if (!botPermissions.has(mappedPermissions))
-					return res(new ExecutionError("Bot does not have the required permissions.", "BOT_PERMISSIONS_MISSING", { missingPermissions: botPermissions.missing(mappedPermissions) }));
+					return res(
+						new ExecutionError("Bot does not have the required permissions.", "BOT_PERMISSIONS_MISSING", {
+							missingPermissions: botPermissions.missing(mappedPermissions),
+						})
+					);
 			}
 			if (commandObject.userRoles && commandObject.userRoles.length) {
 				// Check if user has all required roles
@@ -108,12 +129,21 @@ export class LocalUtils {
 		});
 	}
 
-	async verifyInteraction(interactionEvent: Interaction, interactionObject: InteractionCommand | MessageContextMenu | UserContextMenu): Promise<ExecutionError | undefined> {
+	static async verifyInteraction(
+		interactionEvent: Interaction,
+		interactionObject: InteractionCommand | MessageContextMenu | UserContextMenu
+	): Promise<ExecutionError | undefined> {
 		return new Promise((res) => {
 			// "disabled" field
-			if (interactionObject.disabled && !this.isOwner(interactionObject.handler.owners, interactionEvent.user.id)) return res(new ExecutionError("The command is disabled.", "DISABLED"));
+			if (interactionObject.disabled && !this.isOwner(interactionObject.handler.owners, interactionEvent.user.id))
+				return res(new ExecutionError("The command is disabled.", "DISABLED"));
 			// "guildIds" field
-			if (interactionEvent.guild && interactionObject.guildIds && interactionObject.guildIds?.length && !interactionObject.guildIds.includes(interactionEvent.guild.id))
+			if (
+				interactionEvent.guild &&
+				interactionObject.guildIds &&
+				interactionObject.guildIds?.length &&
+				!interactionObject.guildIds.includes(interactionEvent.guild.id)
+			)
 				return res(new ExecutionError("This guild ID is not whitelisted.", "GUILD_ID_NOT_WHITELISTED"));
 			// "userIds" field
 			if (interactionObject.userIds && interactionObject.userIds?.length && !interactionObject.userIds.includes(interactionEvent.user.id))

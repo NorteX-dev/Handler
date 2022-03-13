@@ -51,7 +51,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Pagination = void 0;
 var events_1 = require("events");
 var discord_js_1 = require("discord.js");
 var nanoid_1 = require("nanoid");
@@ -158,7 +157,14 @@ var Pagination = /** @class */ (function (_super) {
                                         return [4 /*yield*/, this.updateContent()];
                                     case 1:
                                         _a.sent();
-                                        this.emit("change", { next: true, previous: false, page: this.page, maxPage: this.maxPage, perPage: this.perPage, results: this.currentPageDataset });
+                                        this.emit("change", {
+                                            next: true,
+                                            previous: false,
+                                            page: this.page,
+                                            maxPage: this.maxPage,
+                                            perPage: this.perPage,
+                                            results: this.currentPageDataset,
+                                        });
                                         _a.label = 2;
                                     case 2:
                                         if (!(interaction.customId === this.ids[1])) return [3 /*break*/, 4];
@@ -168,12 +174,26 @@ var Pagination = /** @class */ (function (_super) {
                                         return [4 /*yield*/, this.updateContent()];
                                     case 3:
                                         _a.sent();
-                                        this.emit("change", { next: false, previous: true, page: this.page, maxPage: this.maxPage, perPage: this.perPage, results: this.currentPageDataset });
+                                        this.emit("change", {
+                                            next: false,
+                                            previous: true,
+                                            page: this.page,
+                                            maxPage: this.maxPage,
+                                            perPage: this.perPage,
+                                            results: this.currentPageDataset,
+                                        });
                                         _a.label = 4;
                                     case 4:
                                         if (!(interaction.customId === this.ids[2])) return [3 /*break*/, 6];
-                                        gotoPageCollector = this.channel.createMessageCollector({ filter: function (m) { return m.author.id === initiatorId && !isNaN(parseInt(m.content)); }, max: 1, time: 30000 });
-                                        return [4 /*yield*/, interaction.reply({ embeds: [new discord_js_1.MessageEmbed().setDescription("Please type in the page you want to go to.")], ephemeral: true })];
+                                        gotoPageCollector = this.channel.createMessageCollector({
+                                            filter: function (m) { return m.author.id === initiatorId && !isNaN(parseInt(m.content)); },
+                                            max: 1,
+                                            time: 30000,
+                                        });
+                                        return [4 /*yield*/, interaction.reply({
+                                                embeds: [new discord_js_1.MessageEmbed().setDescription("Please type in the page you want to go to.")],
+                                                ephemeral: true,
+                                            })];
                                     case 5:
                                         _a.sent();
                                         gotoPageCollector.on("collect", function (gt) { return __awaiter(_this, void 0, void 0, function () {
@@ -184,7 +204,11 @@ var Pagination = /** @class */ (function (_super) {
                                                         page = parseInt(gt.content);
                                                         gt.delete().catch(function () { });
                                                         if (page > this.maxPage) {
-                                                            interaction.editReply({ embeds: [new discord_js_1.MessageEmbed().setColor("RED").setDescription("This page doesn't exist. Pages go only up to ".concat(this.maxPage, "."))] });
+                                                            interaction.editReply({
+                                                                embeds: [
+                                                                    new discord_js_1.MessageEmbed().setColor("RED").setDescription("This page doesn't exist. Pages go only up to ".concat(this.maxPage, ".")),
+                                                                ],
+                                                            });
                                                             return [2 /*return*/];
                                                         }
                                                         if (page <= 0) {
@@ -281,4 +305,4 @@ var Pagination = /** @class */ (function (_super) {
     };
     return Pagination;
 }(events_1.EventEmitter));
-exports.Pagination = Pagination;
+exports.default = Pagination;

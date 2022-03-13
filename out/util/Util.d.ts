@@ -1,8 +1,8 @@
 import { Client } from "discord.js";
-import { CommandHandler } from "../handlers/CommandHandler";
-import { EventHandler } from "../handlers/EventHandler";
-import { InteractionHandler } from "../handlers/InteractionHandler";
-import { ComponentHandler } from "../handlers/ComponentHandler";
+import CommandHandler from "../handlers/CommandHandler";
+import EventHandler from "../handlers/EventHandler";
+import InteractionHandler from "../handlers/InteractionHandler";
+import ComponentHandler from "../handlers/ComponentHandler";
 interface ManyClientsInterface {
     commands?: any;
     events?: any;
@@ -15,7 +15,7 @@ interface HandlersInterface {
     interactionHandler?: InteractionHandler;
     componentHandler?: ComponentHandler;
 }
-export declare class Util {
+export default class Util {
     private client;
     constructor(client: Client);
     /**
@@ -39,5 +39,6 @@ export declare class Util {
      * }
      * */
     static createMany(client: Client, options: ManyClientsInterface): HandlersInterface;
+    static createMessageLink(guildId: string, channelId: string, messageId?: string): string;
 }
 export {};

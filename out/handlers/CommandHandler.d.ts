@@ -1,6 +1,6 @@
 import { Client, Message } from "discord.js";
-import { Handler } from "./Handler";
-import { Command } from "../structures/Command";
+import Handler from "./Handler";
+import Command from "../structures/Command";
 interface HandlerOptions {
     client: Client;
     autoLoad?: boolean;
@@ -8,7 +8,7 @@ interface HandlerOptions {
     prefix?: string;
     owners?: Array<string>;
 }
-export declare class CommandHandler extends Handler {
+export default class CommandHandler extends Handler {
     /**
      * Initializes a handler on the client.
      *
@@ -60,5 +60,11 @@ export declare class CommandHandler extends Handler {
      * @returns Promise<Command>
      * */
     runCommand(message: Message, ...additionalOptions: any): Promise<Command>;
+    /**
+     * Evaluate parameters.
+     *
+     * @ignore
+     * */
+    private static evaluateParameters;
 }
 export {};

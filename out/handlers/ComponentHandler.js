@@ -60,9 +60,8 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ComponentHandler = void 0;
 var Handler_1 = require("./Handler");
-var index_1 = require("../index");
+var Component_1 = require("../structures/Component");
 var ComponentHandler = /** @class */ (function (_super) {
     __extends(ComponentHandler, _super);
     function ComponentHandler(options) {
@@ -106,7 +105,7 @@ var ComponentHandler = /** @class */ (function (_super) {
      * @returns Interaction
      * */
     ComponentHandler.prototype.registerComponent = function (component) {
-        if (!(component instanceof index_1.Component))
+        if (!(component instanceof Component_1.default))
             throw new TypeError("registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu.");
         if (this.components.find(function (c) { return c.customId === component.customId; }))
             throw new Error("Component '".concat(component.customId, "' cannot be registered twice."));
@@ -175,5 +174,5 @@ var ComponentHandler = /** @class */ (function (_super) {
         }); });
     };
     return ComponentHandler;
-}(Handler_1.Handler));
-exports.ComponentHandler = ComponentHandler;
+}(Handler_1.default));
+exports.default = ComponentHandler;

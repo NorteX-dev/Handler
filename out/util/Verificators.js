@@ -36,24 +36,23 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LocalUtils = void 0;
 var ExecutionError_1 = require("../errors/ExecutionError");
 var discord_js_1 = require("discord.js");
 /**
  * @ignore
  * */
-var LocalUtils = /** @class */ (function () {
-    function LocalUtils() {
+var Verificators = /** @class */ (function () {
+    function Verificators() {
     }
-    LocalUtils.prototype.isClass = function (input) {
+    Verificators.isClass = function (input) {
         return typeof input === "function" && typeof input.prototype === "object" && input.toString().substring(0, 5) === "class";
     };
-    LocalUtils.prototype.isOwner = function (owners, userId) {
+    Verificators.isOwner = function (owners, userId) {
         if (!owners || !owners.length)
             return false;
         return owners.includes(userId);
     };
-    LocalUtils.prototype.verifyCommand = function (message, commandObject, userCooldowns, guildCooldowns) {
+    Verificators.verifyCommand = function (message, commandObject, userCooldowns, guildCooldowns) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
@@ -106,7 +105,9 @@ var LocalUtils = /** @class */ (function () {
                                 return flag;
                             });
                             if (!memberPermissions.has(mappedPermissions))
-                                return res(new ExecutionError_1.default("User does not have the required permissions.", "USER_PERMISSIONS_MISSING", { missingPermissions: memberPermissions.missing(mappedPermissions) }));
+                                return res(new ExecutionError_1.default("User does not have the required permissions.", "USER_PERMISSIONS_MISSING", {
+                                    missingPermissions: memberPermissions.missing(mappedPermissions),
+                                }));
                         }
                         if (commandObject.botPermissions && commandObject.botPermissions.length) {
                             var botMember = message.guild.members.cache.get((_a = commandObject.client.user) === null || _a === void 0 ? void 0 : _a.id);
@@ -119,7 +120,9 @@ var LocalUtils = /** @class */ (function () {
                                 return flag;
                             });
                             if (!botPermissions.has(mappedPermissions))
-                                return res(new ExecutionError_1.default("Bot does not have the required permissions.", "BOT_PERMISSIONS_MISSING", { missingPermissions: botPermissions.missing(mappedPermissions) }));
+                                return res(new ExecutionError_1.default("Bot does not have the required permissions.", "BOT_PERMISSIONS_MISSING", {
+                                    missingPermissions: botPermissions.missing(mappedPermissions),
+                                }));
                         }
                         if (commandObject.userRoles && commandObject.userRoles.length) {
                             // Check if user has all required roles
@@ -151,7 +154,7 @@ var LocalUtils = /** @class */ (function () {
             });
         });
     };
-    LocalUtils.prototype.verifyInteraction = function (interactionEvent, interactionObject) {
+    Verificators.verifyInteraction = function (interactionEvent, interactionObject) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             return __generator(this, function (_a) {
@@ -161,7 +164,10 @@ var LocalUtils = /** @class */ (function () {
                         if (interactionObject.disabled && !_this.isOwner(interactionObject.handler.owners, interactionEvent.user.id))
                             return res(new ExecutionError_1.default("The command is disabled.", "DISABLED"));
                         // "guildIds" field
-                        if (interactionEvent.guild && interactionObject.guildIds && ((_a = interactionObject.guildIds) === null || _a === void 0 ? void 0 : _a.length) && !interactionObject.guildIds.includes(interactionEvent.guild.id))
+                        if (interactionEvent.guild &&
+                            interactionObject.guildIds &&
+                            ((_a = interactionObject.guildIds) === null || _a === void 0 ? void 0 : _a.length) &&
+                            !interactionObject.guildIds.includes(interactionEvent.guild.id))
                             return res(new ExecutionError_1.default("This guild ID is not whitelisted.", "GUILD_ID_NOT_WHITELISTED"));
                         // "userIds" field
                         if (interactionObject.userIds && ((_b = interactionObject.userIds) === null || _b === void 0 ? void 0 : _b.length) && !interactionObject.userIds.includes(interactionEvent.user.id))
@@ -171,6 +177,6 @@ var LocalUtils = /** @class */ (function () {
             });
         });
     };
-    return LocalUtils;
+    return Verificators;
 }());
-exports.LocalUtils = LocalUtils;
+exports.default = Verificators;

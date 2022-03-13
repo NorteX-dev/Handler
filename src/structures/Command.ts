@@ -1,7 +1,7 @@
 import MethodNotOverridenError from "../errors/MethodNotOverridenError";
 
-import { CommandHandler } from "../handlers/CommandHandler";
 import { Message } from "discord.js";
+import CommandHandler from "../handlers/CommandHandler";
 
 /**
  * @interface CommandOptions
@@ -65,18 +65,58 @@ interface CommandOptions {
 	userIds?: Array<string>;
 	guildIds?: Array<string>;
 	disabled?: boolean;
+	parameters?: Array<Parameter>;
 }
 
-export class Command {
+/**
+ * Configuration object for {@link Parameter.prompt}.
+ *
+ * @interface PromptConfig
+ * @param message A string content value or a function that returns a Message instance (value returned from message.channel.send)
+ * @param timeout The amount of time, in milliseconds, when the prompt is going to expire.
+ * @param onTimeout Callback function which is ran when the prompt has not received any response in the time specified.
+ * */
+
+interface PromptConfig {
+	message: string | Function; // A content string or a method that returns type Message
+	timeout?: number;
+	onTimeout?: Function;
+}
+
+/**
+ * Useful for automatically populating args with the correct type and if needed, non-null values, with prompt support.
+ *
+ * @interface Parameter
+ * @param name Parameter name
+ * @param required If true and parameters are missing from the command, the command will not execute and onMissing() is executed
+ * @param prompt Prompt configuration, refer to @see {@link PromptConfig}
+ * @param description Parameter description
+ * @param validator A function with a boolean return type which evaluates whether a specified value is valid (for example checking whether the value is a number or whether it is a valid user).
+ * @param transform A function that transforms the value (for example user fetching or parsing numbers etc.) before it is added back to args.
+ * @param onMissing A function ran when this parameter is missing. Remember this will also fired if prompting is enabled.
+ * @param onInvalid A function ran when this parameter is invalid (fails validator), whether it's from the original command or a prompt response.
+ * */
+interface Parameter {
+	name: string;
+	required?: boolean;
+	description?: string; // Not used anywhere in the handler, but readable
+	prompt?: PromptConfig;
+	validator?: Function;
+	transform?: Function;
+	onMissing?: Function;
+	onInvalid?: Function; // you might reprompt with parameter.prompt(config)
+}
+
+export default class Command {
 	public handler: CommandHandler;
 	public client: any;
 	public name: string;
 	public description?: string | undefined;
 	public category: string;
-	public aliases: Array<string>;
-	public userPermissions: Array<string>;
-	public userRoles: Array<string>;
-	public botPermissions: Array<string>;
+	public aliases: string[];
+	public userPermissions: string[];
+	public userRoles: string[];
+	public botPermissions: string[];
 	public botRoles: Array<string>;
 	public userCooldown: Number;
 	public guildCooldown: Number;
@@ -84,9 +124,10 @@ export class Command {
 	public nsfw: boolean;
 	public allowDm: boolean;
 	public onlyDm: boolean;
-	public userIds: Array<string>;
-	public guildIds: Array<string>;
+	public userIds: string[];
+	public guildIds: string[];
 	public disabled: boolean;
+	public parameters: Parameter[];
 
 	/**
 	 * @param handler The command handler instance
@@ -114,6 +155,7 @@ export class Command {
 		this.userIds = options.userIds || [];
 		this.guildIds = options.guildIds || [];
 		this.disabled = options.disabled || false;
+		this.parameters = options.parameters || [];
 		if (this.onlyDm && !this.allowDm) this.allowDm = true;
 	}
 

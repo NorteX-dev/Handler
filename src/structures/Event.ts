@@ -1,17 +1,19 @@
 import MethodNotOverridenError from "../errors/MethodNotOverridenError";
 
-import { EventHandler } from "../index";
+import EventHandler from "../handlers/EventHandler";
 
 interface EventOptions {
 	name: string;
 	once?: boolean;
+	ws?: boolean;
 }
 
-export class Event {
+export default class Event {
 	public handler: EventHandler;
 	public client: any;
 	public name: string;
 	public once: boolean;
+	public ws: boolean;
 
 	constructor(handler: EventHandler, filename: string, options?: EventOptions) {
 		if (!options) options = <EventOptions>{};
@@ -19,6 +21,7 @@ export class Event {
 		this.client = handler.client;
 		this.name = options.name || filename;
 		this.once = options.once || false;
+		this.ws = options.ws || false;
 	}
 
 	run(args?: Array<any>) {

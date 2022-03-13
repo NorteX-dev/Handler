@@ -1,6 +1,6 @@
 import { Client, Interaction as DJSInteraction } from "discord.js";
-import { Handler } from "./Handler";
-import { Component } from "../index";
+import Handler from "./Handler";
+import Component from "../structures/Component";
 
 interface HandlerOptions {
 	client: Client;
@@ -8,7 +8,7 @@ interface HandlerOptions {
 	autoLoad?: boolean;
 }
 
-export class ComponentHandler extends Handler {
+export default class ComponentHandler extends Handler {
 	/**
 	 * Initializes an component interaction handler on the client.
 	 *

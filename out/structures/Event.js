@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Event = void 0;
 var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
 var Event = /** @class */ (function () {
     function Event(handler, filename, options) {
@@ -10,10 +9,11 @@ var Event = /** @class */ (function () {
         this.client = handler.client;
         this.name = options.name || filename;
         this.once = options.once || false;
+        this.ws = options.ws || false;
     }
     Event.prototype.run = function (args) {
         throw new MethodNotOverridenError_1.default("run() method on " + this.name + " event is not present.");
     };
     return Event;
 }());
-exports.Event = Event;
+exports.default = Event;

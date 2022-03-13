@@ -1,5 +1,5 @@
 import { ApplicationCommandOptionData } from "discord.js";
-import { InteractionHandler } from "../handlers/InteractionHandler";
+import InteractionHandler from "../handlers/InteractionHandler";
 interface ApplicationCommandOptions {
     name: string;
     description: string;
@@ -10,7 +10,7 @@ interface ApplicationCommandOptions {
     defaultPermission?: boolean;
     permissions: any[];
 }
-export declare class InteractionCommand {
+export default class InteractionCommand {
     handler: InteractionHandler;
     client: any;
     type: string;

@@ -1,6 +1,6 @@
 import MethodNotOverridenError from "../errors/MethodNotOverridenError";
 
-import { InteractionHandler } from "../handlers/InteractionHandler";
+import InteractionHandler from "../handlers/InteractionHandler";
 
 interface MessageContextMenuInteractionOptions {
 	name: string;
@@ -9,7 +9,7 @@ interface MessageContextMenuInteractionOptions {
 	guildIds?: Array<string>;
 }
 
-export class MessageContextMenu {
+export default class MessageContextMenu {
 	public handler: InteractionHandler;
 	public client: any;
 	public type: string;

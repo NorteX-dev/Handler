@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MessageContextMenu = void 0;
 var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
 var MessageContextMenu = /** @class */ (function () {
     function MessageContextMenu(handler, filename, options) {
@@ -23,4 +22,4 @@ var MessageContextMenu = /** @class */ (function () {
     };
     return MessageContextMenu;
 }());
-exports.MessageContextMenu = MessageContextMenu;
+exports.default = MessageContextMenu;

@@ -1,18 +1,21 @@
 import { ApplicationCommand, Client, Collection, Interaction as DJSInteraction, Snowflake } from "discord.js";
-import { Handler } from "./Handler";
+import Handler from "./Handler";
 import ExecutionError from "../errors/ExecutionError";
-import { InteractionCommand, MessageContextMenu, UserContextMenu } from "../index";
+import InteractionCommand from "../structures/InteractionCommand";
+import Verificators from "../util/Verificators";
+import UserContextMenu from "../structures/UserContextMenu";
+import MessageContextMenu from "../structures/MessageContextMenu";
 
 interface HandlerOptions {
 	client: Client;
 	directory?: string;
 	autoLoad?: boolean;
-	owners?: Array<string>;
+	owners?: string[];
 }
 
 type InteractionRunnable = InteractionCommand | UserContextMenu | MessageContextMenu;
 
-export class InteractionHandler extends Handler {
+export default class InteractionHandler extends Handler {
 	/**
 	 * Initializes an interaction handler on the client.
 	 *
@@ -118,7 +121,7 @@ export class InteractionHandler extends Handler {
 			)
 				throw new ExecutionError("Attempting to run non-interaction class with runInteraction().", "INVALID_CLASS");
 
-			const failedReason: ExecutionError | undefined = await this.localUtils.verifyInteraction(interaction, applicationCommand);
+			const failedReason: ExecutionError | undefined = await Verificators.verifyInteraction(interaction, applicationCommand);
 			if (failedReason) {
 				rej(failedReason);
 				return;
@@ -148,7 +151,7 @@ export class InteractionHandler extends Handler {
 			if (interaction.targetType === "USER" && contextMenuInt.type !== "USER") return;
 			if (interaction.targetType === "MESSAGE" && contextMenuInt.type !== "MESSAGE") return;
 
-			const failedReason: ExecutionError | undefined = await this.localUtils.verifyInteraction(interaction, contextMenuInt);
+			const failedReason: ExecutionError | undefined = await Verificators.verifyInteraction(interaction, contextMenuInt);
 			if (failedReason) {
 				reject(failedReason);
 				return;

@@ -3,8 +3,7 @@ import DirectoryReferenceError from "../errors/DirectoryReferenceError";
 import { Client } from "discord.js";
 import { EventEmitter } from "events";
 import { glob } from "glob";
-import { LocalUtils } from "../util/LocalUtils";
-import { CommandHandler } from "./CommandHandler";
+import Verificators from "../util/Verificators";
 import * as path from "path";
 import * as fs from "fs";
 
@@ -13,7 +12,7 @@ interface HandlerOptions {
 	directory?: string | undefined;
 }
 
-export class Handler extends EventEmitter {
+export default class Handler extends EventEmitter {
 	/**
 	 * Base class for handlers. Should not be used as-is. Use a subclass instead.
 	 *
@@ -23,13 +22,11 @@ export class Handler extends EventEmitter {
 	 * */
 	public client: Client;
 	public directory?: string;
-	public localUtils: LocalUtils;
 
 	constructor(options: HandlerOptions) {
 		super();
 		if (!options.client) throw new ReferenceError("Handler(): options.client is required.");
 		this.client = options.client;
-		this.localUtils = new LocalUtils();
 		if (options.directory) this.setDirectory(options.directory);
 		return this;
 	}
@@ -73,7 +70,7 @@ export class Handler extends EventEmitter {
 					const parsedPath = path.parse(file);
 					const Constructor = require(file);
 					if (!Constructor) return this.debug(`${parsedPath} failed to load. The file was loaded but cannot be required.`);
-					if (!this.localUtils.isClass(Constructor)) throw new TypeError(`File ${parsedPath.name} doesn't export a class.`);
+					if (!Verificators.isClass(Constructor)) throw new TypeError(`File ${parsedPath.name} doesn't export a class.`);
 					const instance = new Constructor(this, parsedPath.name);
 					this.debug(`Instantiated "${instance.customId || instance.name}" from file ${parsedPath.name}${parsedPath.ext}.`);
 					instances.push(instance);

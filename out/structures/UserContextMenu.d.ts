@@ -1,11 +1,11 @@
-import { InteractionHandler } from "../handlers/InteractionHandler";
+import InteractionHandler from "../handlers/InteractionHandler";
 interface UserContextMenuInteractionOptions {
     name: string;
     disabled?: boolean;
     userIds?: Array<string>;
     guildIds?: Array<string>;
 }
-export declare class UserContextMenu {
+export default class UserContextMenu {
     handler: InteractionHandler;
     client: any;
     type: string;

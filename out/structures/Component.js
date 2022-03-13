@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Component = void 0;
 var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
 var Component = /** @class */ (function () {
     function Component(handler, filename, options) {
@@ -31,4 +30,4 @@ var Component = /** @class */ (function () {
     };
     return Component;
 }());
-exports.Component = Component;
+exports.default = Component;

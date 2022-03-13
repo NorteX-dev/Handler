@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { EventEmitter } from "events";
 import { TextBasedChannel } from "discord.js";
-export declare class Pagination extends EventEmitter {
+export default class Pagination extends EventEmitter {
     private collector?;
     page: number;
     dataset?: Array<any>;

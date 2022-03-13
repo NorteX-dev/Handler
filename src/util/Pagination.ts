@@ -1,8 +1,16 @@
 import { EventEmitter } from "events";
-import { InteractionCollector, Message, MessageActionRow, MessageButton, MessageComponentInteraction, MessageEmbed, TextBasedChannel } from "discord.js";
+import {
+	InteractionCollector,
+	Message,
+	MessageActionRow,
+	MessageButton,
+	MessageComponentInteraction,
+	MessageEmbed,
+	TextBasedChannel,
+} from "discord.js";
 import { nanoid } from "nanoid";
 
-export class Pagination extends EventEmitter {
+export default class Pagination extends EventEmitter {
 	private collector?: InteractionCollector<any>;
 	public page: number;
 	public dataset?: Array<any>;
@@ -84,7 +92,14 @@ export class Pagination extends EventEmitter {
 					interaction.deferUpdate();
 					this.page--;
 					await this.updateContent();
-					this.emit("change", { next: true, previous: false, page: this.page, maxPage: this.maxPage, perPage: this.perPage, results: this.currentPageDataset });
+					this.emit("change", {
+						next: true,
+						previous: false,
+						page: this.page,
+						maxPage: this.maxPage,
+						perPage: this.perPage,
+						results: this.currentPageDataset,
+					});
 				}
 			}
 			if (interaction.customId === this.ids[1]) {
@@ -93,17 +108,35 @@ export class Pagination extends EventEmitter {
 					interaction.deferUpdate();
 					this.page++;
 					await this.updateContent();
-					this.emit("change", { next: false, previous: true, page: this.page, maxPage: this.maxPage, perPage: this.perPage, results: this.currentPageDataset });
+					this.emit("change", {
+						next: false,
+						previous: true,
+						page: this.page,
+						maxPage: this.maxPage,
+						perPage: this.perPage,
+						results: this.currentPageDataset,
+					});
 				}
 			}
 			if (interaction.customId === this.ids[2]) {
-				const gotoPageCollector = this.channel!.createMessageCollector({ filter: (m) => m.author.id === initiatorId && !isNaN(parseInt(m.content)), max: 1, time: 30000 });
-				await interaction.reply({ embeds: [new MessageEmbed().setDescription("Please type in the page you want to go to.")], ephemeral: true });
+				const gotoPageCollector = this.channel!.createMessageCollector({
+					filter: (m) => m.author.id === initiatorId && !isNaN(parseInt(m.content)),
+					max: 1,
+					time: 30000,
+				});
+				await interaction.reply({
+					embeds: [new MessageEmbed().setDescription("Please type in the page you want to go to.")],
+					ephemeral: true,
+				});
 				gotoPageCollector.on("collect", async (gt) => {
 					const page = parseInt(gt.content);
 					gt.delete().catch(() => {});
 					if (page > this.maxPage) {
-						interaction.editReply({ embeds: [new MessageEmbed().setColor("RED").setDescription(`This page doesn't exist. Pages go only up to ${this.maxPage}.`)] });
+						interaction.editReply({
+							embeds: [
+								new MessageEmbed().setColor("RED").setDescription(`This page doesn't exist. Pages go only up to ${this.maxPage}.`),
+							],
+						});
 						return;
 					}
 					if (page <= 0) {

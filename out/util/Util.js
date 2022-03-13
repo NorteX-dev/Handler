@@ -11,7 +11,6 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Util = void 0;
 var CommandHandler_1 = require("../handlers/CommandHandler");
 var EventHandler_1 = require("../handlers/EventHandler");
 var InteractionHandler_1 = require("../handlers/InteractionHandler");
@@ -53,18 +52,25 @@ var Util = /** @class */ (function () {
         for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
             var key = keys_1[_i];
             if (key === "commands")
-                handlers.commandHandler = new CommandHandler_1.CommandHandler(__assign({ client: client }, options[key]));
+                handlers.commandHandler = new CommandHandler_1.default(__assign({ client: client }, options[key]));
             else if (key === "events")
-                handlers.eventHandler = new EventHandler_1.EventHandler(__assign({ client: client }, options[key]));
+                handlers.eventHandler = new EventHandler_1.default(__assign({ client: client }, options[key]));
             else if (key === "interactions")
-                handlers.interactionHandler = new InteractionHandler_1.InteractionHandler(__assign({ client: client }, options[key]));
+                handlers.interactionHandler = new InteractionHandler_1.default(__assign({ client: client }, options[key]));
             else if (key === "components")
-                handlers.componentHandler = new ComponentHandler_1.ComponentHandler(__assign({ client: client }, options[key]));
+                handlers.componentHandler = new ComponentHandler_1.default(__assign({ client: client }, options[key]));
             else
                 throw new Error("createMany(): Invalid key '".concat(key, "' inside 'options'. Valid keys are 'commands', 'events', 'interactions', and 'components'."));
         }
         return handlers;
     };
+    Util.createMessageLink = function (guildId, channelId, messageId) {
+        if (!guildId || !channelId)
+            throw new TypeError("createMessageLink(): missing required properties: 'guildId', 'channelId'.");
+        if (messageId)
+            return "https://discord.com/channels/".concat(guildId, "/").concat(channelId, "/").concat(messageId);
+        return "https://discord.com/channels/".concat(guildId, "/").concat(channelId);
+    };
     return Util;
 }());
-exports.Util = Util;
+exports.default = Util;

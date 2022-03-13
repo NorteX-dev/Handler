@@ -1,13 +1,13 @@
 import MethodNotOverridenError from "../errors/MethodNotOverridenError";
 
-import { ComponentHandler } from "../handlers/ComponentHandler";
+import ComponentHandler from "../handlers/ComponentHandler";
 
 interface ComponentOptions {
 	customId: string;
 	queryingMode: "exact" | "includes" | "startsWith";
 }
 
-export class Component {
+export default class Component {
 	public handler: ComponentHandler;
 	public client: any;
 	public type: string;

@@ -13,16 +13,20 @@ Things to add/change to @nortex/handler:
 - Fix: events innherited from filenames are toLowerCase'd() which makes events like messageCreate messagecreate [✔]
 - Log errors of posting interactions instead of saying nothing changed [✔]
 - Make paths relative instead of absolute [✔]
-- Add more types to return value of createMany because IDE dies
-- Add a runXunsafely() variant to run without any checks
-- Add getCommands(), getInteractions() etc. for querying elements
-- Add "ws" support for events
+- Add more types to return value of createMany because IDE dies [✔ Added .d.ts types, turns out they weren't compiling]
+- Add a generateMessageLink() util function [✔]
+- Check localUtils usage and adjust to static [✔]
+- Built-in Prompters [✔ To be checked]
 - Create a custom "passthrough" to interactionCreate which creates a temporary Map<InteractionID, JSONData> and allows to fetch using getJSONData(interactionId)
 -   Make a modified MessageButton() extender which will store the data automatically
-- Change commands and interactions Map to a custom Collection
 - Combined handler which has `async runCommand` and `async runInteraction`
+- Make most exports default
 - Fetchers utility with sharding support
-- Add a generateMessageLink() util function
-- Built-in Prompters
 - Custom runtime error validators
 - Built-in subcommand support for subcommands in commands (maybe as Util) (?)
+
+// Abandoned:
+- Change commands and interactions Map to a custom Collection [✔ Idea abandoned in favor of an array of objects]
+- Add getCommands(), getInteractions() etc. for querying elements [✔ Idea abandoned in favor of using this.commands]
+- Add a runXunsafely() variant to run without any checks [✔ Idea abandoned in favor of using `handler.commands.find(r => r.name === "command name").run()` manually]
+- Add "ws" support for events [✔ Idea abandoned in favor of using "raw"]

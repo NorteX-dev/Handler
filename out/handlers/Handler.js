@@ -51,11 +51,10 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Handler = void 0;
 var DirectoryReferenceError_1 = require("../errors/DirectoryReferenceError");
 var events_1 = require("events");
 var glob_1 = require("glob");
-var LocalUtils_1 = require("../util/LocalUtils");
+var Verificators_1 = require("../util/Verificators");
 var path = require("path");
 var fs = require("fs");
 var Handler = /** @class */ (function (_super) {
@@ -65,7 +64,6 @@ var Handler = /** @class */ (function (_super) {
         if (!options.client)
             throw new ReferenceError("Handler(): options.client is required.");
         _this.client = options.client;
-        _this.localUtils = new LocalUtils_1.LocalUtils();
         if (options.directory)
             _this.setDirectory(options.directory);
         return _this;
@@ -117,7 +115,7 @@ var Handler = /** @class */ (function (_super) {
                             Constructor = require(file);
                             if (!Constructor)
                                 return [2 /*return*/, this.debug("".concat(parsedPath, " failed to load. The file was loaded but cannot be required."))];
-                            if (!this.localUtils.isClass(Constructor))
+                            if (!Verificators_1.default.isClass(Constructor))
                                 throw new TypeError("File ".concat(parsedPath.name, " doesn't export a class."));
                             instance = new Constructor(this, parsedPath.name);
                             this.debug("Instantiated \"".concat(instance.customId || instance.name, "\" from file ").concat(parsedPath.name).concat(parsedPath.ext, "."));
@@ -135,4 +133,4 @@ var Handler = /** @class */ (function (_super) {
     };
     return Handler;
 }(events_1.EventEmitter));
-exports.Handler = Handler;
+exports.default = Handler;

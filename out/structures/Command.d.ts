@@ -1,5 +1,5 @@
-import { CommandHandler } from "../handlers/CommandHandler";
 import { Message } from "discord.js";
+import CommandHandler from "../handlers/CommandHandler";
 /**
  * @interface CommandOptions
  * Additional command options
@@ -62,17 +62,54 @@ interface CommandOptions {
     userIds?: Array<string>;
     guildIds?: Array<string>;
     disabled?: boolean;
+    parameters?: Array<Parameter>;
 }
-export declare class Command {
+/**
+ * Configuration object for {@link Parameter.prompt}.
+ *
+ * @interface PromptConfig
+ * @param message A string content value or a function that returns a Message instance (value returned from message.channel.send)
+ * @param timeout The amount of time, in milliseconds, when the prompt is going to expire.
+ * @param onTimeout Callback function which is ran when the prompt has not received any response in the time specified.
+ * */
+interface PromptConfig {
+    message: string | Function;
+    timeout?: number;
+    onTimeout?: Function;
+}
+/**
+ * Useful for automatically populating args with the correct type and if needed, non-null values, with prompt support.
+ *
+ * @interface Parameter
+ * @param name Parameter name
+ * @param required If true and parameters are missing from the command, the command will not execute and onMissing() is executed
+ * @param prompt Prompt configuration, refer to @see {@link PromptConfig}
+ * @param description Parameter description
+ * @param validator A function with a boolean return type which evaluates whether a specified value is valid (for example checking whether the value is a number or whether it is a valid user).
+ * @param transform A function that transforms the value (for example user fetching or parsing numbers etc.) before it is added back to args.
+ * @param onMissing A function ran when this parameter is missing. Remember this will also fired if prompting is enabled.
+ * @param onInvalid A function ran when this parameter is invalid (fails validator), whether it's from the original command or a prompt response.
+ * */
+interface Parameter {
+    name: string;
+    required?: boolean;
+    description?: string;
+    prompt?: PromptConfig;
+    validator?: Function;
+    transform?: Function;
+    onMissing?: Function;
+    onInvalid?: Function;
+}
+export default class Command {
     handler: CommandHandler;
     client: any;
     name: string;
     description?: string | undefined;
     category: string;
-    aliases: Array<string>;
-    userPermissions: Array<string>;
-    userRoles: Array<string>;
-    botPermissions: Array<string>;
+    aliases: string[];
+    userPermissions: string[];
+    userRoles: string[];
+    botPermissions: string[];
     botRoles: Array<string>;
     userCooldown: Number;
     guildCooldown: Number;
@@ -80,9 +117,10 @@ export declare class Command {
     nsfw: boolean;
     allowDm: boolean;
     onlyDm: boolean;
-    userIds: Array<string>;
-    guildIds: Array<string>;
+    userIds: string[];
+    guildIds: string[];
     disabled: boolean;
+    parameters: Parameter[];
     /**
      * @param handler The command handler instance
      * @param filename Command name - if unspecified, the filename is taken into consideration

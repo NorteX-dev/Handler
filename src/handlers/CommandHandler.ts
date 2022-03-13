@@ -1,8 +1,9 @@
 import ExecutionError from "../errors/ExecutionError";
 
 import { Client, Message } from "discord.js";
-import { Handler } from "./Handler";
-import { Command } from "../structures/Command";
+import Handler from "./Handler";
+import Command from "../structures/Command";
+import Verificators from "../util/Verificators";
 
 interface HandlerOptions {
 	client: Client;
@@ -12,7 +13,7 @@ interface HandlerOptions {
 	owners?: Array<string>;
 }
 
-export class CommandHandler extends Handler {
+export default class CommandHandler extends Handler {
 	/**
 	 * Initializes a handler on the client.
 	 *
@@ -108,7 +109,6 @@ export class CommandHandler extends Handler {
 
 				if (!typedCommand) return;
 				typedCommand = typedCommand.trim();
-				// @ts-ignore
 				const command =
 					this.commands.find((c) => c.name === typedCommand.toLowerCase()) ||
 					this.commands.find((c) => c.name === this.aliases.get(typedCommand.toLowerCase()));
@@ -120,7 +120,7 @@ export class CommandHandler extends Handler {
 				if (!command.allowDm && message.channel.type === "DM")
 					return reject(new ExecutionError("Command cannot be executed in DM.", "COMMAND_NOT_ALLOWED_IN_DM", { command }));
 
-				const failedReason: ExecutionError | undefined = await this.localUtils.verifyCommand(
+				const failedReason: ExecutionError | undefined = await Verificators.verifyCommand(
 					message,
 					command,
 					this.userCooldowns,
@@ -133,6 +133,9 @@ export class CommandHandler extends Handler {
 
 				if (command.usage) command.usage = `${prefix}${command.name} ${command.usage}` || "";
 
+				// Evaluate parameters
+				args = await CommandHandler.evaluateParameters(message, command, args);
+
 				try {
 					command.run(message, args, ...additionalOptions);
 					resolve(command);
@@ -142,5 +145,80 @@ export class CommandHandler extends Handler {
 				}
 			}
 		});
+	}
+
+	/**
+	 * Evaluate parameters.
+	 *
+	 * @ignore
+	 * */
+	private static async evaluateParameters(message: Message, command: Command, args: string[]) {
+		if (!command.parameters.length) return args;
+		for (let i in command.parameters) {
+			const parameter = command.parameters[i];
+			let value = undefined;
+			if (!args[i] && parameter.required) {
+				// Parameter is required and not provided
+				if (parameter.onMissing) parameter.onMissing(parameter, command, message, args);
+				if (parameter.prompt) {
+					const prompt =
+						typeof parameter.prompt.message === "string"
+							? await message.channel.send({
+									content: parameter.prompt.message,
+							  })
+							: parameter.prompt.message(parameter, command, message, args);
+
+					if (!prompt || !(prompt instanceof Message))
+						throw new Error(
+							`${command.name}: Parameter.prompt.message() in parameter: '${parameter.name}' did not return a Message instance.`
+						);
+
+					const response = await message.channel.awaitMessages({
+						filter: (m: Message) => m.author.id === message.author.id,
+						max: 1,
+						time: parameter.prompt.timeout || 30000,
+						errors: ["time"],
+					});
+					if (!response.size) {
+						if (parameter.prompt.onTimeout) parameter.prompt.onTimeout(parameter, command, message, args);
+						continue;
+					}
+					const responseMessage = response.first();
+					if (!responseMessage) {
+						// Possibly redundant but shuts up TS
+						if (parameter.prompt.onTimeout) parameter.prompt.onTimeout(parameter, command, message, args);
+						continue;
+					}
+
+					await prompt.delete().catch(() => {
+						/*ignore problems related to deleting since they don't affect anything*/
+					});
+					await responseMessage.delete().catch(() => {
+						/*ignore problems related to deleting since they don't affect anything*/
+					});
+
+					value = responseMessage.content;
+				} else {
+					continue;
+				}
+			}
+			// Parameter is specified or it's not but it's not required
+			value = value || args[i];
+			if (parameter.validator) {
+				const isValid = await parameter.validator(value, parameter, command, message, args);
+				if (!isValid) {
+					if (parameter.onInvalid) parameter.onInvalid(parameter, command, message, args);
+					continue;
+				}
+			}
+
+			if (parameter.transform) {
+				const result = await parameter.transform(value, parameter, command, message, args);
+				if (result) args[i] = result;
+			} else {
+				args[i] = value;
+			}
+		}
+		return args;
 	}
 }

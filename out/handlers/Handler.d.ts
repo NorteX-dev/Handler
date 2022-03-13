@@ -1,12 +1,11 @@
 /// <reference types="node" />
 import { Client } from "discord.js";
 import { EventEmitter } from "events";
-import { LocalUtils } from "../util/LocalUtils";
 interface HandlerOptions {
     client: Client;
     directory?: string | undefined;
 }
-export declare class Handler extends EventEmitter {
+export default class Handler extends EventEmitter {
     /**
      * Base class for handlers. Should not be used as-is. Use a subclass instead.
      *
@@ -16,7 +15,6 @@ export declare class Handler extends EventEmitter {
      * */
     client: Client;
     directory?: string;
-    localUtils: LocalUtils;
     constructor(options: HandlerOptions);
     /**
      * Sets directory for commands

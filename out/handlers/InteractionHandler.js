@@ -60,10 +60,12 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.InteractionHandler = void 0;
 var Handler_1 = require("./Handler");
 var ExecutionError_1 = require("../errors/ExecutionError");
-var index_1 = require("../index");
+var InteractionCommand_1 = require("../structures/InteractionCommand");
+var Verificators_1 = require("../util/Verificators");
+var UserContextMenu_1 = require("../structures/UserContextMenu");
+var MessageContextMenu_1 = require("../structures/MessageContextMenu");
 var InteractionHandler = /** @class */ (function (_super) {
     __extends(InteractionHandler, _super);
     function InteractionHandler(options) {
@@ -108,7 +110,7 @@ var InteractionHandler = /** @class */ (function (_super) {
      * @returns Interaction
      * */
     InteractionHandler.prototype.registerInteraction = function (interaction) {
-        if (!(interaction instanceof index_1.InteractionCommand || interaction instanceof index_1.UserContextMenu || interaction instanceof index_1.MessageContextMenu))
+        if (!(interaction instanceof InteractionCommand_1.default || interaction instanceof UserContextMenu_1.default || interaction instanceof MessageContextMenu_1.default))
             throw new TypeError("registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu.");
         if (this.interactions.find(function (c) { return c.name === interaction.name; }))
             throw new Error("Interaction ".concat(interaction.name, " cannot be registered twice."));
@@ -161,11 +163,11 @@ var InteractionHandler = /** @class */ (function (_super) {
                         applicationCommand = this.interactions.find(function (i) { return i.name === interaction.commandName.toLowerCase() && i.type === "CHAT_INPUT"; });
                         if (!applicationCommand)
                             return [2 /*return*/];
-                        if (!(applicationCommand instanceof index_1.InteractionCommand ||
-                            applicationCommand instanceof index_1.UserContextMenu ||
-                            applicationCommand instanceof index_1.MessageContextMenu))
+                        if (!(applicationCommand instanceof InteractionCommand_1.default ||
+                            applicationCommand instanceof UserContextMenu_1.default ||
+                            applicationCommand instanceof MessageContextMenu_1.default))
                             throw new ExecutionError_1.default("Attempting to run non-interaction class with runInteraction().", "INVALID_CLASS");
-                        return [4 /*yield*/, this.localUtils.verifyInteraction(interaction, applicationCommand)];
+                        return [4 /*yield*/, Verificators_1.default.verifyInteraction(interaction, applicationCommand)];
                     case 1:
                         failedReason = _a.sent();
                         if (failedReason) {
@@ -207,7 +209,7 @@ var InteractionHandler = /** @class */ (function (_super) {
                             return [2 /*return*/];
                         if (interaction.targetType === "MESSAGE" && contextMenuInt.type !== "MESSAGE")
                             return [2 /*return*/];
-                        return [4 /*yield*/, this.localUtils.verifyInteraction(interaction, contextMenuInt)];
+                        return [4 /*yield*/, Verificators_1.default.verifyInteraction(interaction, contextMenuInt)];
                     case 1:
                         failedReason = _a.sent();
                         if (failedReason) {
@@ -267,7 +269,7 @@ var InteractionHandler = /** @class */ (function (_super) {
                         interactions = this.interactions.filter(function (r) { return ["CHAT_INPUT", "USER", "MESSAGE"].includes(r.type); });
                         interactionsToSend_1 = [];
                         interactions.forEach(function (interaction) {
-                            if (interaction.type === "CHAT_INPUT" && interaction instanceof index_1.InteractionCommand) {
+                            if (interaction.type === "CHAT_INPUT" && interaction instanceof InteractionCommand_1.default) {
                                 interactionsToSend_1.push({
                                     type: "CHAT_INPUT",
                                     name: interaction.name,
@@ -277,10 +279,10 @@ var InteractionHandler = /** @class */ (function (_super) {
                                     options: interaction.options,
                                 });
                             }
-                            else if (interaction.type === "USER" && interaction instanceof index_1.UserContextMenu) {
+                            else if (interaction.type === "USER" && interaction instanceof UserContextMenu_1.default) {
                                 interactionsToSend_1.push({ type: "USER", name: interaction.name });
                             }
-                            else if (interaction.type === "MESSAGE" && interaction instanceof index_1.MessageContextMenu) {
+                            else if (interaction.type === "MESSAGE" && interaction instanceof MessageContextMenu_1.default) {
                                 interactionsToSend_1.push({ type: "MESSAGE", name: interaction.name });
                             }
                             else {
@@ -353,5 +355,5 @@ var InteractionHandler = /** @class */ (function (_super) {
         return changesMade;
     };
     return InteractionHandler;
-}(Handler_1.Handler));
-exports.InteractionHandler = InteractionHandler;
+}(Handler_1.default));
+exports.default = InteractionHandler;

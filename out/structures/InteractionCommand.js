@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.InteractionCommand = void 0;
 var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
 var InteractionCommand = /** @class */ (function () {
     function InteractionCommand(handler, filename, options) {
@@ -30,4 +29,4 @@ var InteractionCommand = /** @class */ (function () {
     };
     return InteractionCommand;
 }());
-exports.InteractionCommand = InteractionCommand;
+exports.default = InteractionCommand;

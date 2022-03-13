@@ -51,8 +51,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EventHandler = void 0;
-var index_1 = require("../index");
+var Event_1 = require("../structures/Event");
 var Handler_1 = require("./Handler");
 var EventHandler = /** @class */ (function (_super) {
     __extends(EventHandler, _super);
@@ -104,7 +103,7 @@ var EventHandler = /** @class */ (function (_super) {
      * @returns Command
      * */
     EventHandler.prototype.registerEvent = function (event) {
-        if (!(event instanceof index_1.Event))
+        if (!(event instanceof Event_1.default))
             throw new TypeError("registerCommand(): event parameter must be an instance of Event.");
         this.client[event.once ? "once" : "on"](event.name, function () {
             var args = [];
@@ -118,5 +117,5 @@ var EventHandler = /** @class */ (function (_super) {
         return event;
     };
     return EventHandler;
-}(Handler_1.Handler));
-exports.EventHandler = EventHandler;
+}(Handler_1.default));
+exports.default = EventHandler;

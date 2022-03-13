@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UserContextMenu = void 0;
 var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
 var UserContextMenu = /** @class */ (function () {
     function UserContextMenu(handler, filename, options) {
@@ -23,4 +22,4 @@ var UserContextMenu = /** @class */ (function () {
     };
     return UserContextMenu;
 }());
-exports.UserContextMenu = UserContextMenu;
+exports.default = UserContextMenu;

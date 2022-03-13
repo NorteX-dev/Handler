@@ -1,14 +1,16 @@
 import { Client, Interaction as DJSInteraction } from "discord.js";
-import { Handler } from "./Handler";
-import { InteractionCommand, MessageContextMenu, UserContextMenu } from "../index";
+import Handler from "./Handler";
+import InteractionCommand from "../structures/InteractionCommand";
+import UserContextMenu from "../structures/UserContextMenu";
+import MessageContextMenu from "../structures/MessageContextMenu";
 interface HandlerOptions {
     client: Client;
     directory?: string;
     autoLoad?: boolean;
-    owners?: Array<string>;
+    owners?: string[];
 }
 declare type InteractionRunnable = InteractionCommand | UserContextMenu | MessageContextMenu;
-export declare class InteractionHandler extends Handler {
+export default class InteractionHandler extends Handler {
     /**
      * Initializes an interaction handler on the client.
      *

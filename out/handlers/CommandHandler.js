@@ -60,10 +60,11 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CommandHandler = void 0;
 var ExecutionError_1 = require("../errors/ExecutionError");
+var discord_js_1 = require("discord.js");
 var Handler_1 = require("./Handler");
 var Command_1 = require("../structures/Command");
+var Verificators_1 = require("../util/Verificators");
 var CommandHandler = /** @class */ (function (_super) {
     __extends(CommandHandler, _super);
     function CommandHandler(options) {
@@ -125,7 +126,7 @@ var CommandHandler = /** @class */ (function (_super) {
      * */
     CommandHandler.prototype.registerCommand = function (command) {
         var _this = this;
-        if (!(command instanceof Command_1.Command))
+        if (!(command instanceof Command_1.default))
             throw new TypeError("registerCommand(): command parameter is not an instance of Command.");
         if (this.commands.find(function (c) { return c.name === command.name; }))
             throw new Error("Command ".concat(command.name, " cannot be registered twice."));
@@ -177,12 +178,12 @@ var CommandHandler = /** @class */ (function (_super) {
                                             this_1.commands.find(function (c) { return c.name === _this.aliases.get(typedCommand.toLowerCase()); });
                                         if (!command)
                                             return [2 /*return*/, { value: reject(new ExecutionError_1.default("Command not found.", "COMMAND_NOT_FOUND", { query: typedCommand })) }];
-                                        if (!(command instanceof Command_1.Command))
+                                        if (!(command instanceof Command_1.default))
                                             return [2 /*return*/, { value: reject(new ExecutionError_1.default("Attempting to run non-command class with runCommand().", "INVALID_CLASS")) }];
                                         // Handle additional command parameters
                                         if (!command.allowDm && message.channel.type === "DM")
                                             return [2 /*return*/, { value: reject(new ExecutionError_1.default("Command cannot be executed in DM.", "COMMAND_NOT_ALLOWED_IN_DM", { command: command })) }];
-                                        return [4 /*yield*/, this_1.localUtils.verifyCommand(message, command, this_1.userCooldowns, this_1.guildCooldowns)];
+                                        return [4 /*yield*/, Verificators_1.default.verifyCommand(message, command, this_1.userCooldowns, this_1.guildCooldowns)];
                                     case 1:
                                         failedReason = _c.sent();
                                         if (failedReason) {
@@ -191,6 +192,10 @@ var CommandHandler = /** @class */ (function (_super) {
                                         }
                                         if (command.usage)
                                             command.usage = "".concat(prefix).concat(command.name, " ").concat(command.usage) || "";
+                                        return [4 /*yield*/, CommandHandler.evaluateParameters(message, command, args)];
+                                    case 2:
+                                        // Evaluate parameters
+                                        args = _c.sent();
                                         try {
                                             command.run.apply(command, __spreadArray([message, args], additionalOptions, false));
                                             resolve(command);
@@ -223,6 +228,113 @@ var CommandHandler = /** @class */ (function (_super) {
             });
         }); });
     };
+    /**
+     * Evaluate parameters.
+     *
+     * @ignore
+     * */
+    CommandHandler.evaluateParameters = function (message, command, args) {
+        return __awaiter(this, void 0, void 0, function () {
+            var _a, _b, _i, i, parameter, value, prompt_1, _c, response, responseMessage, isValid, result;
+            return __generator(this, function (_d) {
+                switch (_d.label) {
+                    case 0:
+                        if (!command.parameters.length)
+                            return [2 /*return*/, args];
+                        _a = [];
+                        for (_b in command.parameters)
+                            _a.push(_b);
+                        _i = 0;
+                        _d.label = 1;
+                    case 1:
+                        if (!(_i < _a.length)) return [3 /*break*/, 15];
+                        i = _a[_i];
+                        parameter = command.parameters[i];
+                        value = undefined;
+                        if (!(!args[i] && parameter.required)) return [3 /*break*/, 9];
+                        // Parameter is required and not provided
+                        if (parameter.onMissing)
+                            parameter.onMissing(parameter, command, message, args);
+                        if (!parameter.prompt) return [3 /*break*/, 8];
+                        if (!(typeof parameter.prompt.message === "string")) return [3 /*break*/, 3];
+                        return [4 /*yield*/, message.channel.send({
+                                content: parameter.prompt.message,
+                            })];
+                    case 2:
+                        _c = _d.sent();
+                        return [3 /*break*/, 4];
+                    case 3:
+                        _c = parameter.prompt.message(parameter, command, message, args);
+                        _d.label = 4;
+                    case 4:
+                        prompt_1 = _c;
+                        if (!prompt_1 || !(prompt_1 instanceof discord_js_1.Message))
+                            throw new Error("".concat(command.name, ": Parameter.prompt.message() in parameter: '").concat(parameter.name, "' did not return a Message instance."));
+                        return [4 /*yield*/, message.channel.awaitMessages({
+                                filter: function (m) { return m.author.id === message.author.id; },
+                                max: 1,
+                                time: parameter.prompt.timeout || 30000,
+                                errors: ["time"],
+                            })];
+                    case 5:
+                        response = _d.sent();
+                        if (!response.size) {
+                            if (parameter.prompt.onTimeout)
+                                parameter.prompt.onTimeout(parameter, command, message, args);
+                            return [3 /*break*/, 14];
+                        }
+                        responseMessage = response.first();
+                        if (!responseMessage) {
+                            // Possibly redundant but shuts up TS
+                            if (parameter.prompt.onTimeout)
+                                parameter.prompt.onTimeout(parameter, command, message, args);
+                            return [3 /*break*/, 14];
+                        }
+                        return [4 /*yield*/, prompt_1.delete().catch(function () {
+                                /*ignore problems related to deleting since they don't affect anything*/
+                            })];
+                    case 6:
+                        _d.sent();
+                        return [4 /*yield*/, responseMessage.delete().catch(function () {
+                                /*ignore problems related to deleting since they don't affect anything*/
+                            })];
+                    case 7:
+                        _d.sent();
+                        value = responseMessage.content;
+                        return [3 /*break*/, 9];
+                    case 8: return [3 /*break*/, 14];
+                    case 9:
+                        // Parameter is specified or it's not but it's not required
+                        value = value || args[i];
+                        if (!parameter.validator) return [3 /*break*/, 11];
+                        return [4 /*yield*/, parameter.validator(value, parameter, command, message, args)];
+                    case 10:
+                        isValid = _d.sent();
+                        if (!isValid) {
+                            if (parameter.onInvalid)
+                                parameter.onInvalid(parameter, command, message, args);
+                            return [3 /*break*/, 14];
+                        }
+                        _d.label = 11;
+                    case 11:
+                        if (!parameter.transform) return [3 /*break*/, 13];
+                        return [4 /*yield*/, parameter.transform(value, parameter, command, message, args)];
+                    case 12:
+                        result = _d.sent();
+                        if (result)
+                            args[i] = result;
+                        return [3 /*break*/, 14];
+                    case 13:
+                        args[i] = value;
+                        _d.label = 14;
+                    case 14:
+                        _i++;
+                        return [3 /*break*/, 1];
+                    case 15: return [2 /*return*/, args];
+                }
+            });
+        });
+    };
     return CommandHandler;
-}(Handler_1.Handler));
-exports.CommandHandler = CommandHandler;
+}(Handler_1.default));
+exports.default = CommandHandler;

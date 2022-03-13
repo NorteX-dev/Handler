@@ -1,7 +1,7 @@
 import { Client } from "discord.js";
 
-import { Command, Event } from "../index";
-import { Handler } from "./Handler";
+import Event from "../structures/Event";
+import Handler from "./Handler";
 
 interface HandlerOptions {
 	client: Client;
@@ -9,7 +9,7 @@ interface HandlerOptions {
 	directory?: string | undefined;
 }
 
-export class EventHandler extends Handler {
+export default class EventHandler extends Handler {
 	/**
 	 * Initializes an event handler on the client.
 	 *

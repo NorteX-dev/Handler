@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Command = void 0;
 var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
 var Command = /** @class */ (function () {
     /**
@@ -30,6 +29,7 @@ var Command = /** @class */ (function () {
         this.userIds = options.userIds || [];
         this.guildIds = options.guildIds || [];
         this.disabled = options.disabled || false;
+        this.parameters = options.parameters || [];
         if (this.onlyDm && !this.allowDm)
             this.allowDm = true;
     }
@@ -49,4 +49,4 @@ var Command = /** @class */ (function () {
     };
     return Command;
 }());
-exports.Command = Command;
+exports.default = Command;

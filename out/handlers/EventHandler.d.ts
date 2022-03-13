@@ -1,12 +1,12 @@
 import { Client } from "discord.js";
-import { Event } from "../index";
-import { Handler } from "./Handler";
+import Event from "../structures/Event";
+import Handler from "./Handler";
 interface HandlerOptions {
     client: Client;
     autoLoad?: boolean;
     directory?: string | undefined;
 }
-export declare class EventHandler extends Handler {
+export default class EventHandler extends Handler {
     /**
      * Initializes an event handler on the client.
      *

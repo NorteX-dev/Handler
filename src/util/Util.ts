@@ -1,8 +1,8 @@
 import { Client } from "discord.js";
-import { CommandHandler } from "../handlers/CommandHandler";
-import { EventHandler } from "../handlers/EventHandler";
-import { InteractionHandler } from "../handlers/InteractionHandler";
-import { ComponentHandler } from "../handlers/ComponentHandler";
+import CommandHandler from "../handlers/CommandHandler";
+import EventHandler from "../handlers/EventHandler";
+import InteractionHandler from "../handlers/InteractionHandler";
+import ComponentHandler from "../handlers/ComponentHandler";
 
 interface ManyClientsInterface {
 	commands?: any;
@@ -18,7 +18,7 @@ interface HandlersInterface {
 	componentHandler?: ComponentHandler;
 }
 
-export class Util {
+export default class Util {
 	private client: Client;
 	constructor(client: Client) {
 		this.client = client;
@@ -64,5 +64,11 @@ export class Util {
 				);
 		}
 		return handlers;
+	}
+
+	public static createMessageLink(guildId: string, channelId: string, messageId?: string) {
+		if (!guildId || !channelId) throw new TypeError("createMessageLink(): missing required properties: 'guildId', 'channelId'.");
+		if (messageId) return `https://discord.com/channels/${guildId}/${channelId}/${messageId}`;
+		return `https://discord.com/channels/${guildId}/${channelId}`;
 	}
 }

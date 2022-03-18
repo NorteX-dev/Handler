@@ -24,7 +24,7 @@ export default class Event {
 		this.ws = options.ws || false;
 	}
 
-	run(args?: Array<any>) {
+	run(args?: any) {
 		throw new MethodNotOverridenError("run() method on " + this.name + " event is not present.");
 	}
 }

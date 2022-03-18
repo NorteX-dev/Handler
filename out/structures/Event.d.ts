@@ -11,6 +11,6 @@ export default class Event {
     once: boolean;
     ws: boolean;
     constructor(handler: EventHandler, filename: string, options?: EventOptions);
-    run(args?: Array<any>): void;
+    run(args?: any): void;
 }
 export {};

@@ -166,7 +166,7 @@ export default class Command {
 	 *
 	 * @override
 	 * */
-	run(message: Message, args?: Array<String>, ...additionalParams: any) {
+	run(message: Message, args?: Array<String>, additionalParams?: any) {
 		throw new MethodNotOverridenError("run() method on " + this.name + " command is not present.");
 	}
 }

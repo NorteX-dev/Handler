@@ -52,7 +52,7 @@ export default class Handler extends EventEmitter {
 		this.emit("debug", message);
 	}
 
-	loadAndInstance(emitReady: boolean = true) {
+	load(emitReady: boolean = true) {
 		return new Promise<any>(async (resolve, reject) => {
 			this.debug(`Loading files from ${this.directory}.`);
 			let instances: any[] = [];
@@ -71,8 +71,8 @@ export default class Handler extends EventEmitter {
 					const Constructor = require(file);
 					if (!Constructor) return this.debug(`${parsedPath} failed to load. The file was loaded but cannot be required.`);
 					if (!Verificators.isClass(Constructor)) throw new TypeError(`File ${parsedPath.name} doesn't export a class.`);
-					const instance = new Constructor(this, parsedPath.name);
-					this.debug(`Instantiated "${instance.customId || instance.name}" from file ${parsedPath.name}${parsedPath.ext}.`);
+					const instance = new Constructor(this, parsedPath.name, {});
+					this.debug(`Loaded "${instance.customId || instance.name}" from file ${parsedPath.name}${parsedPath.ext}.`);
 					instances.push(instance);
 				}
 				if (emitReady) this.emit("ready");

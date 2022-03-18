@@ -13,11 +13,13 @@ var MessageContextMenu = /** @class */ (function () {
         this.guildIds = options.guildIds || [];
         this.disabled = options.disabled || false;
     }
-    MessageContextMenu.prototype.run = function (userContextMenuInteraction) {
-        var additionalParams = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            additionalParams[_i - 1] = arguments[_i];
-        }
+    /**
+     * @param interaction The Discord.js interaction object
+     * @param additionalParams Parameters that were passed in runInteraction()
+     *
+     * @override
+     * */
+    MessageContextMenu.prototype.run = function (interaction, additionalParams) {
         throw new MethodNotOverridenError_1.default("run() method on " + this.name + " interaction is not present.");
     };
     return MessageContextMenu;

@@ -1,6 +1,6 @@
 import MethodNotOverridenError from "../errors/MethodNotOverridenError";
 
-import { ApplicationCommandOptionData } from "discord.js";
+import { ApplicationCommandOptionData, Interaction } from "discord.js";
 import InteractionHandler from "../handlers/InteractionHandler";
 
 interface ApplicationCommandOptions {
@@ -25,7 +25,7 @@ export default class InteractionCommand {
 	public guildIds: Array<string>;
 	public disabled: boolean;
 	public defaultPermission: boolean;
-	public permissions: any[];
+	public permissions: Array<any>;
 
 	constructor(handler: InteractionHandler, filename: string, options?: ApplicationCommandOptions) {
 		if (!options) options = <ApplicationCommandOptions>{};
@@ -45,7 +45,13 @@ export default class InteractionCommand {
 		this.permissions = options.permissions || [];
 	}
 
-	run(interaction: any, ...additionalParams: any) {
+	/**
+	 * @param interaction The Discord.js interaction object
+	 * @param additionalParams Parameters that were passed in runInteraction()
+	 *
+	 * @override
+	 * */
+	run(interaction: Interaction, additionalParams?: any) {
 		throw new MethodNotOverridenError("run() method on " + this.name + " interaction is not present.");
 	}
 }

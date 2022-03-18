@@ -43,7 +43,7 @@ export default class ComponentHandler extends Handler {
 	 * */
 	loadComponents() {
 		return new Promise(async (res, rej) => {
-			const files = await this.loadAndInstance().catch(rej);
+			const files = await this.load().catch(rej);
 			files.forEach((components: Component) => this.registerComponent(components));
 			return res(this.components);
 		});

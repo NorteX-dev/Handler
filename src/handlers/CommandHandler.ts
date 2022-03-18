@@ -72,7 +72,7 @@ export default class CommandHandler extends Handler {
 	 * */
 	loadCommands() {
 		return new Promise<Command[]>(async (res, rej) => {
-			const files = await this.loadAndInstance().catch(rej);
+			const files = await this.load().catch(rej);
 			files.forEach((cmd: Command) => this.registerCommand(cmd));
 			return res(this.commands);
 		});

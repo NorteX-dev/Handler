@@ -57,7 +57,7 @@ export default class InteractionHandler extends Handler {
 	 * */
 	loadInteractions() {
 		return new Promise(async (res, rej) => {
-			const files = await this.loadAndInstance(false).catch(rej);
+			const files = await this.load(false).catch(rej);
 			files.forEach((interaction: InteractionCommand | UserContextMenu | MessageContextMenu) => this.registerInteraction(interaction));
 			return res(this.interactions);
 		});

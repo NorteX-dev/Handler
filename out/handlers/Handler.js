@@ -89,7 +89,7 @@ var Handler = /** @class */ (function (_super) {
     Handler.prototype.debug = function (message) {
         this.emit("debug", message);
     };
-    Handler.prototype.loadAndInstance = function (emitReady) {
+    Handler.prototype.load = function (emitReady) {
         var _this = this;
         if (emitReady === void 0) { emitReady = true; }
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
@@ -117,8 +117,8 @@ var Handler = /** @class */ (function (_super) {
                                 return [2 /*return*/, this.debug("".concat(parsedPath, " failed to load. The file was loaded but cannot be required."))];
                             if (!Verificators_1.default.isClass(Constructor))
                                 throw new TypeError("File ".concat(parsedPath.name, " doesn't export a class."));
-                            instance = new Constructor(this, parsedPath.name);
-                            this.debug("Instantiated \"".concat(instance.customId || instance.name, "\" from file ").concat(parsedPath.name).concat(parsedPath.ext, "."));
+                            instance = new Constructor(this, parsedPath.name, {});
+                            this.debug("Loaded \"".concat(instance.customId || instance.name, "\" from file ").concat(parsedPath.name).concat(parsedPath.ext, "."));
                             instances.push(instance);
                         }
                         if (emitReady)

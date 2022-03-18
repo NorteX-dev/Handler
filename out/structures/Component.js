@@ -17,15 +17,13 @@ var Component = /** @class */ (function () {
         if (!["exact", "includes", "startsWith"].includes(options.queryingMode))
             throw new Error(filename + ": Invalid querying mode for component interaction. Querying mode must be one of: exact, includes, startsWith.");
     }
-    /*
-     * @param {Interaction} interaction
+    /**
+     * @param interaction The Discord.js interaction object
+     * @param additionalParams Parameters that were passed in runInteraction()
+     *
      * @override
      * */
-    Component.prototype.run = function (interaction) {
-        var additionalParams = [];
-        for (var _i = 1; _i < arguments.length; _i++) {
-            additionalParams[_i - 1] = arguments[_i];
-        }
+    Component.prototype.run = function (interaction, additionalParams) {
         throw new MethodNotOverridenError_1.default("run() method on " + this.customId + " interaction is not present.");
     };
     return Component;

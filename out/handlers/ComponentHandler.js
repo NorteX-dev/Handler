@@ -90,7 +90,7 @@ var ComponentHandler = /** @class */ (function (_super) {
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.loadAndInstance().catch(rej)];
+                    case 0: return [4 /*yield*/, this.load().catch(rej)];
                     case 1:
                         files = _a.sent();
                         files.forEach(function (components) { return _this.registerComponent(components); });

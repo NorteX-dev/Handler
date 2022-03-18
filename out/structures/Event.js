@@ -9,7 +9,6 @@ var Event = /** @class */ (function () {
         this.client = handler.client;
         this.name = options.name || filename;
         this.once = options.once || false;
-        this.ws = options.ws || false;
     }
     Event.prototype.run = function (args) {
         throw new MethodNotOverridenError_1.default("run() method on " + this.name + " event is not present.");

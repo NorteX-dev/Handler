@@ -27,6 +27,6 @@ export default class Handler extends EventEmitter {
      * */
     setDirectory(value: string): this;
     debug(message: string): void;
-    loadAndInstance(emitReady?: boolean): Promise<any>;
+    load(emitReady?: boolean): Promise<any>;
 }
 export {};

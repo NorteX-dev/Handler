@@ -1,6 +1,7 @@
 import MethodNotOverridenError from "../errors/MethodNotOverridenError";
 
 import InteractionHandler from "../handlers/InteractionHandler";
+import { Interaction } from "discord.js";
 
 interface UserContextMenuInteractionOptions {
 	name: string;
@@ -29,7 +30,13 @@ export default class UserContextMenu {
 		this.disabled = options.disabled || false;
 	}
 
-	run(userContextMenuInteraction: any, ...additionalParams: any) {
+	/**
+	 * @param interaction The Discord.js interaction object
+	 * @param additionalParams Parameters that were passed in runInteraction()
+	 *
+	 * @override
+	 * */
+	run(interaction: Interaction, additionalParams?: any) {
 		throw new MethodNotOverridenError("run() method on " + this.name + " interaction is not present.");
 	}
 }

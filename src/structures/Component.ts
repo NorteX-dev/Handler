@@ -1,6 +1,7 @@
 import MethodNotOverridenError from "../errors/MethodNotOverridenError";
 
 import ComponentHandler from "../handlers/ComponentHandler";
+import { Client, Interaction } from "discord.js";
 
 interface ComponentOptions {
 	customId: string;
@@ -9,7 +10,7 @@ interface ComponentOptions {
 
 export default class Component {
 	public handler: ComponentHandler;
-	public client: any;
+	public client: Client;
 	public type: string;
 	public customId: string;
 	public queryingMode: string;
@@ -29,11 +30,13 @@ export default class Component {
 			);
 	}
 
-	/*
-	 * @param {Interaction} interaction
+	/**
+	 * @param interaction The Discord.js interaction object
+	 * @param additionalParams Parameters that were passed in runInteraction()
+	 *
 	 * @override
 	 * */
-	run(interaction: any, ...additionalParams: any) {
+	run(interaction: Interaction, additionalParams?: any) {
 		throw new MethodNotOverridenError("run() method on " + this.customId + " interaction is not present.");
 	}
 }

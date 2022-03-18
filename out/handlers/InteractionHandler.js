@@ -95,7 +95,7 @@ var InteractionHandler = /** @class */ (function (_super) {
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.loadAndInstance(false).catch(rej)];
+                    case 0: return [4 /*yield*/, this.load(false).catch(rej)];
                     case 1:
                         files = _a.sent();
                         files.forEach(function (interaction) { return _this.registerInteraction(interaction); });

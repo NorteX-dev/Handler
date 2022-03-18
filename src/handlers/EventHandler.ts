@@ -38,7 +38,7 @@ export default class EventHandler extends Handler {
 	 * */
 	loadEvents() {
 		return new Promise<EventHandler>(async (res, rej) => {
-			const files = await this.loadAndInstance().catch(rej);
+			const files = await this.load().catch(rej);
 			files.forEach((event: Event) => this.registerEvent(event));
 			return res(this);
 		});

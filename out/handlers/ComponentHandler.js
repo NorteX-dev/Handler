@@ -158,9 +158,7 @@ var ComponentHandler = /** @class */ (function (_super) {
                 });
                 if (!componentInteraction)
                     return [2 /*return*/];
-                this.debug("Found matching interaction with the queryingMode ".concat(componentInteraction.queryingMode, ": ").concat(componentInteraction.customId));
-                if (!componentInteraction)
-                    return [2 /*return*/];
+                this.debug("Found matching interaction with the querying mode ".concat(componentInteraction.queryingMode, ": ").concat(componentInteraction.customId));
                 try {
                     componentInteraction.run.apply(componentInteraction, __spreadArray([interaction], additionalOptions, false));
                     resolve(componentInteraction);

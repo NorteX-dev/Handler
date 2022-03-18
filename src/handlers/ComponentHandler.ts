@@ -98,9 +98,7 @@ export default class ComponentHandler extends Handler {
 			});
 
 			if (!componentInteraction) return;
-
-			this.debug(`Found matching interaction with the queryingMode ${componentInteraction.queryingMode}: ${componentInteraction.customId}`);
-			if (!componentInteraction) return;
+			this.debug(`Found matching interaction with the querying mode ${componentInteraction.queryingMode}: ${componentInteraction.customId}`);
 
 			try {
 				componentInteraction.run(interaction, ...additionalOptions);

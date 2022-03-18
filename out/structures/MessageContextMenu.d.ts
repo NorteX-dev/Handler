@@ -21,6 +21,6 @@ export default class MessageContextMenu {
      *
      * @override
      * */
-    run(interaction: Interaction, additionalParams?: any): void;
+    run(interaction: Interaction, ...additionalParams: any): void;
 }
 export {};

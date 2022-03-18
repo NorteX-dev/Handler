@@ -17,6 +17,6 @@ export default class Component {
      *
      * @override
      * */
-    run(interaction: Interaction, additionalParams?: any): void;
+    run(interaction: Interaction, ...additionalParams: any): void;
 }
 export {};

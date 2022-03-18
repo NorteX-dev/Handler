@@ -40,7 +40,11 @@ var Command = /** @class */ (function () {
      *
      * @override
      * */
-    Command.prototype.run = function (message, args, additionalParams) {
+    Command.prototype.run = function (message, args) {
+        var additionalParams = [];
+        for (var _i = 2; _i < arguments.length; _i++) {
+            additionalParams[_i - 2] = arguments[_i];
+        }
         throw new MethodNotOverridenError_1.default("run() method on " + this.name + " command is not present.");
     };
     return Command;

@@ -55,14 +55,11 @@ export default class ComponentHandler extends Handler {
 	 * @returns Interaction
 	 * */
 	registerComponent(component: Component) {
-		if (!(component instanceof Component))
-			throw new TypeError(
-				"registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu."
-			);
+		if (!(component instanceof Component)) throw new TypeError("registerComponent(): interaction parameter must be an instance of Component.");
 		if (this.components.find((c) => c.customId === component.customId))
 			throw new Error(`Component '${component.customId}' cannot be registered twice.`);
 		this.components.push(component);
-		this.debug(`Loaded interaction "${component.customId}".`);
+		this.debug(`Loaded message component "${component.customId}".`);
 		this.emit("load", component);
 		return component;
 	}

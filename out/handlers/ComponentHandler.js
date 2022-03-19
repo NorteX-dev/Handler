@@ -106,11 +106,11 @@ var ComponentHandler = /** @class */ (function (_super) {
      * */
     ComponentHandler.prototype.registerComponent = function (component) {
         if (!(component instanceof Component_1.default))
-            throw new TypeError("registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu.");
+            throw new TypeError("registerComponent(): interaction parameter must be an instance of Component.");
         if (this.components.find(function (c) { return c.customId === component.customId; }))
             throw new Error("Component '".concat(component.customId, "' cannot be registered twice."));
         this.components.push(component);
-        this.debug("Loaded interaction \"".concat(component.customId, "\"."));
+        this.debug("Loaded message component \"".concat(component.customId, "\"."));
         this.emit("load", component);
         return component;
     };

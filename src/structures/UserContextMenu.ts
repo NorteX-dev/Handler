@@ -36,7 +36,7 @@ export default class UserContextMenu {
 	 *
 	 * @override
 	 * */
-	run(interaction: Interaction, ...additionalParams: any) {
+	run(interaction: Interaction, additionalParams?: any) {
 		throw new MethodNotOverridenError("run() method on " + this.name + " interaction is not present.");
 	}
 }

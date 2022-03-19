@@ -29,6 +29,6 @@ export default class InteractionCommand {
      *
      * @override
      * */
-    run(interaction: Interaction, ...additionalParams: any): void;
+    run(interaction: Interaction, additionalParams?: any): void;
 }
 export {};

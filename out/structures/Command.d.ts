@@ -134,6 +134,6 @@ export default class Command {
      *
      * @override
      * */
-    run(message: Message, args?: Array<String>, ...additionalParams: any): void;
+    run(message: Message, args?: Array<String>, additionalParams?: any): void;
 }
 export {};

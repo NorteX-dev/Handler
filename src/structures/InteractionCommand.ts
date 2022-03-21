@@ -1,6 +1,6 @@
 import MethodNotOverridenError from "../errors/MethodNotOverridenError";
 
-import { ApplicationCommandOptionData, Interaction } from "discord.js";
+import { ApplicationCommandOptionData } from "discord.js";
 import InteractionHandler from "../handlers/InteractionHandler";
 
 interface ApplicationCommandOptions {
@@ -29,7 +29,7 @@ export default class InteractionCommand {
 
 	constructor(handler: InteractionHandler, filename: string, options?: ApplicationCommandOptions) {
 		if (!options) options = <ApplicationCommandOptions>{};
-		if (!options.name || !options.description) throw new Error("CommandInteraction: name & description are required.");
+		if (!options.name || !options.description) throw new Error("InteractionCommand: name & description are required.");
 		this.handler = handler;
 		this.client = handler.client;
 		this.type = "CHAT_INPUT";
@@ -51,7 +51,7 @@ export default class InteractionCommand {
 	 *
 	 * @override
 	 * */
-	run(interaction: Interaction, additionalParams?: any) {
+	run(interaction: any, additionalParams?: any) {
 		throw new MethodNotOverridenError("run() method on " + this.name + " interaction is not present.");
 	}
 }

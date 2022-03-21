@@ -1,4 +1,3 @@
-import { Message } from "discord.js";
 import CommandHandler from "../handlers/CommandHandler";
 /**
  * @interface CommandOptions
@@ -134,6 +133,6 @@ export default class Command {
      *
      * @override
      * */
-    run(message: Message, args?: Array<String>, additionalParams?: any): void;
+    run(message: any, args?: Array<String>, additionalParams?: any): void;
 }
 export {};

@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionData, Interaction } from "discord.js";
+import { ApplicationCommandOptionData } from "discord.js";
 import InteractionHandler from "../handlers/InteractionHandler";
 interface ApplicationCommandOptions {
     name: string;
@@ -29,6 +29,6 @@ export default class InteractionCommand {
      *
      * @override
      * */
-    run(interaction: Interaction, additionalParams?: any): void;
+    run(interaction: any, additionalParams?: any): void;
 }
 export {};

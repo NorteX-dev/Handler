@@ -1,6 +1,4 @@
 import MethodNotOverridenError from "../errors/MethodNotOverridenError";
-
-import { Message } from "discord.js";
 import CommandHandler from "../handlers/CommandHandler";
 
 /**
@@ -166,7 +164,7 @@ export default class Command {
 	 *
 	 * @override
 	 * */
-	run(message: Message, args?: Array<String>, additionalParams?: any) {
+	run(message: any, args?: Array<String>, additionalParams?: any) {
 		throw new MethodNotOverridenError("run() method on " + this.name + " command is not present.");
 	}
 }

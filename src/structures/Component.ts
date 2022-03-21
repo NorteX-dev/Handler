@@ -24,6 +24,7 @@ export default class Component {
 		this.queryingMode = options.queryingMode || "exact";
 		this.type = "COMPONENT";
 		this.customId = options.customId;
+
 		if (!["exact", "includes", "startsWith"].includes(options.queryingMode))
 			throw new Error(
 				filename + ": Invalid querying mode for component interaction. Querying mode must be one of: exact, includes, startsWith."

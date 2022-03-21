@@ -1,5 +1,4 @@
 import InteractionHandler from "../handlers/InteractionHandler";
-import { Interaction } from "discord.js";
 interface MessageContextMenuInteractionOptions {
     name: string;
     disabled?: boolean;
@@ -21,6 +20,6 @@ export default class MessageContextMenu {
      *
      * @override
      * */
-    run(interaction: Interaction, additionalParams?: any): void;
+    run(interaction: any, additionalParams?: any): void;
 }
 export {};

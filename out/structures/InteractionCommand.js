@@ -5,8 +5,6 @@ var InteractionCommand = /** @class */ (function () {
     function InteractionCommand(handler, filename, options) {
         if (!options)
             options = {};
-        if (!options.name || !options.description)
-            throw new Error("InteractionCommand: name & description are required.");
         this.handler = handler;
         this.client = handler.client;
         this.type = "CHAT_INPUT";

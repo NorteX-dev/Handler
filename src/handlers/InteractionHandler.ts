@@ -75,6 +75,8 @@ export default class InteractionHandler extends Handler {
 			);
 		if (this.interactions.find((c) => c.name === interaction.name))
 			throw new Error(`Interaction ${interaction.name} cannot be registered twice.`);
+		if (!interaction.name) throw new Error("InteractionRunnable: name is required.");
+		if (interaction instanceof InteractionCommand) if (!interaction.description) throw new Error("InteractionCommand: description is required.");
 		this.interactions.push(interaction);
 		this.debug(`Loaded interaction "${interaction.name}".`);
 		this.emit("load", interaction);

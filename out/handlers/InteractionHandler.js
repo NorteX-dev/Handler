@@ -114,6 +114,11 @@ var InteractionHandler = /** @class */ (function (_super) {
             throw new TypeError("registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu.");
         if (this.interactions.find(function (c) { return c.name === interaction.name; }))
             throw new Error("Interaction ".concat(interaction.name, " cannot be registered twice."));
+        if (!interaction.name)
+            throw new Error("InteractionRunnable: name is required.");
+        if (interaction instanceof InteractionCommand_1.default)
+            if (!interaction.description)
+                throw new Error("InteractionCommand: description is required.");
         this.interactions.push(interaction);
         this.debug("Loaded interaction \"".concat(interaction.name, "\"."));
         this.emit("load", interaction);

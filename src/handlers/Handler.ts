@@ -71,7 +71,7 @@ export default class Handler extends EventEmitter {
 					const Constructor = require(file);
 					if (!Constructor) return this.debug(`${parsedPath} failed to load. The file was loaded but cannot be required.`);
 					if (!Verificators.isClass(Constructor)) throw new TypeError(`File ${parsedPath.name} doesn't export a class.`);
-					const instance = new Constructor(this, parsedPath.name, {});
+					const instance = new Constructor(this, parsedPath.name);
 					this.debug(`Loaded "${instance.customId || instance.name}" from file ${parsedPath.name}${parsedPath.ext}.`);
 					instances.push(instance);
 				}

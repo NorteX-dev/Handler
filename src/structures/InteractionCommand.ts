@@ -29,7 +29,6 @@ export default class InteractionCommand {
 
 	constructor(handler: InteractionHandler, filename: string, options?: ApplicationCommandOptions) {
 		if (!options) options = <ApplicationCommandOptions>{};
-		if (!options.name || !options.description) throw new Error("InteractionCommand: name & description are required.");
 		this.handler = handler;
 		this.client = handler.client;
 		this.type = "CHAT_INPUT";

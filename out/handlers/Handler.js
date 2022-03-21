@@ -117,7 +117,7 @@ var Handler = /** @class */ (function (_super) {
                                 return [2 /*return*/, this.debug("".concat(parsedPath, " failed to load. The file was loaded but cannot be required."))];
                             if (!Verificators_1.default.isClass(Constructor))
                                 throw new TypeError("File ".concat(parsedPath.name, " doesn't export a class."));
-                            instance = new Constructor(this, parsedPath.name, {});
+                            instance = new Constructor(this, parsedPath.name);
                             this.debug("Loaded \"".concat(instance.customId || instance.name, "\" from file ").concat(parsedPath.name).concat(parsedPath.ext, "."));
                             instances.push(instance);
                         }

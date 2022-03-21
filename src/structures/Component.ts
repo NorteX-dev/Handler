@@ -1,7 +1,6 @@
 import MethodNotOverridenError from "../errors/MethodNotOverridenError";
 
 import ComponentHandler from "../handlers/ComponentHandler";
-import { Interaction } from "discord.js";
 
 interface ComponentOptions {
 	customId: string;
@@ -37,7 +36,7 @@ export default class Component {
 	 *
 	 * @override
 	 * */
-	run(interaction: Interaction, additionalParams?: any) {
+	run(interaction: any, additionalParams?: any) {
 		throw new MethodNotOverridenError("run() method on " + this.customId + " interaction is not present.");
 	}
 }

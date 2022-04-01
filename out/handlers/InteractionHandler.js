@@ -237,7 +237,7 @@ var InteractionHandler = /** @class */ (function (_super) {
     /**
      * Compare the local version of the interactions to the ones in Discord API and update if needed.
      *
-     * @returns Interaction
+     * @returns Promise<boolean>
      *
      * @param {boolean} [force=false] Skip checks and set commands even if the local version is up to date.
      * */

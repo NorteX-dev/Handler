@@ -176,7 +176,7 @@ export default class InteractionHandler extends Handler {
 	 *
 	 * @param {boolean} [force=false] Skip checks and set commands even if the local version is up to date.
 	 * */
-	public async updateInteractions<Promise>(force: boolean = false) {
+	public async updateInteractions(force: boolean = false): Promise<boolean> {
 		return new Promise(async (res, rej) => {
 			if (!this.client.application)
 				return rej(

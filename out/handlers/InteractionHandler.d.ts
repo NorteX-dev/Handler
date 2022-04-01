@@ -68,7 +68,7 @@ export default class InteractionHandler extends Handler {
      *
      * @param {boolean} [force=false] Skip checks and set commands even if the local version is up to date.
      * */
-    updateInteractions(force?: boolean): Promise<void>;
+    updateInteractions<Promise>(force?: boolean): globalThis.Promise<unknown>;
     /**
      * @ignore
      * */

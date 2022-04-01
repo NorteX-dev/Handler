@@ -1,5 +1,4 @@
 import ComponentHandler from "../handlers/ComponentHandler";
-import { Interaction } from "discord.js";
 interface ComponentOptions {
     customId: string;
     queryingMode: "exact" | "includes" | "startsWith";
@@ -17,6 +16,6 @@ export default class Component {
      *
      * @override
      * */
-    run(interaction: Interaction, additionalParams?: any): void;
+    run(interaction: any, additionalParams?: any): void;
 }
 export {};

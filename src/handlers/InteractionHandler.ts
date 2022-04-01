@@ -176,68 +176,74 @@ export default class InteractionHandler extends Handler {
 	 *
 	 * @param {boolean} [force=false] Skip checks and set commands even if the local version is up to date.
 	 * */
-	public async updateInteractions(force: boolean = false) {
-		if (!this.client.application)
-			throw new Error(
-				"updateInteractions(): client.application is undefined. Make sure you are executing updateInteractions() after the client has emitted the 'ready' event."
-			);
-
-		let changesMade = false;
-		if (force) {
-			// Forcing update, automatically assume changes were made
-			this.debug("Skipping checks and updating interactions.");
-			changesMade = true;
-		} else {
-			// Fetch existing interactions and compare to loaded
-			this.debug("Checking for differences.");
-
-			const fetchedInteractions = await this.client.application.commands.fetch().catch((err) => {
-				throw new Error(
-					`Can't fetch client commands: ${err.message}.\nMake sure you are executing updateInteractions() after the client has emitted the 'ready' event and 'this.client.application' is populated.`
+	public async updateInteractions<Promise>(force: boolean = false) {
+		return new Promise(async (res, rej) => {
+			if (!this.client.application)
+				return rej(
+					new Error(
+						"updateInteractions(): client.application is undefined. Make sure you are executing updateInteractions() after the client has emitted the 'ready' event."
+					)
 				);
-			});
-			if (!fetchedInteractions) throw new Error("Interactions weren't fetched.");
-			changesMade = this.checkDiff(fetchedInteractions);
-		}
 
-		if (changesMade) {
-			// Filter out message components
-			const interactions = this.interactions.filter((r) => ["CHAT_INPUT", "USER", "MESSAGE"].includes(r.type));
-			let interactionsToSend = [];
-			interactions.forEach((interaction) => {
-				if (interaction.type === "CHAT_INPUT" && interaction instanceof InteractionCommand) {
-					interactionsToSend.push({
-						type: "CHAT_INPUT",
-						name: interaction.name,
-						description: interaction.description,
-						defaultPermission: interaction.defaultPermission,
-						permissions: interaction.permissions,
-						options: interaction.options,
-					});
-				} else if (interaction.type === "USER" && interaction instanceof UserContextMenu) {
-					interactionsToSend.push({ type: "USER", name: interaction.name });
-				} else if (interaction.type === "MESSAGE" && interaction instanceof MessageContextMenu) {
-					interactionsToSend.push({ type: "MESSAGE", name: interaction.name });
-				} else {
-					this.debug(`Interaction type ${interaction.type} is not supported.`);
-				}
-			});
-			await this.client.application.commands
-				// @ts-ignore
-				.set(interactions)
-				.then((returned) => {
-					this.debug(
-						`Updated interactions (${returned.size} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`
+			let changesMade = false;
+			if (force) {
+				// Forcing update, automatically assume changes were made
+				this.debug("Skipping checks and updating interactions.");
+				changesMade = true;
+			} else {
+				// Fetch existing interactions and compare to loaded
+				this.debug("Checking for differences.");
+
+				const fetchedInteractions = await this.client.application.commands.fetch().catch((err) => {
+					return rej(
+						new Error(
+							`Can't fetch client commands: ${err.message}.\nMake sure you are executing updateInteractions() after the client has emitted the 'ready' event and 'this.client.application' is populated.`
+						)
 					);
-					this.emit("ready");
-				})
-				.catch((err) => {
-					throw new Error(`Can't update client commands: ${err}`);
 				});
-		} else {
-			this.debug("No changes in interactions - not refreshing.");
-			this.emit("ready");
-		}
+				if (!fetchedInteractions) return rej(new Error("Interactions weren't fetched."));
+				changesMade = this.checkDiff(fetchedInteractions);
+			}
+
+			if (changesMade) {
+				// Filter out message components
+				const interactions = this.interactions.filter((r) => ["CHAT_INPUT", "USER", "MESSAGE"].includes(r.type));
+				let interactionsToSend = [];
+				interactions.forEach((interaction) => {
+					if (interaction.type === "CHAT_INPUT" && interaction instanceof InteractionCommand) {
+						interactionsToSend.push({
+							type: "CHAT_INPUT",
+							name: interaction.name,
+							description: interaction.description,
+							defaultPermission: interaction.defaultPermission,
+							permissions: interaction.permissions,
+							options: interaction.options,
+						});
+					} else if (interaction.type === "USER" && interaction instanceof UserContextMenu) {
+						interactionsToSend.push({ type: "USER", name: interaction.name });
+					} else if (interaction.type === "MESSAGE" && interaction instanceof MessageContextMenu) {
+						interactionsToSend.push({ type: "MESSAGE", name: interaction.name });
+					} else {
+						this.debug(`Interaction type ${interaction.type} is not supported.`);
+					}
+				});
+				await this.client.application.commands
+					// @ts-ignore
+					.set(interactions)
+					.then((returned) => {
+						this.debug(
+							`Updated interactions (${returned.size} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`
+						);
+						res(true); // Result with true (updated)
+					})
+					.catch((err) => {
+						return rej(new Error(`Can't update client commands: ${err}`));
+					});
+			} else {
+				this.debug("No changes in interactions - not refreshing.");
+				res(false); // Result with false (no changes)
+			}
+		});
 	}
 
 	/**

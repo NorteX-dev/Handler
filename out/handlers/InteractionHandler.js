@@ -244,75 +244,80 @@ var InteractionHandler = /** @class */ (function (_super) {
     InteractionHandler.prototype.updateInteractions = function (force) {
         if (force === void 0) { force = false; }
         return __awaiter(this, void 0, void 0, function () {
-            var changesMade, fetchedInteractions, interactions, interactionsToSend_1;
             var _this = this;
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        if (!this.client.application)
-                            throw new Error("updateInteractions(): client.application is undefined. Make sure you are executing updateInteractions() after the client has emitted the 'ready' event.");
-                        changesMade = false;
-                        if (!force) return [3 /*break*/, 1];
-                        // Forcing update, automatically assume changes were made
-                        this.debug("Skipping checks and updating interactions.");
-                        changesMade = true;
-                        return [3 /*break*/, 3];
-                    case 1:
-                        // Fetch existing interactions and compare to loaded
-                        this.debug("Checking for differences.");
-                        return [4 /*yield*/, this.client.application.commands.fetch().catch(function (err) {
-                                throw new Error("Can't fetch client commands: ".concat(err.message, ".\nMake sure you are executing updateInteractions() after the client has emitted the 'ready' event and 'this.client.application' is populated."));
-                            })];
-                    case 2:
-                        fetchedInteractions = _a.sent();
-                        if (!fetchedInteractions)
-                            throw new Error("Interactions weren't fetched.");
-                        changesMade = this.checkDiff(fetchedInteractions);
-                        _a.label = 3;
-                    case 3:
-                        if (!changesMade) return [3 /*break*/, 5];
-                        interactions = this.interactions.filter(function (r) { return ["CHAT_INPUT", "USER", "MESSAGE"].includes(r.type); });
-                        interactionsToSend_1 = [];
-                        interactions.forEach(function (interaction) {
-                            if (interaction.type === "CHAT_INPUT" && interaction instanceof InteractionCommand_1.default) {
-                                interactionsToSend_1.push({
-                                    type: "CHAT_INPUT",
-                                    name: interaction.name,
-                                    description: interaction.description,
-                                    defaultPermission: interaction.defaultPermission,
-                                    permissions: interaction.permissions,
-                                    options: interaction.options,
-                                });
-                            }
-                            else if (interaction.type === "USER" && interaction instanceof UserContextMenu_1.default) {
-                                interactionsToSend_1.push({ type: "USER", name: interaction.name });
-                            }
-                            else if (interaction.type === "MESSAGE" && interaction instanceof MessageContextMenu_1.default) {
-                                interactionsToSend_1.push({ type: "MESSAGE", name: interaction.name });
-                            }
-                            else {
-                                _this.debug("Interaction type ".concat(interaction.type, " is not supported."));
+                return [2 /*return*/, new Promise(function (res, rej) { return __awaiter(_this, void 0, void 0, function () {
+                        var changesMade, fetchedInteractions, interactions, interactionsToSend_1;
+                        var _this = this;
+                        return __generator(this, function (_a) {
+                            switch (_a.label) {
+                                case 0:
+                                    if (!this.client.application)
+                                        return [2 /*return*/, rej(new Error("updateInteractions(): client.application is undefined. Make sure you are executing updateInteractions() after the client has emitted the 'ready' event."))];
+                                    changesMade = false;
+                                    if (!force) return [3 /*break*/, 1];
+                                    // Forcing update, automatically assume changes were made
+                                    this.debug("Skipping checks and updating interactions.");
+                                    changesMade = true;
+                                    return [3 /*break*/, 3];
+                                case 1:
+                                    // Fetch existing interactions and compare to loaded
+                                    this.debug("Checking for differences.");
+                                    return [4 /*yield*/, this.client.application.commands.fetch().catch(function (err) {
+                                            return rej(new Error("Can't fetch client commands: ".concat(err.message, ".\nMake sure you are executing updateInteractions() after the client has emitted the 'ready' event and 'this.client.application' is populated.")));
+                                        })];
+                                case 2:
+                                    fetchedInteractions = _a.sent();
+                                    if (!fetchedInteractions)
+                                        return [2 /*return*/, rej(new Error("Interactions weren't fetched."))];
+                                    changesMade = this.checkDiff(fetchedInteractions);
+                                    _a.label = 3;
+                                case 3:
+                                    if (!changesMade) return [3 /*break*/, 5];
+                                    interactions = this.interactions.filter(function (r) { return ["CHAT_INPUT", "USER", "MESSAGE"].includes(r.type); });
+                                    interactionsToSend_1 = [];
+                                    interactions.forEach(function (interaction) {
+                                        if (interaction.type === "CHAT_INPUT" && interaction instanceof InteractionCommand_1.default) {
+                                            interactionsToSend_1.push({
+                                                type: "CHAT_INPUT",
+                                                name: interaction.name,
+                                                description: interaction.description,
+                                                defaultPermission: interaction.defaultPermission,
+                                                permissions: interaction.permissions,
+                                                options: interaction.options,
+                                            });
+                                        }
+                                        else if (interaction.type === "USER" && interaction instanceof UserContextMenu_1.default) {
+                                            interactionsToSend_1.push({ type: "USER", name: interaction.name });
+                                        }
+                                        else if (interaction.type === "MESSAGE" && interaction instanceof MessageContextMenu_1.default) {
+                                            interactionsToSend_1.push({ type: "MESSAGE", name: interaction.name });
+                                        }
+                                        else {
+                                            _this.debug("Interaction type ".concat(interaction.type, " is not supported."));
+                                        }
+                                    });
+                                    return [4 /*yield*/, this.client.application.commands
+                                            // @ts-ignore
+                                            .set(interactions)
+                                            .then(function (returned) {
+                                            _this.debug("Updated interactions (".concat(returned.size, " returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes."));
+                                            res(true); // Result with true (updated)
+                                        })
+                                            .catch(function (err) {
+                                            return rej(new Error("Can't update client commands: ".concat(err)));
+                                        })];
+                                case 4:
+                                    _a.sent();
+                                    return [3 /*break*/, 6];
+                                case 5:
+                                    this.debug("No changes in interactions - not refreshing.");
+                                    res(false); // Result with false (no changes)
+                                    _a.label = 6;
+                                case 6: return [2 /*return*/];
                             }
                         });
-                        return [4 /*yield*/, this.client.application.commands
-                                // @ts-ignore
-                                .set(interactions)
-                                .then(function (returned) {
-                                _this.debug("Updated interactions (".concat(returned.size, " returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes."));
-                                _this.emit("ready");
-                            })
-                                .catch(function (err) {
-                                throw new Error("Can't update client commands: ".concat(err));
-                            })];
-                    case 4:
-                        _a.sent();
-                        return [3 /*break*/, 6];
-                    case 5:
-                        this.debug("No changes in interactions - not refreshing.");
-                        this.emit("ready");
-                        _a.label = 6;
-                    case 6: return [2 /*return*/];
-                }
+                    }); })];
             });
         });
     };

@@ -17,7 +17,7 @@ export default class Handler extends EventEmitter {
     directory?: string;
     constructor(options: HandlerOptions);
     /**
-     * Sets directory for commands
+     * Sets (absolute) directory for commands
      *
      * @remarks This directory includes all children directories too.
      * @see {@link https://www.npmjs.com/package/glob} for information on how directories are parsed

@@ -32,7 +32,7 @@ export default class Handler extends EventEmitter {
 	}
 
 	/**
-	 * Sets directory for commands
+	 * Sets (absolute) directory for commands
 	 *
 	 * @remarks This directory includes all children directories too.
 	 * @see {@link https://www.npmjs.com/package/glob} for information on how directories are parsed
@@ -41,10 +41,9 @@ export default class Handler extends EventEmitter {
 	 * @param value
 	 * */
 	setDirectory(value: string) {
-		if (!value) throw new DirectoryReferenceError("setDirectory(): 'path' parameter is required.");
-		const dirPath = path.join(process.cwd(), value);
-		if (!fs.existsSync(dirPath)) throw new DirectoryReferenceError(`setDirectory(...): Directory ${dirPath} does not exist.`);
-		this.directory = dirPath;
+		if (!value) throw new DirectoryReferenceError("setDirectory(): 'value' parameter is required.");
+		if (!fs.existsSync(value)) throw new DirectoryReferenceError(`setDirectory(...): Directory ${value} does not exist.`);
+		this.directory = value;
 		return this;
 	}
 

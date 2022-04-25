@@ -69,7 +69,7 @@ var Handler = /** @class */ (function (_super) {
         return _this;
     }
     /**
-     * Sets directory for commands
+     * Sets (absolute) directory for commands
      *
      * @remarks This directory includes all children directories too.
      * @see {@link https://www.npmjs.com/package/glob} for information on how directories are parsed
@@ -79,11 +79,10 @@ var Handler = /** @class */ (function (_super) {
      * */
     Handler.prototype.setDirectory = function (value) {
         if (!value)
-            throw new DirectoryReferenceError_1.default("setDirectory(): 'path' parameter is required.");
-        var dirPath = path.join(process.cwd(), value);
-        if (!fs.existsSync(dirPath))
-            throw new DirectoryReferenceError_1.default("setDirectory(...): Directory ".concat(dirPath, " does not exist."));
-        this.directory = dirPath;
+            throw new DirectoryReferenceError_1.default("setDirectory(): 'value' parameter is required.");
+        if (!fs.existsSync(value))
+            throw new DirectoryReferenceError_1.default("setDirectory(...): Directory ".concat(value, " does not exist."));
+        this.directory = value;
         return this;
     };
     Handler.prototype.debug = function (message) {

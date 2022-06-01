@@ -73,14 +73,14 @@ export default class ComponentHandler extends Handler {
 	runComponent(interaction: DJSInteraction, ...additionalOptions: any) {
 		return new Promise<Component>((res, rej) => {
 			if (interaction.user.bot) return rej("Bot users can't run component interactions.");
-			if (!(interaction.isCommand() || interaction.isContextMenu())) {
-				this.handleComponent(interaction, ...additionalOptions)
-					.then(res)
-					.catch(rej);
-			} else {
+			if (interaction.isCommand() || interaction.isContextMenu()) {
 				throw new Error(
 					"ComponentHandler#runComponent(): Unsupported interaction type. This only supports components. You should check the type beforehand, or refer to InteractionHandler() to handle commands & context menus."
 				);
+			} else {
+				this.handleComponent(interaction, ...additionalOptions)
+					.then(res)
+					.catch(rej);
 			}
 		});
 	}

@@ -131,8 +131,6 @@ export default class CommandHandler extends Handler {
 					return;
 				}
 
-				if (command.usage) command.usage = `${prefix}${command.name} ${command.usage}` || "";
-
 				// Evaluate parameters
 				args = await CommandHandler.evaluateParameters(message, command, args);
 

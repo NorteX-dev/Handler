@@ -1,3 +1,4 @@
+import axios from "axios";
 import { ApplicationCommand, Client, Collection, Interaction as DJSInteraction, Snowflake } from "discord.js";
 import Handler from "./Handler";
 import ExecutionError from "../errors/ExecutionError";
@@ -14,6 +15,50 @@ interface HandlerOptions {
 }
 
 type InteractionRunnable = InteractionCommand | UserContextMenu | MessageContextMenu;
+
+const PERMISSION_FLAGS = {
+	CREATE_INSTANT_INVITE: BigInt(1) << BigInt(0),
+	KICK_MEMBERS: BigInt(1) << BigInt(1),
+	BAN_MEMBERS: BigInt(1) << BigInt(2),
+	ADMINISTRATOR: BigInt(1) << BigInt(3),
+	MANAGE_CHANNELS: BigInt(1) << BigInt(4),
+	MANAGE_GUILD: BigInt(1) << BigInt(5),
+	ADD_REACTIONS: BigInt(1) << BigInt(6),
+	VIEW_AUDIT_LOG: BigInt(1) << BigInt(7),
+	PRIORITY_SPEAKER: BigInt(1) << BigInt(8),
+	STREAM: BigInt(1) << BigInt(9),
+	VIEW_CHANNEL: BigInt(1) << BigInt(10),
+	SEND_MESSAGES: BigInt(1) << BigInt(11),
+	SEND_TTS_MESSAGES: BigInt(1) << BigInt(12),
+	MANAGE_MESSAGES: BigInt(1) << BigInt(13),
+	EMBED_LINKS: BigInt(1) << BigInt(14),
+	ATTACH_FILES: BigInt(1) << BigInt(15),
+	READ_MESSAGE_HISTORY: BigInt(1) << BigInt(16),
+	MENTION_EVERYONE: BigInt(1) << BigInt(17),
+	USE_EXTERNAL_EMOJIS: BigInt(1) << BigInt(18),
+	VIEW_GUILD_INSIGHTS: BigInt(1) << BigInt(19),
+	CONNECT: BigInt(1) << BigInt(20),
+	SPEAK: BigInt(1) << BigInt(21),
+	MUTE_MEMBERS: BigInt(1) << BigInt(22),
+	DEAFEN_MEMBERS: BigInt(1) << BigInt(23),
+	MOVE_MEMBERS: BigInt(1) << BigInt(24),
+	USE_VAD: BigInt(1) << BigInt(25),
+	CHANGE_NICKNAME: BigInt(1) << BigInt(26),
+	MANAGE_NICKNAMES: BigInt(1) << BigInt(27),
+	MANAGE_ROLES: BigInt(1) << BigInt(28),
+	MANAGE_WEBHOOKS: BigInt(1) << BigInt(29),
+	MANAGE_EMOJIS_AND_STICKERS: BigInt(1) << BigInt(30),
+	USE_APPLICATION_COMMANDS: BigInt(1) << BigInt(31),
+	REQUEST_TO_SPEAK: BigInt(1) << BigInt(32),
+	MANAGE_EVENTS: BigInt(1) << BigInt(33),
+	MANAGE_THREADS: BigInt(1) << BigInt(34),
+	CREATE_PUBLIC_THREADS: BigInt(1) << BigInt(35),
+	CREATE_PRIVATE_THREADS: BigInt(1) << BigInt(36),
+	USE_EXTERNAL_STICKERS: BigInt(1) << BigInt(37),
+	SEND_MESSAGES_IN_THREADS: BigInt(1) << BigInt(38),
+	USE_EMBEDDED_ACTIVITIES: BigInt(1) << BigInt(39),
+	MODERATE_MEMBERS: BigInt(1) << BigInt(40),
+};
 
 export default class InteractionHandler extends Handler {
 	/**
@@ -114,14 +159,15 @@ export default class InteractionHandler extends Handler {
 		return new Promise(async (res, rej) => {
 			const applicationCommand = this.interactions.find((i) => i.name === interaction.commandName.toLowerCase() && i.type === "CHAT_INPUT");
 			if (!applicationCommand) return;
-			if (
-				!(
-					applicationCommand instanceof InteractionCommand ||
-					applicationCommand instanceof UserContextMenu ||
-					applicationCommand instanceof MessageContextMenu
-				)
-			)
+
+			const isCorrectInstance =
+				applicationCommand instanceof InteractionCommand ||
+				applicationCommand instanceof UserContextMenu ||
+				applicationCommand instanceof MessageContextMenu;
+
+			if (!isCorrectInstance) {
 				throw new ExecutionError("Attempting to run non-interaction class with runInteraction().", "INVALID_CLASS");
+			}
 
 			const failedReason: ExecutionError | undefined = await Verificators.verifyInteraction(interaction, applicationCommand);
 			if (failedReason) {
@@ -208,41 +254,76 @@ export default class InteractionHandler extends Handler {
 			if (changesMade) {
 				// Filter out message components
 				const interactions = this.interactions.filter((r) => ["CHAT_INPUT", "USER", "MESSAGE"].includes(r.type));
-				let interactionsToSend = [];
-				interactions.forEach((interaction) => {
-					if (interaction.type === "CHAT_INPUT" && interaction instanceof InteractionCommand) {
-						interactionsToSend.push({
-							type: "CHAT_INPUT",
-							name: interaction.name,
-							description: interaction.description,
-							defaultPermission: interaction.defaultPermission,
-							permissions: interaction.permissions,
-							options: interaction.options,
-						});
-					} else if (interaction.type === "USER" && interaction instanceof UserContextMenu) {
-						interactionsToSend.push({ type: "USER", name: interaction.name });
-					} else if (interaction.type === "MESSAGE" && interaction instanceof MessageContextMenu) {
-						interactionsToSend.push({ type: "MESSAGE", name: interaction.name });
-					} else {
-						this.debug(`Interaction type ${interaction.type} is not supported.`);
-					}
-				});
-				await this.client.application.commands
-					// @ts-ignore
-					.set(interactions)
-					.then((returned) => {
-						this.debug(
-							`Updated interactions (${returned.size} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`
-						);
-						res(true); // Result with true (updated)
-					})
-					.catch((err) => {
-						return rej(new Error(`Can't update client commands: ${err}`));
-					});
+				// @ts-ignore
+				this.formatAndSend(interactions).then(res).catch(rej);
 			} else {
 				this.debug("No changes in interactions - not refreshing.");
 				res(false); // Result with false (no changes)
 			}
+		});
+	}
+
+	formatAndSend(interactions: any[]) {
+		return new Promise(async (res, rej) => {
+			let interactionsToSend: any[] = [];
+			interactions.forEach((interaction) => {
+				if (interaction.type === "CHAT_INPUT" && interaction instanceof InteractionCommand) {
+					const data = {
+						type: 1,
+						application_id: this.client.application!.id,
+						name: interaction.name,
+						description: interaction.description,
+						options: interaction.options,
+						default_member_permissions: "0",
+					};
+					if (interaction.defaultPermissions) {
+						data.default_member_permissions = interaction.defaultPermissions
+							// @ts-ignore
+							.map((e: string) => PERMISSION_FLAGS[e] ?? 0x0)
+							.reduce((a, b) => a | b, BigInt(0x0))
+							.toString();
+					}
+					console.log(`ADDED `, data.default_member_permissions);
+					interactionsToSend.push(data);
+				} else if (interaction.type === 2 && interaction instanceof UserContextMenu) {
+					interactionsToSend.push({ type: "USER", name: interaction.name });
+				} else if (interaction.type === "MESSAGE" && interaction instanceof MessageContextMenu) {
+					interactionsToSend.push({ type: 3, name: interaction.name });
+				} else {
+					this.debug(`Interaction type ${interaction.type} is not supported.`);
+				}
+			});
+			console.log(interactionsToSend);
+			// await this.client.application.commands
+			// 	// @ts-ignore
+			// 	.set(interactions)
+			// 	.then((returned) => {
+			// 		this.debug(
+			// 			`Updated interactions (${returned.size} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`
+			// 		);
+			// 		res(true); // Result with true (updated)
+			// 	})
+			// 	.catch((err) => {
+			// 		return rej(new Error(`Can't update client commands: ${err}`));
+			// 	});
+			axios(`https://discord.com/api/v10/applications/${this.client.application!.id}/commands`, {
+				method: "PUT",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bot ${this.client.token}`,
+				},
+				data: interactionsToSend,
+			})
+				.then((response) => {
+					console.log("Returned", response.data);
+					this.debug(
+						`Updated interactions (${response.data.length} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`
+					);
+					res(true); // Result with true (updated)
+				})
+				.catch((err) => {
+					return rej(new Error(`Can't update client commands: ${err}`));
+				});
 		});
 	}
 

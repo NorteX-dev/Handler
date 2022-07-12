@@ -10,13 +10,13 @@ var InteractionCommand = /** @class */ (function () {
         this.type = "CHAT_INPUT";
         this.name = options.name || filename;
         this.description = options.description;
+        this.category = options.category;
         this.userIds = options.userIds || [];
         this.guildIds = options.guildIds || [];
         this.disabled = options.disabled || false;
         // Exclusive properties for slash commands
         this.options = options.options;
-        this.defaultPermission = options.defaultPermission || true;
-        this.permissions = options.permissions || [];
+        this.defaultPermissions = options.defaultPermissions;
     }
     /**
      * @param interaction The Discord.js interaction object

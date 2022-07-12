@@ -12,6 +12,7 @@ var MessageContextMenu = /** @class */ (function () {
         this.userIds = options.userIds || [];
         this.guildIds = options.guildIds || [];
         this.disabled = options.disabled || false;
+        this.defaultPermissions = options.defaultPermissions;
     }
     /**
      * @param interaction The Discord.js interaction object

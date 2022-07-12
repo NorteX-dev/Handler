@@ -4,6 +4,7 @@ interface UserContextMenuInteractionOptions {
     disabled?: boolean;
     userIds?: Array<string>;
     guildIds?: Array<string>;
+    defaultPermissions?: Array<string>;
 }
 export default class UserContextMenu {
     handler: InteractionHandler;
@@ -13,6 +14,7 @@ export default class UserContextMenu {
     disabled: boolean;
     userIds: Array<string>;
     guildIds: Array<string>;
+    defaultPermissions?: Array<string>;
     constructor(handler: InteractionHandler, filename: string, options?: UserContextMenuInteractionOptions);
     /**
      * @param interaction The Discord.js interaction object

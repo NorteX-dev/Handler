@@ -3,12 +3,12 @@ import InteractionHandler from "../handlers/InteractionHandler";
 interface ApplicationCommandOptions {
     name: string;
     description: string;
+    category?: string;
     options: ApplicationCommandOptionData;
     userIds?: Array<string>;
     guildIds?: Array<string>;
     disabled?: boolean;
-    defaultPermission?: boolean;
-    permissions: any[];
+    defaultPermissions?: Array<string>;
 }
 export default class InteractionCommand {
     handler: InteractionHandler;
@@ -16,12 +16,12 @@ export default class InteractionCommand {
     type: string;
     name: string;
     description: string;
+    category: string | undefined;
     options: ApplicationCommandOptionData;
     userIds: Array<string>;
     guildIds: Array<string>;
     disabled: boolean;
-    defaultPermission: boolean;
-    permissions: Array<any>;
+    defaultPermissions?: Array<string>;
     constructor(handler: InteractionHandler, filename: string, options?: ApplicationCommandOptions);
     /**
      * @param interaction The Discord.js interaction object

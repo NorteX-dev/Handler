@@ -7,6 +7,7 @@ interface UserContextMenuInteractionOptions {
 	disabled?: boolean;
 	userIds?: Array<string>;
 	guildIds?: Array<string>;
+	defaultPermissions?: Array<string>;
 }
 
 export default class UserContextMenu {
@@ -17,6 +18,7 @@ export default class UserContextMenu {
 	public disabled: boolean;
 	public userIds: Array<string>;
 	public guildIds: Array<string>;
+	public defaultPermissions?: Array<string>;
 
 	constructor(handler: InteractionHandler, filename: string, options?: UserContextMenuInteractionOptions) {
 		if (!options) options = <UserContextMenuInteractionOptions>{};
@@ -27,6 +29,8 @@ export default class UserContextMenu {
 		this.userIds = options.userIds || [];
 		this.guildIds = options.guildIds || [];
 		this.disabled = options.disabled || false;
+
+		this.defaultPermissions = options.defaultPermissions;
 	}
 
 	/**

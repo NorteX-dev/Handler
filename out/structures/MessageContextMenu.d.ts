@@ -4,6 +4,7 @@ interface MessageContextMenuInteractionOptions {
     disabled?: boolean;
     userIds?: Array<string>;
     guildIds?: Array<string>;
+    defaultPermissions?: Array<string>;
 }
 export default class MessageContextMenu {
     handler: InteractionHandler;
@@ -13,6 +14,7 @@ export default class MessageContextMenu {
     disabled: boolean;
     userIds: Array<string>;
     guildIds: Array<string>;
+    defaultPermissions?: Array<string>;
     constructor(handler: InteractionHandler, filename: string, options?: MessageContextMenuInteractionOptions);
     /**
      * @param interaction The Discord.js interaction object

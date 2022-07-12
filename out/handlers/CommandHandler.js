@@ -190,8 +190,6 @@ var CommandHandler = /** @class */ (function (_super) {
                                             reject(failedReason);
                                             return [2 /*return*/, { value: void 0 }];
                                         }
-                                        if (command.usage)
-                                            command.usage = "".concat(prefix).concat(command.name, " ").concat(command.usage) || "";
                                         return [4 /*yield*/, CommandHandler.evaluateParameters(message, command, args)];
                                     case 2:
                                         // Evaluate parameters

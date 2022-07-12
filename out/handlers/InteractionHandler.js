@@ -60,12 +60,56 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+var axios_1 = require("axios");
 var Handler_1 = require("./Handler");
 var ExecutionError_1 = require("../errors/ExecutionError");
 var InteractionCommand_1 = require("../structures/InteractionCommand");
 var Verificators_1 = require("../util/Verificators");
 var UserContextMenu_1 = require("../structures/UserContextMenu");
 var MessageContextMenu_1 = require("../structures/MessageContextMenu");
+var PERMISSION_FLAGS = {
+    CREATE_INSTANT_INVITE: BigInt(1) << BigInt(0),
+    KICK_MEMBERS: BigInt(1) << BigInt(1),
+    BAN_MEMBERS: BigInt(1) << BigInt(2),
+    ADMINISTRATOR: BigInt(1) << BigInt(3),
+    MANAGE_CHANNELS: BigInt(1) << BigInt(4),
+    MANAGE_GUILD: BigInt(1) << BigInt(5),
+    ADD_REACTIONS: BigInt(1) << BigInt(6),
+    VIEW_AUDIT_LOG: BigInt(1) << BigInt(7),
+    PRIORITY_SPEAKER: BigInt(1) << BigInt(8),
+    STREAM: BigInt(1) << BigInt(9),
+    VIEW_CHANNEL: BigInt(1) << BigInt(10),
+    SEND_MESSAGES: BigInt(1) << BigInt(11),
+    SEND_TTS_MESSAGES: BigInt(1) << BigInt(12),
+    MANAGE_MESSAGES: BigInt(1) << BigInt(13),
+    EMBED_LINKS: BigInt(1) << BigInt(14),
+    ATTACH_FILES: BigInt(1) << BigInt(15),
+    READ_MESSAGE_HISTORY: BigInt(1) << BigInt(16),
+    MENTION_EVERYONE: BigInt(1) << BigInt(17),
+    USE_EXTERNAL_EMOJIS: BigInt(1) << BigInt(18),
+    VIEW_GUILD_INSIGHTS: BigInt(1) << BigInt(19),
+    CONNECT: BigInt(1) << BigInt(20),
+    SPEAK: BigInt(1) << BigInt(21),
+    MUTE_MEMBERS: BigInt(1) << BigInt(22),
+    DEAFEN_MEMBERS: BigInt(1) << BigInt(23),
+    MOVE_MEMBERS: BigInt(1) << BigInt(24),
+    USE_VAD: BigInt(1) << BigInt(25),
+    CHANGE_NICKNAME: BigInt(1) << BigInt(26),
+    MANAGE_NICKNAMES: BigInt(1) << BigInt(27),
+    MANAGE_ROLES: BigInt(1) << BigInt(28),
+    MANAGE_WEBHOOKS: BigInt(1) << BigInt(29),
+    MANAGE_EMOJIS_AND_STICKERS: BigInt(1) << BigInt(30),
+    USE_APPLICATION_COMMANDS: BigInt(1) << BigInt(31),
+    REQUEST_TO_SPEAK: BigInt(1) << BigInt(32),
+    MANAGE_EVENTS: BigInt(1) << BigInt(33),
+    MANAGE_THREADS: BigInt(1) << BigInt(34),
+    CREATE_PUBLIC_THREADS: BigInt(1) << BigInt(35),
+    CREATE_PRIVATE_THREADS: BigInt(1) << BigInt(36),
+    USE_EXTERNAL_STICKERS: BigInt(1) << BigInt(37),
+    SEND_MESSAGES_IN_THREADS: BigInt(1) << BigInt(38),
+    USE_EMBEDDED_ACTIVITIES: BigInt(1) << BigInt(39),
+    MODERATE_MEMBERS: BigInt(1) << BigInt(40),
+};
 var InteractionHandler = /** @class */ (function (_super) {
     __extends(InteractionHandler, _super);
     function InteractionHandler(options) {
@@ -161,17 +205,19 @@ var InteractionHandler = /** @class */ (function (_super) {
             additionalOptions[_i - 1] = arguments[_i];
         }
         return new Promise(function (res, rej) { return __awaiter(_this, void 0, void 0, function () {
-            var applicationCommand, failedReason;
+            var applicationCommand, isCorrectInstance, failedReason;
             return __generator(this, function (_a) {
                 switch (_a.label) {
                     case 0:
                         applicationCommand = this.interactions.find(function (i) { return i.name === interaction.commandName.toLowerCase() && i.type === "CHAT_INPUT"; });
                         if (!applicationCommand)
                             return [2 /*return*/];
-                        if (!(applicationCommand instanceof InteractionCommand_1.default ||
+                        isCorrectInstance = applicationCommand instanceof InteractionCommand_1.default ||
                             applicationCommand instanceof UserContextMenu_1.default ||
-                            applicationCommand instanceof MessageContextMenu_1.default))
+                            applicationCommand instanceof MessageContextMenu_1.default;
+                        if (!isCorrectInstance) {
                             throw new ExecutionError_1.default("Attempting to run non-interaction class with runInteraction().", "INVALID_CLASS");
+                        }
                         return [4 /*yield*/, Verificators_1.default.verifyInteraction(interaction, applicationCommand)];
                     case 1:
                         failedReason = _a.sent();
@@ -247,8 +293,7 @@ var InteractionHandler = /** @class */ (function (_super) {
             var _this = this;
             return __generator(this, function (_a) {
                 return [2 /*return*/, new Promise(function (res, rej) { return __awaiter(_this, void 0, void 0, function () {
-                        var changesMade, fetchedInteractions, interactions, interactionsToSend_1;
-                        var _this = this;
+                        var changesMade, fetchedInteractions, interactions;
                         return __generator(this, function (_a) {
                             switch (_a.label) {
                                 case 0:
@@ -273,53 +318,91 @@ var InteractionHandler = /** @class */ (function (_super) {
                                     changesMade = this.checkDiff(fetchedInteractions);
                                     _a.label = 3;
                                 case 3:
-                                    if (!changesMade) return [3 /*break*/, 5];
-                                    interactions = this.interactions.filter(function (r) { return ["CHAT_INPUT", "USER", "MESSAGE"].includes(r.type); });
-                                    interactionsToSend_1 = [];
-                                    interactions.forEach(function (interaction) {
-                                        if (interaction.type === "CHAT_INPUT" && interaction instanceof InteractionCommand_1.default) {
-                                            interactionsToSend_1.push({
-                                                type: "CHAT_INPUT",
-                                                name: interaction.name,
-                                                description: interaction.description,
-                                                defaultPermission: interaction.defaultPermission,
-                                                permissions: interaction.permissions,
-                                                options: interaction.options,
-                                            });
-                                        }
-                                        else if (interaction.type === "USER" && interaction instanceof UserContextMenu_1.default) {
-                                            interactionsToSend_1.push({ type: "USER", name: interaction.name });
-                                        }
-                                        else if (interaction.type === "MESSAGE" && interaction instanceof MessageContextMenu_1.default) {
-                                            interactionsToSend_1.push({ type: "MESSAGE", name: interaction.name });
-                                        }
-                                        else {
-                                            _this.debug("Interaction type ".concat(interaction.type, " is not supported."));
-                                        }
-                                    });
-                                    return [4 /*yield*/, this.client.application.commands
-                                            // @ts-ignore
-                                            .set(interactions)
-                                            .then(function (returned) {
-                                            _this.debug("Updated interactions (".concat(returned.size, " returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes."));
-                                            res(true); // Result with true (updated)
-                                        })
-                                            .catch(function (err) {
-                                            return rej(new Error("Can't update client commands: ".concat(err)));
-                                        })];
-                                case 4:
-                                    _a.sent();
-                                    return [3 /*break*/, 6];
-                                case 5:
-                                    this.debug("No changes in interactions - not refreshing.");
-                                    res(false); // Result with false (no changes)
-                                    _a.label = 6;
-                                case 6: return [2 /*return*/];
+                                    if (changesMade) {
+                                        interactions = this.interactions.filter(function (r) { return ["CHAT_INPUT", "USER", "MESSAGE"].includes(r.type); });
+                                        // @ts-ignore
+                                        this.formatAndSend(interactions).then(res).catch(rej);
+                                    }
+                                    else {
+                                        this.debug("No changes in interactions - not refreshing.");
+                                        res(false); // Result with false (no changes)
+                                    }
+                                    return [2 /*return*/];
                             }
                         });
                     }); })];
             });
         });
+    };
+    InteractionHandler.prototype.formatAndSend = function (interactions) {
+        var _this = this;
+        return new Promise(function (res, rej) { return __awaiter(_this, void 0, void 0, function () {
+            var interactionsToSend;
+            var _this = this;
+            return __generator(this, function (_a) {
+                interactionsToSend = [];
+                interactions.forEach(function (interaction) {
+                    if (interaction.type === "CHAT_INPUT" && interaction instanceof InteractionCommand_1.default) {
+                        var data = {
+                            type: 1,
+                            application_id: _this.client.application.id,
+                            name: interaction.name,
+                            description: interaction.description,
+                            options: interaction.options,
+                            default_member_permissions: "0",
+                        };
+                        if (interaction.defaultPermissions) {
+                            data.default_member_permissions = interaction.defaultPermissions
+                                // @ts-ignore
+                                .map(function (e) { var _a; return (_a = PERMISSION_FLAGS[e]) !== null && _a !== void 0 ? _a : 0x0; })
+                                .reduce(function (a, b) { return a | b; }, BigInt(0x0))
+                                .toString();
+                        }
+                        console.log("ADDED ", data.default_member_permissions);
+                        interactionsToSend.push(data);
+                    }
+                    else if (interaction.type === 2 && interaction instanceof UserContextMenu_1.default) {
+                        interactionsToSend.push({ type: "USER", name: interaction.name });
+                    }
+                    else if (interaction.type === "MESSAGE" && interaction instanceof MessageContextMenu_1.default) {
+                        interactionsToSend.push({ type: 3, name: interaction.name });
+                    }
+                    else {
+                        _this.debug("Interaction type ".concat(interaction.type, " is not supported."));
+                    }
+                });
+                console.log(interactionsToSend);
+                // await this.client.application.commands
+                // 	// @ts-ignore
+                // 	.set(interactions)
+                // 	.then((returned) => {
+                // 		this.debug(
+                // 			`Updated interactions (${returned.size} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`
+                // 		);
+                // 		res(true); // Result with true (updated)
+                // 	})
+                // 	.catch((err) => {
+                // 		return rej(new Error(`Can't update client commands: ${err}`));
+                // 	});
+                (0, axios_1.default)("https://discord.com/api/v10/applications/".concat(this.client.application.id, "/commands"), {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: "Bot ".concat(this.client.token),
+                    },
+                    data: interactionsToSend,
+                })
+                    .then(function (response) {
+                    console.log("Returned", response.data);
+                    _this.debug("Updated interactions (".concat(response.data.length, " returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes."));
+                    res(true); // Result with true (updated)
+                })
+                    .catch(function (err) {
+                    return rej(new Error("Can't update client commands: ".concat(err)));
+                });
+                return [2 /*return*/];
+            });
+        }); });
     };
     /**
      * @ignore

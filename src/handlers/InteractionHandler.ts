@@ -282,7 +282,6 @@ export default class InteractionHandler extends Handler {
 							.reduce((a, b) => a | b, BigInt(0x0))
 							.toString();
 					}
-					console.log(`ADDED `, data.default_member_permissions);
 					interactionsToSend.push(data);
 				} else if (interaction.type === 2 && interaction instanceof UserContextMenu) {
 					interactionsToSend.push({ type: "USER", name: interaction.name });

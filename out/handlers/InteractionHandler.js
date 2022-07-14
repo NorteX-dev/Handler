@@ -60,7 +60,6 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var axios_1 = require("axios");
 var Handler_1 = require("./Handler");
 var ExecutionError_1 = require("../errors/ExecutionError");
 var InteractionCommand_1 = require("../structures/InteractionCommand");
@@ -340,67 +339,53 @@ var InteractionHandler = /** @class */ (function (_super) {
             var interactionsToSend;
             var _this = this;
             return __generator(this, function (_a) {
-                interactionsToSend = [];
-                interactions.forEach(function (interaction) {
-                    if (interaction.type === "CHAT_INPUT" && interaction instanceof InteractionCommand_1.default) {
-                        var data = {
-                            type: 1,
-                            application_id: _this.client.application.id,
-                            name: interaction.name,
-                            description: interaction.description,
-                            options: interaction.options,
-                            default_member_permissions: "0",
-                        };
-                        if (interaction.defaultPermissions) {
-                            data.default_member_permissions = interaction.defaultPermissions
-                                // @ts-ignore
-                                .map(function (e) { var _a; return (_a = PERMISSION_FLAGS[e]) !== null && _a !== void 0 ? _a : 0x0; })
-                                .reduce(function (a, b) { return a | b; }, BigInt(0x0))
-                                .toString();
-                        }
-                        console.log("ADDED ", data.default_member_permissions);
-                        interactionsToSend.push(data);
-                    }
-                    else if (interaction.type === 2 && interaction instanceof UserContextMenu_1.default) {
-                        interactionsToSend.push({ type: "USER", name: interaction.name });
-                    }
-                    else if (interaction.type === "MESSAGE" && interaction instanceof MessageContextMenu_1.default) {
-                        interactionsToSend.push({ type: 3, name: interaction.name });
-                    }
-                    else {
-                        _this.debug("Interaction type ".concat(interaction.type, " is not supported."));
-                    }
-                });
-                console.log(interactionsToSend);
-                // await this.client.application.commands
-                // 	// @ts-ignore
-                // 	.set(interactions)
-                // 	.then((returned) => {
-                // 		this.debug(
-                // 			`Updated interactions (${returned.size} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`
-                // 		);
-                // 		res(true); // Result with true (updated)
-                // 	})
-                // 	.catch((err) => {
-                // 		return rej(new Error(`Can't update client commands: ${err}`));
-                // 	});
-                (0, axios_1.default)("https://discord.com/api/v10/applications/".concat(this.client.application.id, "/commands"), {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: "Bot ".concat(this.client.token),
-                    },
-                    data: interactionsToSend,
-                })
-                    .then(function (response) {
-                    console.log("Returned", response.data);
-                    _this.debug("Updated interactions (".concat(response.data.length, " returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes."));
-                    res(true); // Result with true (updated)
-                })
-                    .catch(function (err) {
-                    return rej(new Error("Can't update client commands: ".concat(err)));
-                });
-                return [2 /*return*/];
+                switch (_a.label) {
+                    case 0:
+                        interactionsToSend = [];
+                        interactions.forEach(function (interaction) {
+                            if (interaction.type === "CHAT_INPUT" && interaction instanceof InteractionCommand_1.default) {
+                                var data = {
+                                    type: 1,
+                                    application_id: _this.client.application.id,
+                                    name: interaction.name,
+                                    description: interaction.description,
+                                    options: interaction.options,
+                                    default_member_permissions: "0",
+                                };
+                                if (interaction.defaultPermissions) {
+                                    data.default_member_permissions = interaction.defaultPermissions
+                                        // @ts-ignore
+                                        .map(function (e) { var _a; return (_a = PERMISSION_FLAGS[e]) !== null && _a !== void 0 ? _a : 0x0; })
+                                        .reduce(function (a, b) { return a | b; }, BigInt(0x0))
+                                        .toString();
+                                }
+                                console.log("ADDED ", data.default_member_permissions);
+                                interactionsToSend.push(data);
+                            }
+                            else if (interaction.type === 2 && interaction instanceof UserContextMenu_1.default) {
+                                interactionsToSend.push({ type: "USER", name: interaction.name });
+                            }
+                            else if (interaction.type === "MESSAGE" && interaction instanceof MessageContextMenu_1.default) {
+                                interactionsToSend.push({ type: 3, name: interaction.name });
+                            }
+                            else {
+                                _this.debug("Interaction type ".concat(interaction.type, " is not supported."));
+                            }
+                        });
+                        return [4 /*yield*/, this.client
+                                .application.commands // @ts-ignore
+                                .set(interactions)
+                                .then(function (returned) {
+                                _this.debug("Updated interactions (".concat(returned.size, " returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes."));
+                                res(true); // Result with true (updated)
+                            })
+                                .catch(function (err) {
+                                return rej(new Error("Can't update client commands: ".concat(err)));
+                            })];
+                    case 1:
+                        _a.sent();
+                        return [2 /*return*/];
+                }
             });
         }); });
     };

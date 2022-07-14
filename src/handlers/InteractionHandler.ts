@@ -1,4 +1,3 @@
-import axios from "axios";
 import { ApplicationCommand, Client, Collection, Interaction as DJSInteraction, Snowflake } from "discord.js";
 import Handler from "./Handler";
 import ExecutionError from "../errors/ExecutionError";
@@ -293,37 +292,36 @@ export default class InteractionHandler extends Handler {
 					this.debug(`Interaction type ${interaction.type} is not supported.`);
 				}
 			});
-			console.log(interactionsToSend);
-			// await this.client.application.commands
-			// 	// @ts-ignore
-			// 	.set(interactions)
-			// 	.then((returned) => {
-			// 		this.debug(
-			// 			`Updated interactions (${returned.size} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`
-			// 		);
-			// 		res(true); // Result with true (updated)
-			// 	})
-			// 	.catch((err) => {
-			// 		return rej(new Error(`Can't update client commands: ${err}`));
-			// 	});
-			axios(`https://discord.com/api/v10/applications/${this.client.application!.id}/commands`, {
-				method: "PUT",
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bot ${this.client.token}`,
-				},
-				data: interactionsToSend,
-			})
-				.then((response) => {
-					console.log("Returned", response.data);
+			await this.client
+				.application!.commands // @ts-ignore
+				.set(interactions)
+				.then((returned) => {
 					this.debug(
-						`Updated interactions (${response.data.length} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`
+						`Updated interactions (${returned.size} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`
 					);
 					res(true); // Result with true (updated)
 				})
 				.catch((err) => {
 					return rej(new Error(`Can't update client commands: ${err}`));
 				});
+			// axios(`https://discord.com/api/v10/applications/${this.client.application!.id}/commands`, {
+			// 	method: "PUT",
+			// 	headers: {
+			// 		"Content-Type": "application/json",
+			// 		Authorization: `Bot ${this.client.token}`,
+			// 	},
+			// 	data: interactionsToSend,
+			// })
+			// 	.then((response) => {
+			// 		console.log("Returned", response.data);
+			// 		this.debug(
+			// 			`Updated interactions (${response.data.length} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`
+			// 		);
+			// 		res(true); // Result with true (updated)
+			// 	})
+			// 	.catch((err) => {
+			// 		return rej(new Error(`Can't update client commands: ${err}`));
+			// 	});
 		});
 	}
 

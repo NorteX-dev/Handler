@@ -57,12 +57,12 @@ var glob_1 = require("glob");
 var Verificators_1 = require("../util/Verificators");
 var path = require("path");
 var fs = require("fs");
-var Handler = /** @class */ (function (_super) {
-    __extends(Handler, _super);
-    function Handler(options) {
+var BaseHandler = /** @class */ (function (_super) {
+    __extends(BaseHandler, _super);
+    function BaseHandler(options) {
         var _this = _super.call(this) || this;
         if (!options.client)
-            throw new ReferenceError("Handler(): options.client is required.");
+            throw new ReferenceError("BaseHandler(): options.client is required.");
         _this.client = options.client;
         if (options.directory)
             _this.setDirectory(options.directory);
@@ -77,7 +77,7 @@ var Handler = /** @class */ (function (_super) {
      * @returns CommandHandler
      * @param value
      * */
-    Handler.prototype.setDirectory = function (value) {
+    BaseHandler.prototype.setDirectory = function (value) {
         if (!value)
             throw new DirectoryReferenceError_1.default("setDirectory(): 'value' parameter is required.");
         if (!fs.existsSync(value))
@@ -85,10 +85,10 @@ var Handler = /** @class */ (function (_super) {
         this.directory = value;
         return this;
     };
-    Handler.prototype.debug = function (message) {
+    BaseHandler.prototype.debug = function (message) {
         this.emit("debug", message);
     };
-    Handler.prototype.load = function (emitReady) {
+    BaseHandler.prototype.load = function (emitReady) {
         var _this = this;
         if (emitReady === void 0) { emitReady = true; }
         return new Promise(function (resolve, reject) { return __awaiter(_this, void 0, void 0, function () {
@@ -130,6 +130,6 @@ var Handler = /** @class */ (function (_super) {
             });
         }); });
     };
-    return Handler;
+    return BaseHandler;
 }(events_1.EventEmitter));
-exports.default = Handler;
+exports.default = BaseHandler;

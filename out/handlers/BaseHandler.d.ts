@@ -1,17 +1,16 @@
-/// <reference types="node" />
 import { Client } from "discord.js";
 import { EventEmitter } from "events";
 interface HandlerOptions {
     client: Client;
     directory?: string | undefined;
 }
-export default class Handler extends EventEmitter {
+export default class BaseHandler extends EventEmitter {
     /**
      * Base class for handlers. Should not be used as-is. Use a subclass instead.
      *
      * @param client Discord.JS Client Instance
-     * @param directory Command files directory
-     * @returns Handler
+     * @param directory MessageCommand files directory
+     * @returns BaseHandler
      * */
     client: Client;
     directory?: string;

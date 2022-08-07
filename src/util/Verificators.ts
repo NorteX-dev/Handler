@@ -1,9 +1,8 @@
 import ExecutionError from "../errors/ExecutionError";
 import { Interaction, Permissions } from "discord.js";
+import MessageCommand from "../structures/MessageCommand";
 import Command from "../structures/Command";
-import UserContextMenu from "../structures/UserContextMenu";
-import InteractionCommand from "../structures/InteractionCommand";
-import MessageContextMenu from "../structures/MessageContextMenu";
+import ContextMenu from "../structures/ContextMenu";
 
 /**
  * @ignore
@@ -20,7 +19,7 @@ export default class Verificators {
 
 	static async verifyCommand(
 		message: any,
-		commandObject: Command,
+		commandObject: MessageCommand,
 		userCooldowns: Map<string, number>,
 		guildCooldowns: Map<string, number>
 	): Promise<ExecutionError | undefined> {
@@ -35,10 +34,10 @@ export default class Verificators {
 			if (commandObject.userIds && commandObject.userIds.length && !commandObject.userIds.includes(message.author.id))
 				return res(new ExecutionError("This user ID is not whitelisted.", "USER_ID_NOT_WHITELISTED", { userId: message.author.id }));
 			// "onlyDm" field
-			if (commandObject.onlyDm && message.channel.type !== "DM") return res(new ExecutionError("Command is DM only.", "COMMAND_DM_0NLY"));
+			if (commandObject.onlyDm && message.channel.type !== "DM") return res(new ExecutionError("The command is DM only.", "COMMAND_DM_0NLY"));
 			// "nsfw" field
 			if (commandObject.nsfw && !message.channel.nsfw)
-				return res(new ExecutionError("Command is marked as NSFW-channels only.", "NSFW_COMMAND_USED_IN_NON_NSFW_CHANNEL"));
+				return res(new ExecutionError("The command is marked as NSFW-channels only.", "NSFW_COMMAND_USED_IN_NON_NSFW_CHANNEL"));
 			// "userCooldown" field
 			if (commandObject.userCooldown && commandObject.userCooldown > 0) {
 				const useAfter = userCooldowns.get(message.author.id);
@@ -129,10 +128,7 @@ export default class Verificators {
 		});
 	}
 
-	static async verifyInteraction(
-		interactionEvent: Interaction,
-		interactionObject: InteractionCommand | MessageContextMenu | UserContextMenu
-	): Promise<ExecutionError | undefined> {
+	static async verifyInteraction(interactionEvent: Interaction, interactionObject: Command | ContextMenu): Promise<ExecutionError | undefined> {
 		return new Promise((res) => {
 			// "disabled" field
 			if (interactionObject.disabled && !this.isOwner(interactionObject.handler.owners, interactionEvent.user.id))

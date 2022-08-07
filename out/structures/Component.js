@@ -24,7 +24,7 @@ var Component = /** @class */ (function () {
      * @override
      * */
     Component.prototype.run = function (interaction, additionalParams) {
-        throw new MethodNotOverridenError_1.default("run() method on " + this.customId + " interaction is not present.");
+        throw new MethodNotOverridenError_1.default("run() method on ".concat(this.customId, " interaction is not present."));
     };
     return Component;
 }());

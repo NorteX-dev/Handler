@@ -11,9 +11,9 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var CommandHandler_1 = require("../handlers/CommandHandler");
+var MessageCommandHandler_1 = require("../handlers/MessageCommandHandler");
 var EventHandler_1 = require("../handlers/EventHandler");
-var InteractionHandler_1 = require("../handlers/InteractionHandler");
+var CommandsHandler_1 = require("../handlers/CommandsHandler");
 var ComponentHandler_1 = require("../handlers/ComponentHandler");
 var Util = /** @class */ (function () {
     function Util(client) {
@@ -52,11 +52,11 @@ var Util = /** @class */ (function () {
         for (var _i = 0, keys_1 = keys; _i < keys_1.length; _i++) {
             var key = keys_1[_i];
             if (key === "commands")
-                handlers.commandHandler = new CommandHandler_1.default(__assign({ client: client }, options[key]));
+                handlers.commandHandler = new MessageCommandHandler_1.default(__assign({ client: client }, options[key]));
             else if (key === "events")
                 handlers.eventHandler = new EventHandler_1.default(__assign({ client: client }, options[key]));
             else if (key === "interactions")
-                handlers.interactionHandler = new InteractionHandler_1.default(__assign({ client: client }, options[key]));
+                handlers.interactionHandler = new CommandsHandler_1.default(__assign({ client: client }, options[key]));
             else if (key === "components")
                 handlers.componentHandler = new ComponentHandler_1.default(__assign({ client: client }, options[key]));
             else

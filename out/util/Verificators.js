@@ -37,7 +37,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var ExecutionError_1 = require("../errors/ExecutionError");
-var discord_js_1 = require("discord.js");
 /**
  * @ignore
  * */
@@ -69,10 +68,10 @@ var Verificators = /** @class */ (function () {
                             return res(new ExecutionError_1.default("This user ID is not whitelisted.", "USER_ID_NOT_WHITELISTED", { userId: message.author.id }));
                         // "onlyDm" field
                         if (commandObject.onlyDm && message.channel.type !== "DM")
-                            return res(new ExecutionError_1.default("Command is DM only.", "COMMAND_DM_0NLY"));
+                            return res(new ExecutionError_1.default("The command is DM only.", "COMMAND_DM_0NLY"));
                         // "nsfw" field
                         if (commandObject.nsfw && !message.channel.nsfw)
-                            return res(new ExecutionError_1.default("Command is marked as NSFW-channels only.", "NSFW_COMMAND_USED_IN_NON_NSFW_CHANNEL"));
+                            return res(new ExecutionError_1.default("The command is marked as NSFW-channels only.", "NSFW_COMMAND_USED_IN_NON_NSFW_CHANNEL"));
                         // "userCooldown" field
                         if (commandObject.userCooldown && commandObject.userCooldown > 0) {
                             var useAfter = userCooldowns.get(message.author.id);
@@ -99,7 +98,7 @@ var Verificators = /** @class */ (function () {
                             var memberPermissions = message.channel.permissionsFor(message.member);
                             var mappedPermissions = commandObject.userPermissions.map(function (perm) {
                                 // @ts-ignore
-                                var flag = discord_js_1.Permissions.FLAGS[perm];
+                                var flag = Permissions.FLAGS[perm];
                                 if (!flag)
                                     return; // Ignore invalid permissions
                                 return flag;
@@ -114,7 +113,7 @@ var Verificators = /** @class */ (function () {
                             var botPermissions = message.channel.permissionsFor(botMember);
                             var mappedPermissions = commandObject.botPermissions.map(function (perm) {
                                 // @ts-ignore
-                                var flag = discord_js_1.Permissions.FLAGS[perm];
+                                var flag = Permissions.FLAGS[perm];
                                 if (!flag)
                                     return; // Ignore invalid permissions
                                 return flag;

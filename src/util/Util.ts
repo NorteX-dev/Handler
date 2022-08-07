@@ -1,7 +1,7 @@
 import { Client } from "discord.js";
-import CommandHandler from "../handlers/CommandHandler";
+import MessageCommandHandler from "../handlers/MessageCommandHandler";
 import EventHandler from "../handlers/EventHandler";
-import InteractionHandler from "../handlers/InteractionHandler";
+import CommandsHandler from "../handlers/CommandsHandler";
 import ComponentHandler from "../handlers/ComponentHandler";
 
 interface ManyClientsInterface {
@@ -12,9 +12,9 @@ interface ManyClientsInterface {
 }
 
 interface HandlersInterface {
-	commandHandler?: CommandHandler;
+	commandHandler?: MessageCommandHandler;
 	eventHandler?: EventHandler;
-	interactionHandler?: InteractionHandler;
+	interactionHandler?: CommandsHandler;
 	componentHandler?: ComponentHandler;
 }
 
@@ -54,9 +54,9 @@ export default class Util {
 		};
 		const keys: string[] = Object.keys(options);
 		for (let key of keys) {
-			if (key === "commands") handlers.commandHandler = new CommandHandler({ client, ...options[key] });
+			if (key === "commands") handlers.commandHandler = new MessageCommandHandler({ client, ...options[key] });
 			else if (key === "events") handlers.eventHandler = new EventHandler({ client, ...options[key] });
-			else if (key === "interactions") handlers.interactionHandler = new InteractionHandler({ client, ...options[key] });
+			else if (key === "interactions") handlers.interactionHandler = new CommandsHandler({ client, ...options[key] });
 			else if (key === "components") handlers.componentHandler = new ComponentHandler({ client, ...options[key] });
 			else
 				throw new Error(

@@ -22,6 +22,6 @@ export default class Event {
 	}
 
 	run(args?: any) {
-		throw new MethodNotOverridenError("run() method on " + this.name + " event is not present.");
+		throw new MethodNotOverridenError(`run() method on ${this.name} event is not present.`);
 	}
 }

@@ -1,22 +1,5 @@
 Things to add/change to @nortex/handler:
-- Usage should be concatonated with the prefix + command [✔]
-- Don't reject promise when no command part is present [+docs] [✔]
-- All additional command ...options should be available in `this.x` [✔]
-- Set cooldown function which sets per-execution cooldown [✔]
-- Make interaction handling not automatic and instead require runInteraction() method like classic [✔]
-- Add an @override flag on run() functions [✔]
-- Set prefix method (even though assigning manually works) [✔]
-- Additional readable parameters to CommandExecutionErrors like remaining cooldown [✔]
-- Make sure promise resolves synchronously (dont wait for actual execution) [✔]
-- Fix: Options don't update interactions [✔]
-- Refactor: Interaction refreshing [✔]
-- Fix: events innherited from filenames are toLowerCase'd() which makes events like messageCreate messagecreate [✔]
-- Log errors of posting interactions instead of saying nothing changed [✔]
-- Make paths relative instead of absolute [✔]
-- Add more types to return value of createMany because IDE dies [✔ Added .d.ts types, turns out they weren't compiling]
-- Add a generateMessageLink() util function [✔]
-- Check localUtils usage and adjust to static [✔]
-- Built-in Prompters [✔ To be checked]
+- Consolidate ComponentHandler and CommandsHandler
 - Add a toUpperCase() on option types when registering
 - Create a custom "passthrough" to interactionCreate which creates a temporary Map<InteractionID, JSONData> and allows to fetch using getJSONData(interactionId)
 -   Make a modified MessageButton() extender which will store the data automatically

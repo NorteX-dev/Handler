@@ -1,10 +1,18 @@
-import { ApplicationCommand, Client, Collection, Interaction as DJSInteraction, Snowflake } from "discord.js";
-import Handler from "./Handler";
+import {
+	ApplicationCommand,
+	Client,
+	Collection,
+	Interaction as DJSInteraction,
+	Snowflake,
+	ApplicationCommandType,
+	SlashCommandBuilder,
+} from "discord.js";
+import { InteractionType } from "discord.js";
+import BaseHandler from "./BaseHandler";
 import ExecutionError from "../errors/ExecutionError";
-import InteractionCommand from "../structures/InteractionCommand";
+import Command from "../structures/Command";
 import Verificators from "../util/Verificators";
-import UserContextMenu from "../structures/UserContextMenu";
-import MessageContextMenu from "../structures/MessageContextMenu";
+import ContextMenu from "../structures/ContextMenu";
 
 interface HandlerOptions {
 	client: Client;
@@ -13,7 +21,7 @@ interface HandlerOptions {
 	owners?: string[];
 }
 
-type InteractionRunnable = InteractionCommand | UserContextMenu | MessageContextMenu;
+type InteractionRunnable = Command | ContextMenu;
 
 const PERMISSION_FLAGS = {
 	CREATE_INSTANT_INVITE: BigInt(1) << BigInt(0),
@@ -59,7 +67,7 @@ const PERMISSION_FLAGS = {
 	MODERATE_MEMBERS: BigInt(1) << BigInt(40),
 };
 
-export default class InteractionHandler extends Handler {
+export default class CommandsHandler extends BaseHandler {
 	/**
 	 * Initializes an interaction handler on the client.
 	 *
@@ -68,11 +76,11 @@ export default class InteractionHandler extends Handler {
 	 * @param options.directory Optional - Interaction files directory
 	 * @param options.owners Optional - Array of superusers' ids
 	 * @param options.autoLoad Optional - Automatically invoke the loadInteractions() method - requires `directory` to be set in the options
-	 * @returns InteractionHandler
+	 * @returns CommandsHandler
 	 * @example
 	 * ```js
-	 * const { InteractionHandler } = require("@nortex/handler");
-	 * const handler = new InteractionHandler({ client, directory: "./interactions" });
+	 * const { CommandsHandler } = require("@nortex/handler");
+	 * const handler = new CommandsHandler({ client, directory: "./interactions" });
 	 * ```
 	 * */
 	public client: Client;
@@ -82,7 +90,7 @@ export default class InteractionHandler extends Handler {
 
 	constructor(options: HandlerOptions) {
 		super(options);
-		if (!options.client) throw new ReferenceError("InteractionHandler(): options.client is required.");
+		if (!options.client) throw new ReferenceError("CommandsHandler(): options.client is required.");
 		this.client = options.client;
 		this.owners = options.owners || [];
 		this.interactions = [];
@@ -93,16 +101,16 @@ export default class InteractionHandler extends Handler {
 	/**
 	 * Loads interaction commands into memory
 	 *
-	 * @returns InteractionHandler
+	 * @returns CommandsHandler
 	 *
 	 * @remarks
-	 * Requires @see {@link InteractionHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
-	 * {@link InteractionHandler.runInteraction} has to be run on the interactionCreate event to invoke the command run.
+	 * Requires @see {@link CommandsHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
+	 * {@link CommandsHandler.runInteraction} has to be run on the interactionCreate event to invoke the command run.
 	 * */
 	loadInteractions() {
 		return new Promise(async (res, rej) => {
 			const files = await this.load(false).catch(rej);
-			files.forEach((interaction: InteractionCommand | UserContextMenu | MessageContextMenu) => this.registerInteraction(interaction));
+			files.forEach((interaction: Command | ContextMenu) => this.registerInteraction(interaction));
 			return res(this.interactions);
 		});
 	}
@@ -113,14 +121,12 @@ export default class InteractionHandler extends Handler {
 	 * @returns Interaction
 	 * */
 	registerInteraction(interaction: InteractionRunnable) {
-		if (!(interaction instanceof InteractionCommand || interaction instanceof UserContextMenu || interaction instanceof MessageContextMenu))
-			throw new TypeError(
-				"registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu."
-			);
+		if (!(interaction instanceof Command || interaction instanceof ContextMenu))
+			throw new TypeError("registerInteraction(): interaction parameter must be an instance of Command, ContextMenu.");
 		if (this.interactions.find((c) => c.name === interaction.name))
 			throw new Error(`Interaction ${interaction.name} cannot be registered twice.`);
 		if (!interaction.name) throw new Error("InteractionRunnable: name is required.");
-		if (interaction instanceof InteractionCommand) if (!interaction.description) throw new Error("InteractionCommand: description is required.");
+		if (interaction instanceof Command) if (!interaction.description) throw new Error("Command: description is required.");
 		this.interactions.push(interaction);
 		this.debug(`Loaded interaction "${interaction.name}".`);
 		this.emit("load", interaction);
@@ -135,17 +141,18 @@ export default class InteractionHandler extends Handler {
 	runInteraction(interaction: DJSInteraction, ...additionalOptions: any) {
 		return new Promise((res, rej) => {
 			if (interaction.user.bot) return rej("Bot users can't run interactions.");
-			if (interaction.isCommand()) {
+			if (interaction.type === InteractionType.ApplicationCommand) {
 				this.handleCommandInteraction(interaction, ...additionalOptions)
 					.then(res)
 					.catch(rej);
-			} else if (interaction.isContextMenu()) {
-				this.handleContextMenuInteraction(interaction, ...additionalOptions)
-					.then(res)
-					.catch(rej);
+				// todo : readd context menu support
+				// } else if (interaction.type === InteractionType) {
+				// 	this.handleContextMenuInteraction(interaction, ...additionalOptions)
+				// 		.then(res)
+				// 		.catch(rej);
 			} else {
 				throw new Error(
-					"InteractionHandler#runInteraction(): Unsupported interaction type. This only supports command and context menus interactions. You should check the type beforehand, or refer to ComponentHandler() to handle components."
+					"CommandsHandler#runInteraction(): Unsupported interaction type. This only supports command and context menus interactions. You should check the type beforehand, or refer to ComponentHandler() to handle component interactions."
 				);
 			}
 		});
@@ -159,10 +166,7 @@ export default class InteractionHandler extends Handler {
 			const applicationCommand = this.interactions.find((i) => i.name === interaction.commandName.toLowerCase() && i.type === "CHAT_INPUT");
 			if (!applicationCommand) return;
 
-			const isCorrectInstance =
-				applicationCommand instanceof InteractionCommand ||
-				applicationCommand instanceof UserContextMenu ||
-				applicationCommand instanceof MessageContextMenu;
+			const isCorrectInstance = applicationCommand instanceof Command || applicationCommand instanceof ContextMenu;
 
 			if (!isCorrectInstance) {
 				throw new ExecutionError("Attempting to run non-interaction class with runInteraction().", "INVALID_CLASS");
@@ -266,9 +270,10 @@ export default class InteractionHandler extends Handler {
 		return new Promise(async (res, rej) => {
 			let interactionsToSend: any[] = [];
 			interactions.forEach((interaction) => {
-				if (interaction.type === "CHAT_INPUT" && interaction instanceof InteractionCommand) {
+				if (interaction.type.toUpperCase() === "CHAT_INPUT" && interaction instanceof Command) {
+					console.log("type", ApplicationCommandType.ChatInput);
 					const data = {
-						type: 1,
+						type: ApplicationCommandType.ChatInput,
 						application_id: this.client.application!.id,
 						name: interaction.name,
 						description: interaction.description,
@@ -283,21 +288,20 @@ export default class InteractionHandler extends Handler {
 							.toString();
 					}
 					interactionsToSend.push(data);
-				} else if (interaction.type === 2 && interaction instanceof UserContextMenu) {
-					interactionsToSend.push({ type: "USER", name: interaction.name });
-				} else if (interaction.type === "MESSAGE" && interaction instanceof MessageContextMenu) {
-					interactionsToSend.push({ type: 3, name: interaction.name });
+					// todo : readd context menu ints
+					// } else if (interaction.type.toUpperCase() === "USER") {
+					// 	interactionsToSend.push({ type: ApplicationCommandType.UserContextMenu, name: interaction.name });
+					// } else if (interaction.type.toUpperCase() === "MESSAGE") {
+					// 	interactionsToSend.push({ type: ApplicationCommandType.MessageContextMenu, name: interaction.name });
 				} else {
 					this.debug(`Interaction type ${interaction.type} is not supported.`);
 				}
 			});
 			await this.client
 				.application!.commands // @ts-ignore
-				.set(interactions)
+				.set(interactionsToSend)
 				.then((returned) => {
-					this.debug(
-						`Updated interactions (${returned.size} returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes.`
-					);
+					this.debug(`Updated interactions (${returned.size} returned). Updates should be visible momentarily.`);
 					res(true); // Result with true (updated)
 				})
 				.catch((err) => {
@@ -340,7 +344,7 @@ export default class InteractionHandler extends Handler {
 				break;
 			}
 			// Handle changed commands
-			// @ts-ignore Fine to ignore since we are only comparing a select amount of properties
+			// @ts-ignore
 			changesMade = !remoteCmd.equals(localCmd);
 		}
 		// Handle deleted commands

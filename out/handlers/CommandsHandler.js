@@ -60,12 +60,13 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var Handler_1 = require("./Handler");
+var discord_js_1 = require("discord.js");
+var discord_js_2 = require("discord.js");
+var BaseHandler_1 = require("./BaseHandler");
 var ExecutionError_1 = require("../errors/ExecutionError");
-var InteractionCommand_1 = require("../structures/InteractionCommand");
+var Command_1 = require("../structures/Command");
 var Verificators_1 = require("../util/Verificators");
-var UserContextMenu_1 = require("../structures/UserContextMenu");
-var MessageContextMenu_1 = require("../structures/MessageContextMenu");
+var ContextMenu_1 = require("../structures/ContextMenu");
 var PERMISSION_FLAGS = {
     CREATE_INSTANT_INVITE: BigInt(1) << BigInt(0),
     KICK_MEMBERS: BigInt(1) << BigInt(1),
@@ -109,12 +110,12 @@ var PERMISSION_FLAGS = {
     USE_EMBEDDED_ACTIVITIES: BigInt(1) << BigInt(39),
     MODERATE_MEMBERS: BigInt(1) << BigInt(40),
 };
-var InteractionHandler = /** @class */ (function (_super) {
-    __extends(InteractionHandler, _super);
-    function InteractionHandler(options) {
+var CommandsHandler = /** @class */ (function (_super) {
+    __extends(CommandsHandler, _super);
+    function CommandsHandler(options) {
         var _this = _super.call(this, options) || this;
         if (!options.client)
-            throw new ReferenceError("InteractionHandler(): options.client is required.");
+            throw new ReferenceError("CommandsHandler(): options.client is required.");
         _this.client = options.client;
         _this.owners = options.owners || [];
         _this.interactions = [];
@@ -125,13 +126,13 @@ var InteractionHandler = /** @class */ (function (_super) {
     /**
      * Loads interaction commands into memory
      *
-     * @returns InteractionHandler
+     * @returns CommandsHandler
      *
      * @remarks
-     * Requires @see {@link InteractionHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
-     * {@link InteractionHandler.runInteraction} has to be run on the interactionCreate event to invoke the command run.
+     * Requires @see {@link CommandsHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
+     * {@link CommandsHandler.runInteraction} has to be run on the interactionCreate event to invoke the command run.
      * */
-    InteractionHandler.prototype.loadInteractions = function () {
+    CommandsHandler.prototype.loadInteractions = function () {
         var _this = this;
         return new Promise(function (res, rej) { return __awaiter(_this, void 0, void 0, function () {
             var files;
@@ -152,16 +153,16 @@ var InteractionHandler = /** @class */ (function (_super) {
      *
      * @returns Interaction
      * */
-    InteractionHandler.prototype.registerInteraction = function (interaction) {
-        if (!(interaction instanceof InteractionCommand_1.default || interaction instanceof UserContextMenu_1.default || interaction instanceof MessageContextMenu_1.default))
-            throw new TypeError("registerInteraction(): interaction parameter must be an instance of InteractionCommand, UserContextMenu, MessageContextMenu.");
+    CommandsHandler.prototype.registerInteraction = function (interaction) {
+        if (!(interaction instanceof Command_1.default || interaction instanceof ContextMenu_1.default))
+            throw new TypeError("registerInteraction(): interaction parameter must be an instance of Command, ContextMenu.");
         if (this.interactions.find(function (c) { return c.name === interaction.name; }))
             throw new Error("Interaction ".concat(interaction.name, " cannot be registered twice."));
         if (!interaction.name)
             throw new Error("InteractionRunnable: name is required.");
-        if (interaction instanceof InteractionCommand_1.default)
+        if (interaction instanceof Command_1.default)
             if (!interaction.description)
-                throw new Error("InteractionCommand: description is required.");
+                throw new Error("Command: description is required.");
         this.interactions.push(interaction);
         this.debug("Loaded interaction \"".concat(interaction.name, "\"."));
         this.emit("load", interaction);
@@ -172,7 +173,7 @@ var InteractionHandler = /** @class */ (function (_super) {
      *
      * @returns Promise<Interaction>
      * */
-    InteractionHandler.prototype.runInteraction = function (interaction) {
+    CommandsHandler.prototype.runInteraction = function (interaction) {
         var _this = this;
         var additionalOptions = [];
         for (var _i = 1; _i < arguments.length; _i++) {
@@ -181,23 +182,24 @@ var InteractionHandler = /** @class */ (function (_super) {
         return new Promise(function (res, rej) {
             if (interaction.user.bot)
                 return rej("Bot users can't run interactions.");
-            if (interaction.isCommand()) {
+            if (interaction.type === discord_js_2.InteractionType.ApplicationCommand) {
                 _this.handleCommandInteraction.apply(_this, __spreadArray([interaction], additionalOptions, false)).then(res)
                     .catch(rej);
-            }
-            else if (interaction.isContextMenu()) {
-                _this.handleContextMenuInteraction.apply(_this, __spreadArray([interaction], additionalOptions, false)).then(res)
-                    .catch(rej);
+                // todo : readd context menu support
+                // } else if (interaction.type === InteractionType) {
+                // 	this.handleContextMenuInteraction(interaction, ...additionalOptions)
+                // 		.then(res)
+                // 		.catch(rej);
             }
             else {
-                throw new Error("InteractionHandler#runInteraction(): Unsupported interaction type. This only supports command and context menus interactions. You should check the type beforehand, or refer to ComponentHandler() to handle components.");
+                throw new Error("CommandsHandler#runInteraction(): Unsupported interaction type. This only supports command and context menus interactions. You should check the type beforehand, or refer to ComponentHandler() to handle component interactions.");
             }
         });
     };
     /**
      * @ignore
      * */
-    InteractionHandler.prototype.handleCommandInteraction = function (interaction) {
+    CommandsHandler.prototype.handleCommandInteraction = function (interaction) {
         var _this = this;
         var additionalOptions = [];
         for (var _i = 1; _i < arguments.length; _i++) {
@@ -211,9 +213,7 @@ var InteractionHandler = /** @class */ (function (_super) {
                         applicationCommand = this.interactions.find(function (i) { return i.name === interaction.commandName.toLowerCase() && i.type === "CHAT_INPUT"; });
                         if (!applicationCommand)
                             return [2 /*return*/];
-                        isCorrectInstance = applicationCommand instanceof InteractionCommand_1.default ||
-                            applicationCommand instanceof UserContextMenu_1.default ||
-                            applicationCommand instanceof MessageContextMenu_1.default;
+                        isCorrectInstance = applicationCommand instanceof Command_1.default || applicationCommand instanceof ContextMenu_1.default;
                         if (!isCorrectInstance) {
                             throw new ExecutionError_1.default("Attempting to run non-interaction class with runInteraction().", "INVALID_CLASS");
                         }
@@ -240,7 +240,7 @@ var InteractionHandler = /** @class */ (function (_super) {
     /**
      * @ignore
      * */
-    InteractionHandler.prototype.handleContextMenuInteraction = function (interaction) {
+    CommandsHandler.prototype.handleContextMenuInteraction = function (interaction) {
         var _this = this;
         var additionalOptions = [];
         for (var _i = 1; _i < arguments.length; _i++) {
@@ -286,7 +286,7 @@ var InteractionHandler = /** @class */ (function (_super) {
      *
      * @param {boolean} [force=false] Skip checks and set commands even if the local version is up to date.
      * */
-    InteractionHandler.prototype.updateInteractions = function (force) {
+    CommandsHandler.prototype.updateInteractions = function (force) {
         if (force === void 0) { force = false; }
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
@@ -333,7 +333,7 @@ var InteractionHandler = /** @class */ (function (_super) {
             });
         });
     };
-    InteractionHandler.prototype.formatAndSend = function (interactions) {
+    CommandsHandler.prototype.formatAndSend = function (interactions) {
         var _this = this;
         return new Promise(function (res, rej) { return __awaiter(_this, void 0, void 0, function () {
             var interactionsToSend;
@@ -343,9 +343,10 @@ var InteractionHandler = /** @class */ (function (_super) {
                     case 0:
                         interactionsToSend = [];
                         interactions.forEach(function (interaction) {
-                            if (interaction.type === "CHAT_INPUT" && interaction instanceof InteractionCommand_1.default) {
+                            if (interaction.type.toUpperCase() === "CHAT_INPUT" && interaction instanceof Command_1.default) {
+                                console.log("type", discord_js_1.ApplicationCommandType.ChatInput);
                                 var data = {
-                                    type: 1,
+                                    type: discord_js_1.ApplicationCommandType.ChatInput,
                                     application_id: _this.client.application.id,
                                     name: interaction.name,
                                     description: interaction.description,
@@ -359,14 +360,12 @@ var InteractionHandler = /** @class */ (function (_super) {
                                         .reduce(function (a, b) { return a | b; }, BigInt(0x0))
                                         .toString();
                                 }
-                                console.log("ADDED ", data.default_member_permissions);
                                 interactionsToSend.push(data);
-                            }
-                            else if (interaction.type === 2 && interaction instanceof UserContextMenu_1.default) {
-                                interactionsToSend.push({ type: "USER", name: interaction.name });
-                            }
-                            else if (interaction.type === "MESSAGE" && interaction instanceof MessageContextMenu_1.default) {
-                                interactionsToSend.push({ type: 3, name: interaction.name });
+                                // todo : readd context menu ints
+                                // } else if (interaction.type.toUpperCase() === "USER") {
+                                // 	interactionsToSend.push({ type: ApplicationCommandType.UserContextMenu, name: interaction.name });
+                                // } else if (interaction.type.toUpperCase() === "MESSAGE") {
+                                // 	interactionsToSend.push({ type: ApplicationCommandType.MessageContextMenu, name: interaction.name });
                             }
                             else {
                                 _this.debug("Interaction type ".concat(interaction.type, " is not supported."));
@@ -374,9 +373,9 @@ var InteractionHandler = /** @class */ (function (_super) {
                         });
                         return [4 /*yield*/, this.client
                                 .application.commands // @ts-ignore
-                                .set(interactions)
+                                .set(interactionsToSend)
                                 .then(function (returned) {
-                                _this.debug("Updated interactions (".concat(returned.size, " returned). Wait a bit (up to 1 hour) for the cache to update or kick and add the bot back to see changes."));
+                                _this.debug("Updated interactions (".concat(returned.size, " returned). Updates should be visible momentarily."));
                                 res(true); // Result with true (updated)
                             })
                                 .catch(function (err) {
@@ -392,7 +391,7 @@ var InteractionHandler = /** @class */ (function (_super) {
     /**
      * @ignore
      * */
-    InteractionHandler.prototype.checkDiff = function (interactions) {
+    CommandsHandler.prototype.checkDiff = function (interactions) {
         var fetched = Array.from(interactions.values()); // Collection to array conversion
         // Assume no changes made
         var changesMade = false;
@@ -405,7 +404,7 @@ var InteractionHandler = /** @class */ (function (_super) {
                 return "break";
             }
             // Handle changed commands
-            // @ts-ignore Fine to ignore since we are only comparing a select amount of properties
+            // @ts-ignore
             changesMade = !remoteCmd.equals(localCmd);
         };
         var this_1 = this;
@@ -432,6 +431,6 @@ var InteractionHandler = /** @class */ (function (_super) {
         }
         return changesMade;
     };
-    return InteractionHandler;
-}(Handler_1.default));
-exports.default = InteractionHandler;
+    return CommandsHandler;
+}(BaseHandler_1.default));
+exports.default = CommandsHandler;

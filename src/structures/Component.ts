@@ -37,6 +37,6 @@ export default class Component {
 	 * @override
 	 * */
 	run(interaction: any, additionalParams?: any) {
-		throw new MethodNotOverridenError("run() method on " + this.customId + " interaction is not present.");
+		throw new MethodNotOverridenError(`run() method on ${this.customId} interaction is not present.`);
 	}
 }

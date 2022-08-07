@@ -52,7 +52,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var Event_1 = require("../structures/Event");
-var Handler_1 = require("./Handler");
+var BaseHandler_1 = require("./BaseHandler");
 var EventHandler = /** @class */ (function (_super) {
     __extends(EventHandler, _super);
     /**
@@ -117,5 +117,5 @@ var EventHandler = /** @class */ (function (_super) {
         return event;
     };
     return EventHandler;
-}(Handler_1.default));
+}(BaseHandler_1.default));
 exports.default = EventHandler;

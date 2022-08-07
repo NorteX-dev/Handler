@@ -1,35 +1,36 @@
 import MethodNotOverridenError from "../errors/MethodNotOverridenError";
 
-import InteractionHandler from "../handlers/InteractionHandler";
+import CommandsHandler from "../handlers/CommandsHandler";
 
-interface MessageContextMenuInteractionOptions {
+interface IContextMenuInteractionOptions {
 	name: string;
+	type: "MESSAGE" | "USER";
 	disabled?: boolean;
 	userIds?: Array<string>;
 	guildIds?: Array<string>;
 	defaultPermissions?: Array<string>;
 }
 
-export default class MessageContextMenu {
-	public handler: InteractionHandler;
+export default class ContextMenu {
+	public handler: CommandsHandler;
 	public client: any;
-	public type: string;
+	public type: "MESSAGE" | "USER";
 	public name: string;
 	public disabled: boolean;
 	public userIds: Array<string>;
 	public guildIds: Array<string>;
 	public defaultPermissions?: Array<string>;
 
-	constructor(handler: InteractionHandler, filename: string, options?: MessageContextMenuInteractionOptions) {
-		if (!options) options = <MessageContextMenuInteractionOptions>{};
+	constructor(handler: CommandsHandler, filename: string, options?: IContextMenuInteractionOptions) {
+		if (!options) options = <IContextMenuInteractionOptions>{};
+		if (!options.name || !options.type) throw new Error(`Failed to load ${filename}: name and type are required.`);
 		this.handler = handler;
 		this.client = handler.client;
-		this.type = "MESSAGE";
+		this.type = options.type;
 		this.name = options.name || filename;
 		this.userIds = options.userIds || [];
 		this.guildIds = options.guildIds || [];
 		this.disabled = options.disabled || false;
-
 		this.defaultPermissions = options.defaultPermissions;
 	}
 
@@ -40,6 +41,6 @@ export default class MessageContextMenu {
 	 * @override
 	 * */
 	run(interaction: any, additionalParams?: any) {
-		throw new MethodNotOverridenError("run() method on " + this.name + " interaction is not present.");
+		throw new MethodNotOverridenError(`run() method on ${this.name} interaction is not present.`);
 	}
 }

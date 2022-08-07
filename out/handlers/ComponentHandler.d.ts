@@ -1,12 +1,12 @@
 import { Client, Interaction as DJSInteraction } from "discord.js";
-import Handler from "./Handler";
+import BaseHandler from "./BaseHandler";
 import Component from "../structures/Component";
 interface HandlerOptions {
     client: Client;
     directory?: string;
     autoLoad?: boolean;
 }
-export default class ComponentHandler extends Handler {
+export default class ComponentHandler extends BaseHandler {
     /**
      * Initializes an component interaction handler on the client.
      *
@@ -44,6 +44,6 @@ export default class ComponentHandler extends Handler {
      *
      * */
     runComponent(interaction: DJSInteraction, ...additionalOptions: any): Promise<Component>;
-    private handleComponent;
+    private handleComponentOrMS;
 }
 export {};

@@ -60,7 +60,8 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var Handler_1 = require("./Handler");
+var discord_js_1 = require("discord.js");
+var BaseHandler_1 = require("./BaseHandler");
 var Component_1 = require("../structures/Component");
 var ComponentHandler = /** @class */ (function (_super) {
     __extends(ComponentHandler, _super);
@@ -129,16 +130,16 @@ var ComponentHandler = /** @class */ (function (_super) {
         return new Promise(function (res, rej) {
             if (interaction.user.bot)
                 return rej("Bot users can't run component interactions.");
-            if (interaction.isCommand() || interaction.isContextMenu()) {
-                throw new Error("ComponentHandler#runComponent(): Unsupported interaction type. This only supports components. You should check the type beforehand, or refer to InteractionHandler() to handle commands & context menus.");
+            if (interaction.type === discord_js_1.InteractionType.MessageComponent || interaction.type === discord_js_1.InteractionType.ModalSubmit) {
+                _this.handleComponentOrMS.apply(_this, __spreadArray([interaction], additionalOptions, false)).then(res)
+                    .catch(rej);
             }
             else {
-                _this.handleComponent.apply(_this, __spreadArray([interaction], additionalOptions, false)).then(res)
-                    .catch(rej);
+                throw new Error("ComponentHandler#runComponent(): Unsupported interaction type. This only supports components. You should check the type beforehand, or refer to CommandsHandler() to handle commands & context menus.");
             }
         });
     };
-    ComponentHandler.prototype.handleComponent = function (interaction) {
+    ComponentHandler.prototype.handleComponentOrMS = function (interaction) {
         var _this = this;
         var additionalOptions = [];
         for (var _i = 1; _i < arguments.length; _i++) {
@@ -158,7 +159,6 @@ var ComponentHandler = /** @class */ (function (_super) {
                 });
                 if (!componentInteraction)
                     return [2 /*return*/];
-                this.debug("Found matching interaction with the querying mode ".concat(componentInteraction.queryingMode, ": ").concat(componentInteraction.customId));
                 try {
                     componentInteraction.run.apply(componentInteraction, __spreadArray([interaction], additionalOptions, false));
                     resolve(componentInteraction);
@@ -172,5 +172,5 @@ var ComponentHandler = /** @class */ (function (_super) {
         }); });
     };
     return ComponentHandler;
-}(Handler_1.default));
+}(BaseHandler_1.default));
 exports.default = ComponentHandler;

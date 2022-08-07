@@ -1,7 +1,7 @@
 import { Client } from "discord.js";
-import CommandHandler from "../handlers/CommandHandler";
+import MessageCommandHandler from "../handlers/MessageCommandHandler";
 import EventHandler from "../handlers/EventHandler";
-import InteractionHandler from "../handlers/InteractionHandler";
+import CommandsHandler from "../handlers/CommandsHandler";
 import ComponentHandler from "../handlers/ComponentHandler";
 interface ManyClientsInterface {
     commands?: any;
@@ -10,9 +10,9 @@ interface ManyClientsInterface {
     components?: any;
 }
 interface HandlersInterface {
-    commandHandler?: CommandHandler;
+    commandHandler?: MessageCommandHandler;
     eventHandler?: EventHandler;
-    interactionHandler?: InteractionHandler;
+    interactionHandler?: CommandsHandler;
     componentHandler?: ComponentHandler;
 }
 export default class Util {

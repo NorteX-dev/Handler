@@ -1,21 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
-var InteractionCommand = /** @class */ (function () {
-    function InteractionCommand(handler, filename, options) {
+var ContextMenu = /** @class */ (function () {
+    function ContextMenu(handler, filename, options) {
         if (!options)
             options = {};
+        if (!options.name || !options.type)
+            throw new Error("Failed to load ".concat(filename, ": name and type are required."));
         this.handler = handler;
         this.client = handler.client;
-        this.type = "CHAT_INPUT";
+        this.type = options.type;
         this.name = options.name || filename;
-        this.description = options.description;
-        this.category = options.category;
         this.userIds = options.userIds || [];
         this.guildIds = options.guildIds || [];
         this.disabled = options.disabled || false;
-        // Exclusive properties for slash commands
-        this.options = options.options;
         this.defaultPermissions = options.defaultPermissions;
     }
     /**
@@ -24,9 +22,9 @@ var InteractionCommand = /** @class */ (function () {
      *
      * @override
      * */
-    InteractionCommand.prototype.run = function (interaction, additionalParams) {
-        throw new MethodNotOverridenError_1.default("run() method on " + this.name + " interaction is not present.");
+    ContextMenu.prototype.run = function (interaction, additionalParams) {
+        throw new MethodNotOverridenError_1.default("run() method on ".concat(this.name, " interaction is not present."));
     };
-    return InteractionCommand;
+    return ContextMenu;
 }());
-exports.default = InteractionCommand;
+exports.default = ContextMenu;

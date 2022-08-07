@@ -1,5 +1,5 @@
-import { Client, Interaction as DJSInteraction } from "discord.js";
-import Handler from "./Handler";
+import { Client, Interaction as DJSInteraction, InteractionType } from "discord.js";
+import BaseHandler from "./BaseHandler";
 import Component from "../structures/Component";
 
 interface HandlerOptions {
@@ -8,7 +8,7 @@ interface HandlerOptions {
 	autoLoad?: boolean;
 }
 
-export default class ComponentHandler extends Handler {
+export default class ComponentHandler extends BaseHandler {
 	/**
 	 * Initializes an component interaction handler on the client.
 	 *
@@ -73,19 +73,19 @@ export default class ComponentHandler extends Handler {
 	runComponent(interaction: DJSInteraction, ...additionalOptions: any) {
 		return new Promise<Component>((res, rej) => {
 			if (interaction.user.bot) return rej("Bot users can't run component interactions.");
-			if (interaction.isCommand() || interaction.isContextMenu()) {
-				throw new Error(
-					"ComponentHandler#runComponent(): Unsupported interaction type. This only supports components. You should check the type beforehand, or refer to InteractionHandler() to handle commands & context menus."
-				);
-			} else {
-				this.handleComponent(interaction, ...additionalOptions)
+			if (interaction.type === InteractionType.MessageComponent || interaction.type === InteractionType.ModalSubmit) {
+				this.handleComponentOrMS(interaction, ...additionalOptions)
 					.then(res)
 					.catch(rej);
+			} else {
+				throw new Error(
+					"ComponentHandler#runComponent(): Unsupported interaction type. This only supports components. You should check the type beforehand, or refer to CommandsHandler() to handle commands & context menus."
+				);
 			}
 		});
 	}
 
-	private handleComponent(interaction: any, ...additionalOptions: any) {
+	private handleComponentOrMS(interaction: any, ...additionalOptions: any) {
 		return new Promise<Component>(async (resolve, reject) => {
 			const componentInteraction = this.components.find((componentObject) => {
 				if (componentObject.queryingMode === "exact") return componentObject.customId === interaction.customId;
@@ -95,7 +95,6 @@ export default class ComponentHandler extends Handler {
 			});
 
 			if (!componentInteraction) return;
-			this.debug(`Found matching interaction with the querying mode ${componentInteraction.queryingMode}: ${componentInteraction.customId}`);
 
 			try {
 				componentInteraction.run(interaction, ...additionalOptions);

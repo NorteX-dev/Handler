@@ -12,20 +12,20 @@ interface HandlerOptions {
 	directory?: string | undefined;
 }
 
-export default class Handler extends EventEmitter {
+export default class BaseHandler extends EventEmitter {
 	/**
 	 * Base class for handlers. Should not be used as-is. Use a subclass instead.
 	 *
 	 * @param client Discord.JS Client Instance
-	 * @param directory Command files directory
-	 * @returns Handler
+	 * @param directory MessageCommand files directory
+	 * @returns BaseHandler
 	 * */
 	public client: Client;
 	public directory?: string;
 
 	constructor(options: HandlerOptions) {
 		super();
-		if (!options.client) throw new ReferenceError("Handler(): options.client is required.");
+		if (!options.client) throw new ReferenceError("BaseHandler(): options.client is required.");
 		this.client = options.client;
 		if (options.directory) this.setDirectory(options.directory);
 		return this;

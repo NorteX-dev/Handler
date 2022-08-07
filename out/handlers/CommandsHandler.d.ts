@@ -1,16 +1,15 @@
 import { Client, Interaction as DJSInteraction } from "discord.js";
-import Handler from "./Handler";
-import InteractionCommand from "../structures/InteractionCommand";
-import UserContextMenu from "../structures/UserContextMenu";
-import MessageContextMenu from "../structures/MessageContextMenu";
+import BaseHandler from "./BaseHandler";
+import Command from "../structures/Command";
+import ContextMenu from "../structures/ContextMenu";
 interface HandlerOptions {
     client: Client;
     directory?: string;
     autoLoad?: boolean;
     owners?: string[];
 }
-declare type InteractionRunnable = InteractionCommand | UserContextMenu | MessageContextMenu;
-export default class InteractionHandler extends Handler {
+declare type InteractionRunnable = Command | ContextMenu;
+export default class CommandsHandler extends BaseHandler {
     /**
      * Initializes an interaction handler on the client.
      *
@@ -19,11 +18,11 @@ export default class InteractionHandler extends Handler {
      * @param options.directory Optional - Interaction files directory
      * @param options.owners Optional - Array of superusers' ids
      * @param options.autoLoad Optional - Automatically invoke the loadInteractions() method - requires `directory` to be set in the options
-     * @returns InteractionHandler
+     * @returns CommandsHandler
      * @example
      * ```js
-     * const { InteractionHandler } = require("@nortex/handler");
-     * const handler = new InteractionHandler({ client, directory: "./interactions" });
+     * const { CommandsHandler } = require("@nortex/handler");
+     * const handler = new CommandsHandler({ client, directory: "./interactions" });
      * ```
      * */
     client: Client;
@@ -34,11 +33,11 @@ export default class InteractionHandler extends Handler {
     /**
      * Loads interaction commands into memory
      *
-     * @returns InteractionHandler
+     * @returns CommandsHandler
      *
      * @remarks
-     * Requires @see {@link InteractionHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
-     * {@link InteractionHandler.runInteraction} has to be run on the interactionCreate event to invoke the command run.
+     * Requires @see {@link CommandsHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
+     * {@link CommandsHandler.runInteraction} has to be run on the interactionCreate event to invoke the command run.
      * */
     loadInteractions(): Promise<unknown>;
     /**

@@ -11,7 +11,7 @@ var Event = /** @class */ (function () {
         this.once = options.once || false;
     }
     Event.prototype.run = function (args) {
-        throw new MethodNotOverridenError_1.default("run() method on " + this.name + " event is not present.");
+        throw new MethodNotOverridenError_1.default("run() method on ".concat(this.name, " event is not present."));
     };
     return Event;
 }());

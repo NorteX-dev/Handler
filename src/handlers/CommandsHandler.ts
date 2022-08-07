@@ -271,7 +271,6 @@ export default class CommandsHandler extends BaseHandler {
 			let interactionsToSend: any[] = [];
 			interactions.forEach((interaction) => {
 				if (interaction.type.toUpperCase() === "CHAT_INPUT" && interaction instanceof Command) {
-					console.log("type", ApplicationCommandType.ChatInput);
 					const data = {
 						type: ApplicationCommandType.ChatInput,
 						application_id: this.client.application!.id,

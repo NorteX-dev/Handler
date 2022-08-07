@@ -344,7 +344,6 @@ var CommandsHandler = /** @class */ (function (_super) {
                         interactionsToSend = [];
                         interactions.forEach(function (interaction) {
                             if (interaction.type.toUpperCase() === "CHAT_INPUT" && interaction instanceof Command_1.default) {
-                                console.log("type", discord_js_1.ApplicationCommandType.ChatInput);
                                 var data = {
                                     type: discord_js_1.ApplicationCommandType.ChatInput,
                                     application_id: _this.client.application.id,

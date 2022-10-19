@@ -2,7 +2,6 @@ import DirectoryReferenceError from "../errors/DirectoryReferenceError";
 
 import { Client } from "discord.js";
 import { EventEmitter } from "events";
-import { glob } from "glob";
 import Verificators from "../util/Verificators";
 import * as path from "path";
 import * as fs from "fs";
@@ -62,20 +61,44 @@ export default class BaseHandler extends EventEmitter {
 					)
 				);
 			if (!fs.existsSync(this.directory)) return reject(new DirectoryReferenceError(`Directory "${this.directory}" does not exist.`));
-			glob(this.directory + "/**/*.js", async (err: Error | null, files: string[]) => {
-				if (err) return reject(new DirectoryReferenceError("Error while loading files: " + err.message));
-				if (!files.length) this.debug("No files found in supplied directory.");
-				for (const file of files) {
-					const parsedPath = path.parse(file);
-					const Constructor = require(file);
-					if (!Constructor) return this.debug(`${parsedPath} failed to load. The file was loaded but cannot be required.`);
-					if (!Verificators.isClass(Constructor)) throw new TypeError(`File ${parsedPath.name} doesn't export a class.`);
-					const instance = new Constructor(this, parsedPath.name);
-					this.debug(`Loaded "${instance.customId || instance.name}" from file ${parsedPath.name}${parsedPath.ext}.`);
-					instances.push(instance);
-				}
-				if (emitReady) this.emit("ready");
-				resolve(instances);
+			console.log(this.directory);
+			this.loadFiles(this.directory)
+				.then((files) => {
+					console.log("fi", files);
+					if (!files.length) this.debug("No files found in supplied directory.");
+					for (const file of files) {
+						const parsedPath = path.parse(file);
+						const Constructor = require(file);
+						if (!Constructor) return this.debug(`${parsedPath} failed to load. The file was loaded but cannot be required.`);
+						if (!Verificators.isClass(Constructor)) throw new TypeError(`File ${parsedPath.name} doesn't export a class.`);
+						const instance = new Constructor(this, parsedPath.name);
+						this.debug(`Loaded "${instance.customId || instance.name}" from file ${parsedPath.name}${parsedPath.ext}.`);
+						instances.push(instance);
+					}
+					if (emitReady) this.emit("ready");
+					resolve(instances);
+				})
+				.catch((err) => {
+					return reject(new DirectoryReferenceError("Error while loading files: " + err.message));
+				});
+		});
+	}
+
+	async loadFiles<Promise>(directory: string) {
+		return new Promise<string[]>((resolve, reject) => {
+			fs.readdir(directory, async (err, files) => {
+				if (err) return reject(err);
+				let filelist: string[] = [];
+				await Promise.all(
+					files.map(async (fileOrDir) => {
+						if (fs.statSync(path.join(directory, fileOrDir)).isDirectory()) {
+							filelist = filelist.concat(await this.loadFiles(path.join(directory, fileOrDir)));
+						} else {
+							filelist.push(path.join(directory, fileOrDir));
+						}
+					})
+				);
+				resolve(filelist);
 			});
 		});
 	}

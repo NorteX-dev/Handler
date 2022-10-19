@@ -27,5 +27,6 @@ export default class BaseHandler extends EventEmitter {
     setDirectory(value: string): this;
     debug(message: string): void;
     load(emitReady?: boolean): Promise<any>;
+    loadFiles<Promise>(directory: string): globalThis.Promise<string[]>;
 }
 export {};

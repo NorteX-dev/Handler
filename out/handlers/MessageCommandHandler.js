@@ -68,8 +68,9 @@ var Verificators_1 = require("../util/Verificators");
 var MessageCommandHandler = /** @class */ (function (_super) {
     __extends(MessageCommandHandler, _super);
     function MessageCommandHandler(options) {
+        var _this = this;
         var _a;
-        var _this = _super.call(this, options) || this;
+        _this = _super.call(this, options) || this;
         _this.owners = options.owners || [];
         _this.commands = [];
         _this.aliases = new Map();

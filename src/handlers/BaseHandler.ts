@@ -1,6 +1,6 @@
 import DirectoryReferenceError from "../errors/DirectoryReferenceError";
 
-import { Client } from "discord.js";
+import { Client, Partials } from "discord.js";
 import { EventEmitter } from "events";
 import Verificators from "../util/Verificators";
 import * as path from "path";
@@ -61,16 +61,20 @@ export default class BaseHandler extends EventEmitter {
 					)
 				);
 			if (!fs.existsSync(this.directory)) return reject(new DirectoryReferenceError(`Directory "${this.directory}" does not exist.`));
-			console.log(this.directory);
 			this.loadFiles(this.directory)
-				.then((files) => {
-					console.log("fi", files);
+				.then(async (files) => {
+					this.debug("Files found:\n" + files.map((f) => `- ${f}`).join("\n"));
 					if (!files.length) this.debug("No files found in supplied directory.");
 					for (const file of files) {
 						const parsedPath = path.parse(file);
-						const Constructor = require(file);
-						if (!Constructor) return this.debug(`${parsedPath} failed to load. The file was loaded but cannot be required.`);
-						if (!Verificators.isClass(Constructor)) throw new TypeError(`File ${parsedPath.name} doesn't export a class.`);
+						const MConstructor = await import(file);
+						let Constructor;
+						Constructor = MConstructor.default ? MConstructor.default : MConstructor;
+						if (!Constructor)
+							return this.debug(
+								`The module ${parsedPath} failed to import. The file does not have a default export or module.exports.`
+							);
+						// if (!Verificators.isClass(Constructor.default)) throw new TypeError(`File ${parsedPath.name} doesn't export a class.`);
 						const instance = new Constructor(this, parsedPath.name);
 						this.debug(`Loaded "${instance.customId || instance.name}" from file ${parsedPath.name}${parsedPath.ext}.`);
 						instances.push(instance);

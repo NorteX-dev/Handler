@@ -53,7 +53,6 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var DirectoryReferenceError_1 = require("../errors/DirectoryReferenceError");
 var events_1 = require("events");
-var Verificators_1 = require("../util/Verificators");
 var path = require("path");
 var fs = require("fs");
 var BaseHandler = /** @class */ (function (_super) {
@@ -100,28 +99,43 @@ var BaseHandler = /** @class */ (function (_super) {
                     return [2 /*return*/, reject(new DirectoryReferenceError_1.default("Directory is not set. Use setDirectory(path) or specify a 'directory' key to the constructor prior to loading."))];
                 if (!fs.existsSync(this.directory))
                     return [2 /*return*/, reject(new DirectoryReferenceError_1.default("Directory \"".concat(this.directory, "\" does not exist.")))];
-                console.log(this.directory);
                 this.loadFiles(this.directory)
-                    .then(function (files) {
-                    console.log("fi", files);
-                    if (!files.length)
-                        _this.debug("No files found in supplied directory.");
-                    for (var _i = 0, files_1 = files; _i < files_1.length; _i++) {
-                        var file = files_1[_i];
-                        var parsedPath = path.parse(file);
-                        var Constructor = require(file);
-                        if (!Constructor)
-                            return _this.debug("".concat(parsedPath, " failed to load. The file was loaded but cannot be required."));
-                        if (!Verificators_1.default.isClass(Constructor))
-                            throw new TypeError("File ".concat(parsedPath.name, " doesn't export a class."));
-                        var instance = new Constructor(_this, parsedPath.name);
-                        _this.debug("Loaded \"".concat(instance.customId || instance.name, "\" from file ").concat(parsedPath.name).concat(parsedPath.ext, "."));
-                        instances.push(instance);
-                    }
-                    if (emitReady)
-                        _this.emit("ready");
-                    resolve(instances);
-                })
+                    .then(function (files) { return __awaiter(_this, void 0, void 0, function () {
+                    var _i, files_1, file, parsedPath, MConstructor, Constructor, instance;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                this.debug("Files found:\n" + files.map(function (f) { return "- ".concat(f); }).join("\n"));
+                                if (!files.length)
+                                    this.debug("No files found in supplied directory.");
+                                _i = 0, files_1 = files;
+                                _a.label = 1;
+                            case 1:
+                                if (!(_i < files_1.length)) return [3 /*break*/, 4];
+                                file = files_1[_i];
+                                parsedPath = path.parse(file);
+                                return [4 /*yield*/, Promise.resolve().then(function () { return require(file); })];
+                            case 2:
+                                MConstructor = _a.sent();
+                                Constructor = void 0;
+                                Constructor = MConstructor.default ? MConstructor.default : MConstructor;
+                                if (!Constructor)
+                                    return [2 /*return*/, this.debug("The module ".concat(parsedPath, " failed to import. The file does not have a default export or module.exports."))];
+                                instance = new Constructor(this, parsedPath.name);
+                                this.debug("Loaded \"".concat(instance.customId || instance.name, "\" from file ").concat(parsedPath.name).concat(parsedPath.ext, "."));
+                                instances.push(instance);
+                                _a.label = 3;
+                            case 3:
+                                _i++;
+                                return [3 /*break*/, 1];
+                            case 4:
+                                if (emitReady)
+                                    this.emit("ready");
+                                resolve(instances);
+                                return [2 /*return*/];
+                        }
+                    });
+                }); })
                     .catch(function (err) {
                     return reject(new DirectoryReferenceError_1.default("Error while loading files: " + err.message));
                 });

@@ -1,4 +1,3 @@
-import { ApplicationCommandOptionData } from "discord.js";
 import CommandsHandler from "../handlers/CommandsHandler";
 import MethodNotOverridenError from "../errors/MethodNotOverridenError";
 
@@ -6,7 +5,7 @@ interface ApplicationCommandOptions {
 	name: string;
 	description: string;
 	category?: string;
-	options: ApplicationCommandOptionData;
+	options: any[];
 	userIds?: Array<string>;
 	guildIds?: Array<string>;
 	disabled?: boolean;
@@ -20,7 +19,7 @@ export default class Command {
 	public name: string;
 	public description: string;
 	public category: string | undefined;
-	public options: ApplicationCommandOptionData;
+	public options: any[];
 	public userIds: Array<string>;
 	public guildIds: Array<string>;
 	public disabled: boolean;

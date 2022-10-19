@@ -1,10 +1,9 @@
-import { ApplicationCommandOptionData } from "discord.js";
 import CommandsHandler from "../handlers/CommandsHandler";
 interface ApplicationCommandOptions {
     name: string;
     description: string;
     category?: string;
-    options: ApplicationCommandOptionData;
+    options: any[];
     userIds?: Array<string>;
     guildIds?: Array<string>;
     disabled?: boolean;
@@ -17,7 +16,7 @@ export default class Command {
     name: string;
     description: string;
     category: string | undefined;
-    options: ApplicationCommandOptionData;
+    options: any[];
     userIds: Array<string>;
     guildIds: Array<string>;
     disabled: boolean;

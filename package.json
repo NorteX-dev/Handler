@@ -1,11 +1,11 @@
 {
 	"name": "@nortex/handler",
-	"version": "6.1.2",
+	"version": "7.0.0",
 	"description": "The easy to use, all-in-one command and event handler.",
 	"main": "out/index.js",
 	"module": "out/esm/index.js",
 	"scripts": {
-		"test": "nodemon test/index.js"
+		"test": "nodemon test/index.ts"
 	},
 	"repository": "https://github.com/NorteX-dev/Handler",
 	"keywords": [

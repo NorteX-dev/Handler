@@ -12,6 +12,15 @@ import { Description } from "./decorators/commands/Description";
 import { Options } from "./decorators/commands/Options";
 import { DMOnly } from "./decorators/commands/DMOnly";
 import { GuildOnly } from "./decorators/commands/GuildOnly";
+import { GuildIDs } from "./decorators/commands/GuildIDs";
+import { GuildID } from "./decorators/commands/GuildID";
+import { UserIDs } from "./decorators/commands/UserIDs";
+import { Disabled } from "./decorators/commands/Disabled";
+import { Category } from "./decorators/commands/Category";
+import { DefaultPermissions } from "./decorators/commands/DefaultPermissions";
+import { QueryingMode } from "./decorators/components/QueryingMode";
+import { CustomID } from "./decorators/components/CustomID";
+import { Once } from "./decorators/events/Once";
 
 export {
 	// Structures
@@ -23,9 +32,22 @@ export {
 	EventHandler,
 	ComponentHandler,
 	// Decorators
+	// common
 	Name,
+	// commands
+	Category,
+	DefaultPermissions,
 	Description,
-	Options,
-	GuildOnly,
+	Disabled,
 	DMOnly,
+	GuildID,
+	GuildIDs,
+	GuildOnly,
+	Options,
+	UserIDs,
+	// components
+	CustomID,
+	QueryingMode,
+	// events
+	Once,
 };

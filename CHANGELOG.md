@@ -6,5 +6,6 @@
 - The handler is now fully TypeScript based because of the decorators used. Clean JavaScript is not supported anymore.
 - Removed message-based command support to align with Discord's plan.
 - ContextMenu suport has been temporarily removed.
+- Added toJSON() method to the Command class (other classes are soon to follow).
 - Code refactoring:
     - The majority (if not all) imports are now named instead of default.

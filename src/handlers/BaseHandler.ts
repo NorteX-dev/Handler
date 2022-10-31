@@ -1,8 +1,6 @@
-import DirectoryReferenceError from "../errors/DirectoryReferenceError";
-
-import { Client, Partials } from "discord.js";
+import { DirectoryReferenceError } from "../errors/DirectoryReferenceError";
+import { Client } from "discord.js";
 import { EventEmitter } from "events";
-import Verificators from "../util/Verificators";
 import * as path from "path";
 import * as fs from "fs";
 
@@ -11,14 +9,7 @@ interface HandlerOptions {
 	directory?: string | undefined;
 }
 
-export default class BaseHandler extends EventEmitter {
-	/**
-	 * Base class for handlers. Should not be used as-is. Use a subclass instead.
-	 *
-	 * @param client Discord.JS Client Instance
-	 * @param directory MessageCommand files directory
-	 * @returns BaseHandler
-	 * */
+export class BaseHandler extends EventEmitter {
 	public client: Client;
 	public directory?: string;
 
@@ -30,15 +21,6 @@ export default class BaseHandler extends EventEmitter {
 		return this;
 	}
 
-	/**
-	 * Sets (absolute) directory for commands
-	 *
-	 * @remarks This directory includes all children directories too.
-	 * @see {@link https://www.npmjs.com/package/glob} for information on how directories are parsed
-	 *
-	 * @returns CommandHandler
-	 * @param value
-	 * */
 	setDirectory(value: string) {
 		if (!value) throw new DirectoryReferenceError("setDirectory(): 'value' parameter is required.");
 		if (!fs.existsSync(value)) throw new DirectoryReferenceError(`setDirectory(...): Directory ${value} does not exist.`);

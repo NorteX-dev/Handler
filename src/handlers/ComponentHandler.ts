@@ -1,6 +1,6 @@
-import { Client, Interaction as DJSInteraction, InteractionType } from "discord.js";
-import BaseHandler from "./BaseHandler";
-import Component from "../structures/Component";
+import { Client, Interaction, InteractionType } from "discord.js";
+import { BaseHandler } from "./BaseHandler";
+import { Component } from "../structures/Component";
 
 interface HandlerOptions {
 	client: Client;
@@ -8,19 +8,9 @@ interface HandlerOptions {
 	autoLoad?: boolean;
 }
 
-export default class ComponentHandler extends BaseHandler {
-	/**
-	 * Initializes an component interaction handler on the client.
-	 *
-	 * @param options Component handler options
-	 * @param options.client Discord.JS Client Instance
-	 * @param options.directory Optional - Component interaction files directory
-	 * @param options.autoLoad Optional - Automatically invoke the loadInteractions() method - requires `directory` to be set in the options
-	 * @returns ComponentHandler
-	 * */
+export class ComponentHandler extends BaseHandler {
 	public client: Client;
 	public directory?: string;
-	public owners?: Array<string>;
 	public components: Component[];
 
 	constructor(options: HandlerOptions) {
@@ -32,15 +22,6 @@ export default class ComponentHandler extends BaseHandler {
 		return this;
 	}
 
-	/**
-	 * Loads component interactions into memory
-	 *
-	 * @returns ComponentHandler
-	 *
-	 * @remarks
-	 * Requires @see {@link InteractionHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
-	 * Run {@link ComponentHandler.runComponent()} to be invoked to run the ocmmand on an event.
-	 * */
 	loadComponents() {
 		return new Promise(async (res, rej) => {
 			const files = await this.load().catch(rej);
@@ -49,43 +30,46 @@ export default class ComponentHandler extends BaseHandler {
 		});
 	}
 
-	/**
-	 * Manually register an instanced component interaction. This should not be needed when using loadComponents().
-	 *
-	 * @returns Interaction
-	 * */
 	registerComponent(component: Component) {
 		if (!(component instanceof Component)) throw new TypeError("registerComponent(): interaction parameter must be an instance of Component.");
 		if (this.components.find((c) => c.customId === component.customId))
 			throw new Error(`Component '${component.customId}' cannot be registered twice.`);
+
+		// Verify & define defaults for optional fields
+		if (!component.customId) {
+			throw new Error(
+				"registerComponent(): Can't register component that does not have a customId. Define the custom id with the @CustomID decorator."
+			);
+		}
+		if (!component.queryingMode) component.queryingMode = "exact";
+		if (!["exact", "startsWith", "includes"].includes(component.queryingMode))
+			throw new Error("registerComponent(): Invalid querying mode. Valid modes are: exact, startsWith, includes.");
+		// Define handler and client properties on class
+		Object.defineProperty(component, "handler", { value: this });
+		Object.defineProperty(component, "client", { value: this.client });
+
 		this.components.push(component);
 		this.debug(`Loaded message component "${component.customId}".`);
 		this.emit("load", component);
 		return component;
 	}
 
-	/**
-	 * Attempts to run the interaction. Returns a promise with the interaction if run succeeded, or rejects with an execution error.
-	 *
-	 * @returns Promise<Component>
-	 *
-	 * */
-	runComponent(interaction: DJSInteraction, ...additionalOptions: any) {
+	runComponent(interaction: Interaction, ...additionalOptions: any): Promise<Component> {
 		return new Promise<Component>((res, rej) => {
 			if (interaction.user.bot) return rej("Bot users can't run component interactions.");
-			if (interaction.type === InteractionType.MessageComponent || interaction.type === InteractionType.ModalSubmit) {
-				this.handleComponentOrMS(interaction, ...additionalOptions)
+			if ([InteractionType.MessageComponent, InteractionType.ModalSubmit].includes(interaction.type)) {
+				this.handleComponent(interaction, ...additionalOptions)
 					.then(res)
 					.catch(rej);
 			} else {
 				throw new Error(
-					"ComponentHandler#runComponent(): Unsupported interaction type. This only supports components. You should check the type beforehand, or refer to CommandsHandler() to handle commands & context menus."
+					"ComponentHandler#runComponent(): Unsupported interaction type. This only supports components and modal submits. You should check the type beforehand, or refer to CommandHandler() to handle commands & context menus."
 				);
 			}
 		});
 	}
 
-	private handleComponentOrMS(interaction: any, ...additionalOptions: any) {
+	private handleComponent(interaction: any, ...additionalOptions: any): Promise<Component> {
 		return new Promise<Component>(async (resolve, reject) => {
 			const componentInteraction = this.components.find((componentObject) => {
 				if (componentObject.queryingMode === "exact") return componentObject.customId === interaction.customId;

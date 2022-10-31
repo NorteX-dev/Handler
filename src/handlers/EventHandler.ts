@@ -1,7 +1,7 @@
 import { Client } from "discord.js";
 
 import { Event } from "../structures/Event";
-import BaseHandler from "./BaseHandler";
+import { BaseHandler } from "./BaseHandler";
 
 interface HandlerOptions {
 	client: Client;
@@ -9,17 +9,7 @@ interface HandlerOptions {
 	directory?: string | undefined;
 }
 
-export default class EventHandler extends BaseHandler {
-	/**
-	 * Initializes an event handler on the client.
-	 *
-	 * @returns EventHandler
-	 * @param options The options to initialize the handler with.
-	 * @param options.client The client to initialize the handler with.
-	 * @param options.autoLoad Whether or not to automatically load the events.
-	 * @param options.directory The directory to load the events from.
-	 * */
-
+export class EventHandler extends BaseHandler {
 	constructor(options: HandlerOptions) {
 		super(options);
 		if (!options.client) throw new ReferenceError("EventHandler(): options.client is required.");
@@ -28,14 +18,6 @@ export default class EventHandler extends BaseHandler {
 		return this;
 	}
 
-	/**
-	 * Loads events & creates the event emitter handlers.
-	 *
-	 * @returns Promise<EventHandler>
-	 *
-	 * @remarks
-	 * Requires @see {@link EventHandler.setDirectory} to be executed first, or `directory` to be specified in the constructor.
-	 * */
 	loadEvents() {
 		return new Promise<EventHandler>(async (res, rej) => {
 			const files = await this.load().catch(rej);
@@ -44,18 +26,23 @@ export default class EventHandler extends BaseHandler {
 		});
 	}
 
-	/**
-	 * Manually register an instanced event. This should not be needed when using loadEvents().
-	 *
-	 * @returns Command
-	 * */
-	registerEvent(event: Event) {
-		if (!(event instanceof Event)) throw new TypeError("registerCommand(): event parameter must be an instance of Event.");
+	registerEvent(event: Event): Event {
+		if (!(event instanceof Event)) throw new TypeError("registerEvent(): event parameter must be an instance of Event.");
+
+		// Verify & define defaults for optional fields
+		if (!event.name) {
+			throw new Error("registerEvent(): Can't register event that does not have a name. Define the event name with the @Name decorator.");
+		}
+		if (!event.once) event.once = false;
+		// Define handler and client properties on class
+		Object.defineProperty(event, "handler", { value: this });
+		Object.defineProperty(event, "client", { value: this.client });
+
 		this.client[event.once ? "once" : "on"](event.name, (...args) => {
 			event.run(...args);
 		});
 		this.emit("load", event);
-		this.debug(`Registered command "${event.name}".`);
+		this.debug(`Registered event "${event.name}".`);
 		return event;
 	}
 }

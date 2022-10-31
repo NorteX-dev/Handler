@@ -1,13 +1,12 @@
-class ExecutionError extends Error {
+export class ExecutionError extends Error {
 	public code: string;
-	private params: Array<any>;
-	constructor(message: string, code: string, ...params: Array<any>) {
+	public params: any[];
+
+	constructor(message: string, code: string, ...params: any[]) {
 		super(message);
-		this.name = "InteractionExecutionError";
+		this.name = "ExecutionError";
 		this.code = code;
 		this.message = message;
 		this.params = params;
 	}
 }
-
-export default ExecutionError;

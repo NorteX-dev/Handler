@@ -5,3 +5,6 @@
 - Discord.js version is now v14. The handler is no longer compatible with v13.
 - The handler is now fully TypeScript based because of the decorators used. Clean JavaScript is not supported anymore.
 - Removed message-based command support to align with Discord's plan.
+- ContextMenu suport has been temporarily removed.
+- Code refactoring:
+    - The majority (if not all) imports are now named instead of default.

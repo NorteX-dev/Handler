@@ -1,7 +1,15 @@
-import MethodNotOverridenError from "../errors/MethodNotOverridenError";
+import { MethodNotOverridenError } from "../errors/MethodNotOverridenError";
+import { ComponentHandler } from "../handlers/ComponentHandler";
+
+export type QueryingMode = "exact" | "startsWith" | "includes";
 
 export class Component {
-	async run() {
-		throw new MethodNotOverridenError("run() method must be overriden.");
+	public handler: ComponentHandler | undefined;
+	public client: any;
+	public customId: string | undefined;
+	public queryingMode: QueryingMode | undefined;
+
+	run(interaction: any, additionalParams?: any) {
+		throw new MethodNotOverridenError(`run() method on ${this.customId} interaction is not present.`);
 	}
 }

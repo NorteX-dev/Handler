@@ -1,4 +1,4 @@
-import { Command } from "../structures/Command";
+import { Command } from "../../structures/Command";
 
 export const DMOnly = (target: Function) => {
 	if (!(target.prototype instanceof Command)) {

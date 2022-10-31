@@ -1,3 +1,0 @@
-Things to add/change to @nortex/handler:
-- Decorators for name etc
-- Change classes to function like React handles things

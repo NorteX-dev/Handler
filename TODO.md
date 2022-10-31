@@ -1,3 +1,3 @@
 - [ ] Re-add context menu support
-- [ ] Add autocomplete intercations support
+- [ ] Add autocomplete command interacations support
 - [ ] Make @Disabled decorator common to all classes

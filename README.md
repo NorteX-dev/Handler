@@ -2,8 +2,8 @@
 
 ## Prerequisites
 - Discord.js v14.x
-- TypeScript 4.7+
-- NodeJS v18
+- TypeScript v4.7+
+- NodeJS v16+
 
 **Warning:** Versions v7 of this package DO NOT WORK with JavaScript and are TypeScript only. This is due to the severe dependency on decorators which are not implemented in pure ECMAScript (yet).
 

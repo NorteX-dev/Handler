@@ -20,12 +20,12 @@ import { CommandHandler, Command, ExecutionError } from "@nortex/handler";
 import * as path from "path";
 
 const client: Client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
 });
 
 const commandHandler: CommandHandler = new CommandHandler({
-    client: client, // The Discord.js client instance
-    directory: path.join("./commands/") // The directory where the commands should be imported from
+  client: client, // The Discord.js client instance
+  directory: path.join("./commands/") // The directory where the commands should be imported from
 });
 
 /*
@@ -37,7 +37,7 @@ const commandHandler: CommandHandler = new CommandHandler({
 // You can optionally listen to handler events for example 'load':
 commandHandler.on("load", (command: Command) => {
 	// `command` is the command class which contains name, description, etc.
-    console.log("Loaded", command.name);
+  console.log("Loaded", command.name);
 });
 
 client.on("ready", () => {
@@ -46,21 +46,20 @@ client.on("ready", () => {
 
 // You have to manually run the interaction, otherwise it is not going to run and the user will see a "The app hasn't responded" message.
 client.on("interactionCreate", (interaction: Interaction) => {
-	
 	// Do not run interactions that are not application commands.
-    // If you attempt to run a non-application-command interaction with CommandHandler, an error will be thrown.
+  // If you attempt to run a non-application-command interaction with CommandHandler, an error will be thrown.
 	if(interaction.type !== InteractionType.APPLICATION_COMMAND) return;
 	
 	commandHandler.runInteraction(interaction).catch((err: ExecutionError) => {
 		// Some error happened during the execution of the command itself.
-        // This could be caused by:
-        // - the command being disabled
-        // - the user trying to execute the command not being in the userIds array (if present)
-        // - the user trying to execute the command not being in the guildIds array (if present)
-		interaction.reply({
-			content: err.message,
-		});
+    // This could be caused by:
+    // - the command being disabled
+    // - the user trying to execute the command not being in the userIds array (if present)
+    // - the user trying to execute the command not being in the guildIds array (if present)
+    interaction.reply({
+      content: err.message,
     });
+  });
 });
 
 client.login(process.env.TOKEN);

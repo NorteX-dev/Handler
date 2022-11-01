@@ -1,0 +1,11 @@
+src
+test
+node_modules
+.prettierrc
+.idea
+.vscode
+.gitignore
+.env
+.env.development
+tsconfig.json
+things to add.txt

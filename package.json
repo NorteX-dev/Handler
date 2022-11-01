@@ -1,0 +1,31 @@
+{
+	"name": "@nortex/handler",
+	"version": "6.1.2",
+	"description": "The easy to use, all-in-one command and event handler.",
+	"main": "out/index.js",
+	"module": "out/esm/index.js",
+	"scripts": {
+		"test": "nodemon test/index.js"
+	},
+	"repository": "https://github.com/NorteX-dev/Handler",
+	"keywords": [
+		"discord",
+		"handler",
+		"commands",
+		"discordjs",
+		"discord.js",
+		"commandhandler"
+	],
+	"author": "NorteX",
+	"license": "ISC",
+	"types": "out/index.d.ts",
+	"devDependencies": {
+		"@types/glob": "^7.1.4",
+		"dotenv": "^10.0.0",
+		"prettier": "^2.5.1",
+		"typescript": "^4.8.4"
+	},
+	"dependencies": {
+		"discord.js": "^14.6.0"
+	}
+}

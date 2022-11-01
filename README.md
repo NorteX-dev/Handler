@@ -44,18 +44,21 @@ client.on("ready", () => {
 	console.log("Ready!");
 });
 
-// You have to manually run the interaction, otherwise it is not going to run and the user will see a "The app hasn't responded" message.
+// You have to manually run the interaction.
+// If you don't, it is not going to run and the user will see a "The app hasn't responded" message.
 client.on("interactionCreate", (interaction: Interaction) => {
 	// Do not run interactions that are not application commands.
   // If you attempt to run a non-application-command interaction with CommandHandler, an error will be thrown.
 	if(interaction.type !== InteractionType.APPLICATION_COMMAND) return;
 	
 	commandHandler.runInteraction(interaction).catch((err: ExecutionError) => {
-		// Some error happened during the execution of the command itself.
-    // This could be caused by:
-    // - the command being disabled
-    // - the user trying to execute the command not being in the userIds array (if present)
-    // - the user trying to execute the command not being in the guildIds array (if present)
+		/*
+		* Some error happened during the execution of the command itself.
+    * This could be caused by:
+    * - the command being disabled
+    * - the user trying to execute the command not being in the userIds array (if present)
+    * - the user trying to execute the command not being in the guildIds array (if present)
+    * */
     interaction.reply({
       content: err.message,
     });

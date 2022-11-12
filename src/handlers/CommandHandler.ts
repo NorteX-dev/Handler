@@ -169,8 +169,23 @@ export class CommandHandler extends BaseHandler {
 		let changesMade = false;
 		for (let localCmd of this.commands) {
 			const remoteCmd = fetched.find((f) => f.name === localCmd.name);
+			if (!remoteCmd) {
+				// Handle created commands
+				this.debug("Commands match check failed because there are new files created in the filesystem. Updating...");
+				changesMade = true;
+				break;
+			}
+			// Handle changed commands
 			// @ts-ignore
-			changesMade = !remoteCmd.equals(localCmd.toJSON());
+			changesMade = !remoteCmd.equals(localCmd);
+		}
+		// Handle deleted commands
+		for (let remoteCmd of fetched) {
+			if (!this.commands.find((i) => i.name === remoteCmd.name)) {
+				this.debug("Commands match check failed because local command files are missing from the fetched command list. Updating...");
+				changesMade = true;
+				break;
+			}
 		}
 		return changesMade;
 	}

@@ -11,6 +11,7 @@ export declare class Command {
     guildId: string | undefined;
     userIds: string[] | undefined;
     guildIds: string[] | undefined;
+    autocomplete(interaction: any, additionalParams?: any): void;
     run(interaction: any, additionalParams?: any): void;
     toJSON(): {
         name: string | undefined;

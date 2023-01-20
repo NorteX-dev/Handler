@@ -133,6 +133,11 @@ var CommandHandler = /** @class */ (function (_super) {
                 _this.handleCommandRun.apply(_this, __spreadArray([interaction], additionalOptions, false)).then(res)
                     .catch(rej);
             }
+            else if (interaction.type === discord_js_1.InteractionType.ApplicationCommandAutocomplete) {
+                // Polyfill for autocomplete interactions
+                _this.handleAutocomplete.apply(_this, __spreadArray([interaction], additionalOptions, false)).then(res)
+                    .catch(rej);
+            }
             else {
                 throw new Error("CommandHandler#runCommand(): Unsupported interaction type. This only supports commands. You should check the type beforehand, or refer to ComponentHandler() to handle component interactions.");
             }
@@ -255,6 +260,35 @@ var CommandHandler = /** @class */ (function (_super) {
                         }
                         return [2 /*return*/];
                 }
+            });
+        }); });
+    };
+    CommandHandler.prototype.handleAutocomplete = function (interaction) {
+        var _this = this;
+        var additionalOptions = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            additionalOptions[_i - 1] = arguments[_i];
+        }
+        return new Promise(function (res, rej) { return __awaiter(_this, void 0, void 0, function () {
+            var cmd;
+            return __generator(this, function (_a) {
+                cmd = this.commands.find(function (cmd) { return cmd.name === interaction.commandName.toLowerCase(); });
+                if (!cmd)
+                    return [2 /*return*/];
+                if (!(cmd instanceof Command_1.Command)) {
+                    throw new ExecutionError_1.ExecutionError("Attempting to call autocomplete on non-command class.", "INVALID_CLASS");
+                }
+                if (!cmd["autocomplete"])
+                    return [2 /*return*/];
+                try {
+                    cmd.autocomplete.apply(cmd, __spreadArray([interaction], additionalOptions, false));
+                    res(cmd);
+                }
+                catch (ex) {
+                    console.error(ex);
+                    rej(ex);
+                }
+                return [2 /*return*/];
             });
         }); });
     };

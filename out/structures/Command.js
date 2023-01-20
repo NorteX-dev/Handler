@@ -5,6 +5,9 @@ var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
 var Command = /** @class */ (function () {
     function Command() {
     }
+    Command.prototype.autocomplete = function (interaction, additionalParams) {
+        return;
+    };
     Command.prototype.run = function (interaction, additionalParams) {
         throw new MethodNotOverridenError_1.MethodNotOverridenError("run() method on ".concat(this.name, " command is not present."));
     };

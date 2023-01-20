@@ -17,6 +17,7 @@ export declare class CommandHandler extends BaseHandler {
     updateInteractions(force?: boolean): Promise<boolean>;
     formatAndSend(commands: Command[]): Promise<boolean>;
     private handleCommandRun;
+    private handleAutocomplete;
     private checkDiff;
 }
 export {};

@@ -1,5 +1,5 @@
 import { ComponentHandler } from "../handlers/ComponentHandler";
-export declare type QueryingMode = "exact" | "startsWith" | "includes";
+import { QueryingMode } from "../decorators/components/CustomID";
 export declare class Component {
     handler: ComponentHandler | undefined;
     client: any;

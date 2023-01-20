@@ -64,6 +64,7 @@ exports.ComponentHandler = void 0;
 var discord_js_1 = require("discord.js");
 var BaseHandler_1 = require("./BaseHandler");
 var Component_1 = require("../structures/Component");
+var CustomID_1 = require("../decorators/components/CustomID");
 var ComponentHandler = /** @class */ (function (_super) {
     __extends(ComponentHandler, _super);
     function ComponentHandler(options) {
@@ -102,9 +103,7 @@ var ComponentHandler = /** @class */ (function (_super) {
             throw new Error("registerComponent(): Can't register component that does not have a customId. Define the custom id with the @CustomID decorator.");
         }
         if (!component.queryingMode)
-            component.queryingMode = "exact";
-        if (!["exact", "startsWith", "includes"].includes(component.queryingMode))
-            throw new Error("registerComponent(): Invalid querying mode. Valid modes are: exact, startsWith, includes.");
+            component.queryingMode = CustomID_1.QueryingMode.Exact;
         // Define handler and client properties on class
         Object.defineProperty(component, "handler", { value: this });
         Object.defineProperty(component, "client", { value: this.client });
@@ -141,11 +140,11 @@ var ComponentHandler = /** @class */ (function (_super) {
             var componentInteraction;
             return __generator(this, function (_a) {
                 componentInteraction = this.components.find(function (componentObject) {
-                    if (componentObject.queryingMode === "exact")
+                    if (componentObject.queryingMode === CustomID_1.QueryingMode.Exact)
                         return componentObject.customId === interaction.customId;
-                    if (componentObject.queryingMode === "includes")
+                    if (componentObject.queryingMode === CustomID_1.QueryingMode.Includes)
                         return interaction.customId.includes(componentObject.customId);
-                    if (componentObject.queryingMode === "startsWith")
+                    if (componentObject.queryingMode === CustomID_1.QueryingMode.StartsWith)
                         return interaction.customId.startsWith(componentObject.customId);
                     return false;
                 });

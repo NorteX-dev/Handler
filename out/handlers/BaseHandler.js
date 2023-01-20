@@ -103,6 +103,9 @@ var BaseHandler = /** @class */ (function (_super) {
                     case 1:
                         if (!(_i < _a.length)) return [3 /*break*/, 4];
                         file = _a[_i];
+                        if (file.endsWith(".map")) {
+                            return [3 /*break*/, 3];
+                        }
                         parsedPath = path.parse(file);
                         return [4 /*yield*/, Promise.resolve().then(function () { return require(file); })];
                     case 2:

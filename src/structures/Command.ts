@@ -15,6 +15,10 @@ export class Command {
 	public userIds: string[] | undefined;
 	public guildIds: string[] | undefined;
 
+	autocomplete(interaction: any, additionalParams?: any) {
+		return;
+	}
+
 	run(interaction: any, additionalParams?: any) {
 		throw new MethodNotOverridenError(`run() method on ${this.name} command is not present.`);
 	}

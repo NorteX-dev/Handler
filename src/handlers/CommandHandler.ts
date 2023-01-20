@@ -65,6 +65,11 @@ export class CommandHandler extends BaseHandler {
 				this.handleCommandRun(interaction, ...additionalOptions)
 					.then(res)
 					.catch(rej);
+			} else if (interaction.type === InteractionType.ApplicationCommandAutocomplete) {
+				// Polyfill for autocomplete interactions
+				this.handleAutocomplete(interaction, ...additionalOptions)
+					.then(res)
+					.catch(rej);
 			} else {
 				throw new Error(
 					"CommandHandler#runCommand(): Unsupported interaction type. This only supports commands. You should check the type beforehand, or refer to ComponentHandler() to handle component interactions."
@@ -155,6 +160,26 @@ export class CommandHandler extends BaseHandler {
 
 			try {
 				cmd.run(interaction, ...additionalOptions);
+				res(cmd);
+			} catch (ex) {
+				console.error(ex);
+				rej(ex);
+			}
+		});
+	}
+
+	private handleAutocomplete(interaction: CommandInteraction, ...additionalOptions: any) {
+		return new Promise(async (res, rej) => {
+			const cmd = this.commands.find((cmd) => cmd.name === interaction.commandName.toLowerCase());
+			if (!cmd) return;
+
+			if (!(cmd instanceof Command)) {
+				throw new ExecutionError("Attempting to call autocomplete on non-command class.", "INVALID_CLASS");
+			}
+			if (!cmd["autocomplete"]) return;
+
+			try {
+				cmd.autocomplete(interaction, ...additionalOptions);
 				res(cmd);
 			} catch (ex) {
 				console.error(ex);

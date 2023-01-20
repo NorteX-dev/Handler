@@ -1,5 +1,8 @@
 import { Component, QueryingMode as QueryingModeType } from "../../structures/Component";
 
+/**
+ * @deprecated Use the second parameter of @CustomID instead.
+ * */
 export const QueryingMode = (queryingMode: QueryingModeType) => (target: Function) => {
 	if (!(target.prototype instanceof Component)) {
 		throw new TypeError("The @QueryingMode decorator can only be used on Component classes.");

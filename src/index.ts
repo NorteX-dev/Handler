@@ -18,9 +18,8 @@ import { UserIDs } from "./decorators/commands/UserIDs";
 import { Disabled } from "./decorators/commands/Disabled";
 import { Category } from "./decorators/commands/Category";
 import { DefaultPermissions } from "./decorators/commands/DefaultPermissions";
-import { QueryingMode } from "./decorators/components/QueryingMode";
-import { QueryingMode as QueryingModeEnum } from "./decorators/components/CustomID";
 import { CustomID } from "./decorators/components/CustomID";
+import { QueryingMode } from "./decorators/components/CustomID";
 import { Once } from "./decorators/events/Once";
 
 export {
@@ -49,7 +48,6 @@ export {
 	// components
 	CustomID,
 	QueryingMode,
-	QueryingModeEnum,
 	// events
 	Once,
 };

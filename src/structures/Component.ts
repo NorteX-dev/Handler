@@ -1,7 +1,6 @@
 import { MethodNotOverridenError } from "../errors/MethodNotOverridenError";
 import { ComponentHandler } from "../handlers/ComponentHandler";
-
-export type QueryingMode = "exact" | "startsWith" | "includes";
+import { QueryingMode } from "../decorators/components/CustomID";
 
 export class Component {
 	public handler: ComponentHandler | undefined;

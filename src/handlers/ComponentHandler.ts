@@ -1,6 +1,7 @@
 import { Client, Interaction, InteractionType } from "discord.js";
 import { BaseHandler } from "./BaseHandler";
 import { Component } from "../structures/Component";
+import { QueryingMode } from "../decorators/components/CustomID";
 
 interface HandlerOptions {
 	client: Client;
@@ -41,9 +42,7 @@ export class ComponentHandler extends BaseHandler {
 				"registerComponent(): Can't register component that does not have a customId. Define the custom id with the @CustomID decorator."
 			);
 		}
-		if (!component.queryingMode) component.queryingMode = "exact";
-		if (!["exact", "startsWith", "includes"].includes(component.queryingMode))
-			throw new Error("registerComponent(): Invalid querying mode. Valid modes are: exact, startsWith, includes.");
+		if (!component.queryingMode) component.queryingMode = QueryingMode.Exact;
 		// Define handler and client properties on class
 		Object.defineProperty(component, "handler", { value: this });
 		Object.defineProperty(component, "client", { value: this.client });
@@ -72,9 +71,9 @@ export class ComponentHandler extends BaseHandler {
 	private handleComponent(interaction: any, ...additionalOptions: any): Promise<Component> {
 		return new Promise<Component>(async (resolve, reject) => {
 			const componentInteraction = this.components.find((componentObject) => {
-				if (componentObject.queryingMode === "exact") return componentObject.customId === interaction.customId;
-				if (componentObject.queryingMode === "includes") return interaction.customId.includes(componentObject.customId);
-				if (componentObject.queryingMode === "startsWith") return interaction.customId.startsWith(componentObject.customId);
+				if (componentObject.queryingMode === QueryingMode.Exact) return componentObject.customId === interaction.customId;
+				if (componentObject.queryingMode === QueryingMode.Includes) return interaction.customId.includes(componentObject.customId);
+				if (componentObject.queryingMode === QueryingMode.StartsWith) return interaction.customId.startsWith(componentObject.customId);
 				return false;
 			});
 

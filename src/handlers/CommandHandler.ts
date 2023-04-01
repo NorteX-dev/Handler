@@ -1,11 +1,21 @@
-import { ApplicationCommand, ApplicationCommandType, Client, Collection, CommandInteraction, InteractionType, Snowflake } from "discord.js";
+import {
+	ApplicationCommand,
+	ApplicationCommandType,
+	CacheType,
+	ChatInputCommandInteraction,
+	Client,
+	Collection,
+	CommandInteraction,
+	InteractionType,
+	Snowflake,
+} from "discord.js";
 import { BaseHandler } from "./BaseHandler";
 import { ExecutionError } from "../errors/ExecutionError";
 import Verificators from "../util/Verificators";
 import { Command } from "../structures/Command";
 
 interface HandlerOptions {
-	client: Client;
+	client: any; // TODO : Temporary workaround for Discord.js v14.8 typings bug
 	directory?: string;
 	autoLoad?: boolean;
 }
@@ -58,7 +68,7 @@ export class CommandHandler extends BaseHandler {
 		return cmd;
 	}
 
-	runCommand(interaction: CommandInteraction, ...additionalOptions: any) {
+	runCommand(interaction: any /*TODO: temporary typing fix*/, ...additionalOptions: any) {
 		return new Promise((res, rej) => {
 			if (interaction.user.bot) return rej("Bot users can't run interactions.");
 			if (interaction.type === InteractionType.ApplicationCommand) {

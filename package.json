@@ -1,6 +1,6 @@
 {
 	"name": "@nortex/handler",
-	"version": "7.3.1",
+	"version": "7.3.2",
 	"description": "The easy to use, all-in-one command and event handler.",
 	"main": "out/index.js",
 	"module": "out/esm/index.js",
@@ -20,12 +20,11 @@
 	"license": "ISC",
 	"types": "out/index.d.ts",
 	"devDependencies": {
-		"@types/glob": "^7.1.4",
 		"dotenv": "^10.0.0",
 		"prettier": "^2.5.1",
-		"typescript": "^4.8.4"
+		"typescript": "^5.0.2"
 	},
 	"dependencies": {
-		"discord.js": "^14.7.1"
+		"discord.js": "^14.8.0"
 	}
 }

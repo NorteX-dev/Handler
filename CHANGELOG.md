@@ -1,3 +1,6 @@
+### 7.3.2
+- Updated Discord.js to 14.8.0
+
 ### Version 7.0 changelog
 
 #### Warning: v7 is a major update. Compatibility with v6 is not supported.

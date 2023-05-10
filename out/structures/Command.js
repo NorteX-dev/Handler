@@ -1,29 +1,26 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Command = void 0;
-var MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
-var Command = /** @class */ (function () {
-    function Command() {
-    }
-    Command.prototype.autocomplete = function (interaction, additionalParams) {
+const MethodNotOverridenError_1 = require("../errors/MethodNotOverridenError");
+class Command {
+    autocomplete(interaction, additionalParams) {
         return;
-    };
-    Command.prototype.run = function (interaction, additionalParams) {
-        throw new MethodNotOverridenError_1.MethodNotOverridenError("run() method on ".concat(this.name, " command is not present."));
-    };
-    Command.prototype.toJSON = function () {
+    }
+    run(interaction, additionalParams) {
+        throw new MethodNotOverridenError_1.MethodNotOverridenError(`run() method on ${this.name} command is not present.`);
+    }
+    toJSON() {
         return {
             name: this.name,
             description: this.description,
             options: this.options,
-            default_permissions: this.defaultPermissions,
             disabled: this.disabled,
             category: this.category,
             guild_id: this.guildId,
             user_ids: this.userIds,
             guild_ids: this.guildIds,
+            default_member_permissions: this.defaultMemberPermissions,
         };
-    };
-    return Command;
-}());
+    }
+}
 exports.Command = Command;

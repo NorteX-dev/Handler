@@ -1,8 +1,7 @@
-import { Client } from "discord.js";
 import { Event } from "../structures/Event";
 import { BaseHandler } from "./BaseHandler";
 interface HandlerOptions {
-    client: Client;
+    client: any;
     autoLoad?: boolean;
     directory?: string | undefined;
 }

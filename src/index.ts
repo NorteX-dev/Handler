@@ -17,7 +17,7 @@ import { GuildID } from "./decorators/commands/GuildID";
 import { UserIDs } from "./decorators/commands/UserIDs";
 import { Disabled } from "./decorators/commands/Disabled";
 import { Category } from "./decorators/commands/Category";
-import { DefaultPermissions } from "./decorators/commands/DefaultPermissions";
+import { DefaultMemberPermissions } from "./decorators/commands/DefaultMemberPermissions";
 import { CustomID } from "./decorators/components/CustomID";
 import { QueryingMode } from "./decorators/components/CustomID";
 import { Once } from "./decorators/events/Once";
@@ -36,7 +36,6 @@ export {
 	Name,
 	// commands
 	Category,
-	DefaultPermissions,
 	Description,
 	Disabled,
 	DMOnly,
@@ -45,6 +44,7 @@ export {
 	GuildOnly,
 	Options,
 	UserIDs,
+	DefaultMemberPermissions,
 	// components
 	CustomID,
 	QueryingMode,

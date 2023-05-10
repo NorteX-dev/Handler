@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DMOnly = void 0;
-var Command_1 = require("../../structures/Command");
-var DMOnly = function (target) {
+const Command_1 = require("../../structures/Command");
+const DMOnly = (target) => {
     if (!(target.prototype instanceof Command_1.Command)) {
         throw new TypeError("The @DMOnly decorator can only be used on Command classes.");
     }

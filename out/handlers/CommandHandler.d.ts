@@ -1,8 +1,8 @@
-import { Client, CommandInteraction } from "discord.js";
+import { Client } from "discord.js";
 import { BaseHandler } from "./BaseHandler";
 import { Command } from "../structures/Command";
 interface HandlerOptions {
-    client: Client;
+    client: any;
     directory?: string;
     autoLoad?: boolean;
 }
@@ -13,7 +13,7 @@ export declare class CommandHandler extends BaseHandler {
     constructor(options: HandlerOptions);
     loadCommands(): Promise<unknown>;
     registerCommand(cmd: Command): Command;
-    runCommand(interaction: CommandInteraction, ...additionalOptions: any): Promise<unknown>;
+    runCommand(interaction: any, ...additionalOptions: any): Promise<unknown>;
     updateInteractions(force?: boolean): Promise<boolean>;
     formatAndSend(commands: Command[]): Promise<boolean>;
     private handleCommandRun;

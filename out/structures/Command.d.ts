@@ -5,8 +5,8 @@ export declare class Command {
     name: string | undefined;
     description: string | undefined;
     options: any[] | undefined;
-    defaultPermissions: any[] | undefined;
     disabled: boolean | undefined;
+    defaultMemberPermissions: number | undefined;
     category: string | undefined;
     guildId: string | undefined;
     userIds: string[] | undefined;
@@ -17,11 +17,11 @@ export declare class Command {
         name: string | undefined;
         description: string | undefined;
         options: any[] | undefined;
-        default_permissions: any[] | undefined;
         disabled: boolean | undefined;
         category: string | undefined;
         guild_id: string | undefined;
         user_ids: string[] | undefined;
         guild_ids: string[] | undefined;
+        default_member_permissions: number | undefined;
     };
 }

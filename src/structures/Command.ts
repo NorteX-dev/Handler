@@ -8,7 +8,7 @@ export class Command {
 	public description: string | undefined;
 	public options: any[] | undefined;
 	public disabled: boolean | undefined;
-	public defaultMemberPermissions: bigint | undefined;
+	public defaultMemberPermissions: string | undefined;
 	// Nullable fields
 	public category: string | undefined;
 	public guildId: string | undefined;

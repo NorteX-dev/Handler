@@ -1,1 +1,1 @@
-export declare const DefaultMemberPermissions: (bitfield: number) => (target: Function) => void;
+export declare const DefaultMemberPermissions: (bitfield: string | undefined) => (target: Function) => void;

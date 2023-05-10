@@ -47,8 +47,6 @@ class CommandHandler extends BaseHandler_1.BaseHandler {
         }
         if (!cmd.options)
             cmd.options = [];
-        if (!cmd.defaultMemberPermissions)
-            cmd.defaultMemberPermissions = 0;
         if (!cmd.disabled)
             cmd.disabled = false;
         // Define handler and client properties on class

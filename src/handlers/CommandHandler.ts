@@ -56,7 +56,6 @@ export class CommandHandler extends BaseHandler {
 			);
 		}
 		if (!cmd.options) cmd.options = [];
-		if (!cmd.defaultMemberPermissions) cmd.defaultMemberPermissions = 0n;
 		if (!cmd.disabled) cmd.disabled = false;
 		// Define handler and client properties on class
 		Object.defineProperty(cmd, "handler", { value: this });
@@ -137,7 +136,7 @@ export class CommandHandler extends BaseHandler {
 					name: cmd.name,
 					description: cmd.description,
 					options: cmd.options,
-					default_member_permissions: cmd.defaultMemberPermissions?.toString(),
+					default_member_permissions: cmd.defaultMemberPermissions,
 				};
 				interactionsToSend.push(data);
 			});

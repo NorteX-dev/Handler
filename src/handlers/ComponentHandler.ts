@@ -31,8 +31,8 @@ export class ComponentHandler extends BaseHandler {
 		});
 	}
 
-	registerComponent(component: Component) {
-		if (!(component instanceof Component)) throw new TypeError("registerComponent(): interaction parameter must be an instance of Component.");
+	registerComponent(component: Component): void {
+		if (!(component instanceof Component)) return;
 		if (this.components.find((c) => c.customId === component.customId))
 			throw new Error(`Component '${component.customId}' cannot be registered twice.`);
 
@@ -50,7 +50,7 @@ export class ComponentHandler extends BaseHandler {
 		this.components.push(component);
 		this.debug(`Loaded message component "${component.customId}".`);
 		this.emit("load", component);
-		return component;
+		return;
 	}
 
 	runComponent(interaction: Interaction, ...additionalOptions: any): Promise<Component> {

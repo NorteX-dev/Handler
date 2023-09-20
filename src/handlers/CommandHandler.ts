@@ -42,8 +42,8 @@ export class CommandHandler extends BaseHandler {
 		});
 	}
 
-	registerCommand(cmd: Command) {
-		if (!(cmd instanceof Command)) throw new TypeError("registerInteraction(): cmd parameter must be an instance of Command.");
+	registerCommand(cmd: Command): void {
+		if (!(cmd instanceof Command)) return;
 		if (this.commands.find((c) => c.name === cmd.name)) throw new Error(`Command ${cmd.name} cannot be registered twice.`);
 
 		// Verify & define defaults for optional fields
@@ -64,7 +64,7 @@ export class CommandHandler extends BaseHandler {
 		this.commands.push(cmd);
 		this.debug(`Loaded command "${cmd.name}".`);
 		this.emit("load", cmd);
-		return cmd;
+		return;
 	}
 
 	runCommand(interaction: any /*TODO: temporary typing fix*/, ...additionalOptions: any) {

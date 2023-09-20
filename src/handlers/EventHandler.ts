@@ -26,8 +26,8 @@ export class EventHandler extends BaseHandler {
 		});
 	}
 
-	registerEvent(event: Event): Event {
-		if (!(event instanceof Event)) throw new TypeError("registerEvent(): event parameter must be an instance of Event.");
+	registerEvent(event: Event): void {
+		if (!(event instanceof Event)) return;
 
 		// Verify & define defaults for optional fields
 		if (!event.name) {
@@ -43,6 +43,6 @@ export class EventHandler extends BaseHandler {
 		});
 		this.emit("load", event);
 		this.debug(`Registered event "${event.name}".`);
-		return event;
+		return;
 	}
 }

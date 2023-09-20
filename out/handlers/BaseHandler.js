@@ -59,7 +59,7 @@ class BaseHandler extends events_1.EventEmitter {
                 Constructor = MConstructor.default ? MConstructor.default : MConstructor;
                 if (!Constructor)
                     return this.debug(`The module ${parsedPath} failed to import. The file does not have a default export or module.exports.`);
-                if (!Verificators_1.default.isClass(Constructor.default))
+                if (!Verificators_1.default.isClass(Constructor))
                     continue; // Fail silently
                 const instance = new Constructor(this, parsedPath.name);
                 this.debug(`Loaded "${instance.customId || instance.name}" from file ${parsedPath.name}${parsedPath.ext}.`);

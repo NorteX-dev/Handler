@@ -8,6 +8,6 @@ interface HandlerOptions {
 export declare class EventHandler extends BaseHandler {
     constructor(options: HandlerOptions);
     loadEvents(): Promise<EventHandler>;
-    registerEvent(event: Event): Event;
+    registerEvent(event: Event): void;
 }
 export {};

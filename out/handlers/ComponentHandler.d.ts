@@ -12,7 +12,7 @@ export declare class ComponentHandler extends BaseHandler {
     components: Component[];
     constructor(options: HandlerOptions);
     loadComponents(): Promise<unknown>;
-    registerComponent(component: Component): Component;
+    registerComponent(component: Component): void;
     runComponent(interaction: Interaction, ...additionalOptions: any): Promise<Component>;
     private handleComponent;
 }

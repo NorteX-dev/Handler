@@ -12,7 +12,7 @@ export declare class CommandHandler extends BaseHandler {
     directory?: string;
     constructor(options: HandlerOptions);
     loadCommands(): Promise<unknown>;
-    registerCommand(cmd: Command): Command;
+    registerCommand(cmd: Command): void;
     runCommand(interaction: any, ...additionalOptions: any): Promise<unknown>;
     updateInteractions(force?: boolean): Promise<boolean>;
     formatAndSend(commands: Command[]): Promise<boolean>;

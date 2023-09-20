@@ -31,7 +31,7 @@ class EventHandler extends BaseHandler_1.BaseHandler {
     }
     registerEvent(event) {
         if (!(event instanceof Event_1.Event))
-            throw new TypeError("registerEvent(): event parameter must be an instance of Event.");
+            return;
         // Verify & define defaults for optional fields
         if (!event.name) {
             throw new Error("registerEvent(): Can't register event that does not have a name. Define the event name with the @Name decorator.");
@@ -46,7 +46,7 @@ class EventHandler extends BaseHandler_1.BaseHandler {
         });
         this.emit("load", event);
         this.debug(`Registered event "${event.name}".`);
-        return event;
+        return;
     }
 }
 exports.EventHandler = EventHandler;

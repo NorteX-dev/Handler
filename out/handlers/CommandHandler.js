@@ -35,7 +35,7 @@ class CommandHandler extends BaseHandler_1.BaseHandler {
     }
     registerCommand(cmd) {
         if (!(cmd instanceof Command_1.Command))
-            throw new TypeError("registerInteraction(): cmd parameter must be an instance of Command.");
+            return;
         if (this.commands.find((c) => c.name === cmd.name))
             throw new Error(`Command ${cmd.name} cannot be registered twice.`);
         // Verify & define defaults for optional fields
@@ -55,7 +55,7 @@ class CommandHandler extends BaseHandler_1.BaseHandler {
         this.commands.push(cmd);
         this.debug(`Loaded command "${cmd.name}".`);
         this.emit("load", cmd);
-        return cmd;
+        return;
     }
     runCommand(interaction /*TODO: temporary typing fix*/, ...additionalOptions) {
         return new Promise((res, rej) => {

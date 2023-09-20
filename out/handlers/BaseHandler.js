@@ -14,6 +14,7 @@ const DirectoryReferenceError_1 = require("../errors/DirectoryReferenceError");
 const events_1 = require("events");
 const path = require("path");
 const fs = require("fs");
+const Verificators_1 = require("../util/Verificators");
 class BaseHandler extends events_1.EventEmitter {
     constructor(options) {
         super();
@@ -59,7 +60,8 @@ class BaseHandler extends events_1.EventEmitter {
                 Constructor = MConstructor.default ? MConstructor.default : MConstructor;
                 if (!Constructor)
                     return this.debug(`The module ${parsedPath} failed to import. The file does not have a default export or module.exports.`);
-                // if (!Verificators.isClass(Constructor.default)) throw new TypeError(`File ${parsedPath.name} doesn't export a class.`);
+                if (!Verificators_1.default.isClass(Constructor.default))
+                    return; // Fail silently
                 const instance = new Constructor(this, parsedPath.name);
                 this.debug(`Loaded "${instance.customId || instance.name}" from file ${parsedPath.name}${parsedPath.ext}.`);
                 instances.push(instance);

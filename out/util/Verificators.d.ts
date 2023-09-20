@@ -3,5 +3,5 @@ import { CommandInteraction } from "discord.js";
 import { Command } from "../structures/Command";
 export default class Verificators {
     static verifyCommand(interaction: CommandInteraction, cmd: Command): Promise<ExecutionError | undefined>;
-    static isClass(obj: any): any;
+    static isClass(v: any): boolean;
 }

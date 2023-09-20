@@ -3,6 +3,7 @@ import { Client } from "discord.js";
 import { EventEmitter } from "events";
 import * as path from "path";
 import * as fs from "fs";
+import Verificators from "../util/Verificators";
 
 interface HandlerOptions {
 	client: Client;
@@ -57,7 +58,7 @@ export class BaseHandler extends EventEmitter {
 				Constructor = MConstructor.default ? MConstructor.default : MConstructor;
 				if (!Constructor)
 					return this.debug(`The module ${parsedPath} failed to import. The file does not have a default export or module.exports.`);
-				// if (!Verificators.isClass(Constructor.default)) throw new TypeError(`File ${parsedPath.name} doesn't export a class.`);
+				if (!Verificators.isClass(Constructor.default)) return; // Fail silently
 				const instance = new Constructor(this, parsedPath.name);
 				this.debug(`Loaded "${instance.customId || instance.name}" from file ${parsedPath.name}${parsedPath.ext}.`);
 				instances.push(instance);

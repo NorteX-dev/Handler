@@ -51,9 +51,8 @@ class BaseHandler extends events_1.EventEmitter {
             else
                 this.debug("Files found:\n" + this.files.map((f) => `- ${f}`).join("\n"));
             for (const file of this.files) {
-                if (file.endsWith(".map")) {
+                if (file.endsWith(".map"))
                     continue;
-                }
                 const parsedPath = path.parse(file);
                 const MConstructor = yield Promise.resolve(`${file}`).then(s => require(s));
                 let Constructor;
@@ -61,7 +60,7 @@ class BaseHandler extends events_1.EventEmitter {
                 if (!Constructor)
                     return this.debug(`The module ${parsedPath} failed to import. The file does not have a default export or module.exports.`);
                 if (!Verificators_1.default.isClass(Constructor.default))
-                    return; // Fail silently
+                    continue; // Fail silently
                 const instance = new Constructor(this, parsedPath.name);
                 this.debug(`Loaded "${instance.customId || instance.name}" from file ${parsedPath.name}${parsedPath.ext}.`);
                 instances.push(instance);

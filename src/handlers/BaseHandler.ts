@@ -45,7 +45,7 @@ export class BaseHandler extends EventEmitter {
 					)
 				);
 			if (!fs.existsSync(this.directory)) return reject(new DirectoryReferenceError(`Directory "${this.directory}" does not exist.`));
-			this.loadAndPopulateFiles(this.directory);
+			this.populateFilesField(this.directory);
 			if (!this.files.length) this.debug("No files found in supplied directory.");
 			else this.debug("Files found:\n" + this.files.map((f) => `- ${f}`).join("\n"));
 			for (const file of this.files) {
@@ -53,9 +53,11 @@ export class BaseHandler extends EventEmitter {
 				const parsedPath = path.parse(file);
 				const MConstructor = await import(file);
 				let Constructor;
-				Constructor = MConstructor.default ? MConstructor.default : MConstructor;
-				if (!Constructor)
-					return this.debug(`The module ${parsedPath} failed to import. The file does not have a default export or module.exports.`);
+				Constructor = MConstructor.default ?? MConstructor;
+				if (!Constructor) {
+					this.debug(`The module ${parsedPath} failed to import. The file does not have a default export.`);
+					continue;
+				}
 				if (!Verificators.isClass(Constructor)) continue; // Fail silently
 				const instance = new Constructor(this, parsedPath.name);
 				this.debug(`Loaded "${instance.customId || instance.name}" from file ${parsedPath.name}${parsedPath.ext}.`);
@@ -66,12 +68,12 @@ export class BaseHandler extends EventEmitter {
 		});
 	}
 
-	loadAndPopulateFiles(directory: string) {
+	populateFilesField(directory: string) {
 		const filesInDirectory = fs.readdirSync(directory);
 		for (const file of filesInDirectory) {
 			const absolute = path.join(directory, file);
 			if (fs.statSync(absolute).isDirectory()) {
-				this.loadAndPopulateFiles(absolute);
+				this.populateFilesField(absolute);
 			} else {
 				this.files.push(absolute);
 			}

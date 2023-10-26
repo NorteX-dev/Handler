@@ -29,11 +29,10 @@ export default class Util {
 			eventHandler: undefined,
 			componentHandler: undefined,
 		};
-		const keys: string[] = Object.keys(options);
-		for (let key of keys) {
-			if (key === "events") handlers.eventHandler = new EventHandler({ client, ...options[key] });
-			else if (key === "commands") handlers.commandHandler = new CommandHandler({ client, ...options[key] });
-			else if (key === "components") handlers.componentHandler = new ComponentHandler({ client, ...options[key] });
+		for (let [key, value] of Object.entries(options)) {
+			if (key === "events") handlers.eventHandler = new EventHandler({ client, ...value });
+			else if (key === "commands") handlers.commandHandler = new CommandHandler({ client, ...value });
+			else if (key === "components") handlers.componentHandler = new ComponentHandler({ client, ...value });
 			else throw new Error(`createMany(): Invalid key '${key}' inside 'options'. Valid keys are 'commands', 'events' and 'components'.`);
 		}
 		return handlers;

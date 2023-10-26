@@ -1,9 +1,10 @@
 import { CommandHandler } from "../handlers/CommandHandler";
 import { MethodNotOverridenError } from "../errors/MethodNotOverridenError";
+import { Client } from "discord.js";
 
 export class Command {
 	public handler: CommandHandler | undefined;
-	public client: any;
+	public client: Client | undefined;
 	public name: string | undefined;
 	public description: string | undefined;
 	public options: any[] | undefined;

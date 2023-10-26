@@ -1,5 +1,5 @@
 import { ExecutionError } from "../errors/ExecutionError";
-import { CommandInteraction, Permissions } from "discord.js";
+import { CommandInteraction } from "discord.js";
 import { Command } from "../structures/Command";
 
 export default class Verificators {

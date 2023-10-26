@@ -15,7 +15,7 @@ import Verificators from "../util/Verificators";
 import { Command } from "../structures/Command";
 
 interface HandlerOptions {
-	client: any; // TODO : Temporary workaround for Discord.js v14.8 typings bug
+	client: Client;
 	directory?: string;
 	autoLoad?: boolean;
 }

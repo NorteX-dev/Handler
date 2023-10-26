@@ -3,7 +3,7 @@
 		"target": "es6",
 		"module": "commonjs",
 		"declaration": true,
-		"outDir": "./out",
+		"outDir": "./dist",
 		"strict": true,
 		"lib": ["dom", "es5", "scripthost"],
 		"experimentalDecorators": true

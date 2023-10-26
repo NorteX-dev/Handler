@@ -2,7 +2,7 @@ import { CommandHandler } from "../handlers/CommandHandler";
 import { Client } from "discord.js";
 export declare class Command {
     handler: CommandHandler | undefined;
-    client: Client | undefined;
+    client: Client;
     name: string | undefined;
     description: string | undefined;
     options: any[] | undefined;

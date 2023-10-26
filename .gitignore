@@ -3,5 +3,6 @@ node_modules
 /test/.env
 .env
 /test/node_modules
+/test/config.ts
 yarn.lock
 yarn-error.log

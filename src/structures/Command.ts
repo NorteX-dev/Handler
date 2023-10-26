@@ -4,7 +4,7 @@ import { Client } from "discord.js";
 
 export class Command {
 	public handler: CommandHandler | undefined;
-	public client: Client | undefined;
+	public client!: Client;
 	public name: string | undefined;
 	public description: string | undefined;
 	public options: any[] | undefined;

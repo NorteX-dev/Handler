@@ -5,7 +5,7 @@ import { Client } from "discord.js";
 
 export class Component {
 	public handler: ComponentHandler | undefined;
-	public client: Client | undefined;
+	public client!: Client;
 	public customId: string | undefined;
 	public queryingMode: QueryingMode | undefined;
 

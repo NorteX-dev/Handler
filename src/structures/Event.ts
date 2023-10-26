@@ -4,7 +4,7 @@ import { Client } from "discord.js";
 
 export class Event {
 	public handler: EventHandler | undefined;
-	public client: Client | undefined;
+	public client!: Client;
 	public name: string | undefined;
 	public once: boolean | undefined;
 

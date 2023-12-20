@@ -1,5 +1,7 @@
 # @nortex/handler - effortlessly handle commands and events.
 
+## This handler is deprecated. Please use the [new handler](https://github.com/NorteX-dev/nhandler) which is actively updated.
+
 ## Prerequisites
 - Discord.js v14.x
 - TypeScript v4.7+
